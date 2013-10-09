@@ -17,9 +17,10 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.ldap.internal;
+package org.xwiki.ldap.script;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import org.xwiki.component.annotation.Component;
 import org.xwiki.context.Execution;
@@ -33,10 +34,10 @@ import com.xpn.xwiki.plugin.ldap.XWikiLDAPUtils;
  * 
  * @version $Id$
  */
-@Component("ldap")
+@Component
+@Named("ldap")
 public class LDAPScriptService implements ScriptService
 {
-
     /**
      * Execution, needed to retrieve the legacy XWiki context.
      */
