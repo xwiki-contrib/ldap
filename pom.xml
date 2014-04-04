@@ -31,6 +31,7 @@
   <name>XWiki Platform - LDAP - Parent POM</name>
   <packaging>pom</packaging>
   <modules>
+    <module>xwiki-platform-ldap-authenticator</module>
     <module>xwiki-platform-ldap-api</module>
     <module>xwiki-platform-ldap-ui</module>
   </modules>
