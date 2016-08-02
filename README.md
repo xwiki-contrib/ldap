@@ -12,3 +12,9 @@ Various tools to manipulate LDAP servers in XWiki.
 * Translations: N/A
 * Sonar Dashboard: N/A
 * Continuous Integration Status: [![Build Status](http://ci.xwiki.org/buildStatus/icon?job=Contrib%20-%20LDAP)](http://ci.xwiki.org/job/Contrib%20-%20LDAP/)
+
+# Release
+
+    mvn release:prepare -Pintegration-tests
+    mvn release:perform
+
