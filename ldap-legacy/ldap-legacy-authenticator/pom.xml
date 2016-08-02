@@ -33,7 +33,7 @@
   <properties>
     <!-- Old name -->
     <xwiki.extension.features>
-      org.xwiki.platform:xwiki-platform-legacy-ldap-authenticator
+      org.xwiki.platform:xwiki-platform-legacy-ldap-authenticator,
       org.xwiki.platform:xwiki-platform-ldap-authenticator
     </xwiki.extension.features>
 
