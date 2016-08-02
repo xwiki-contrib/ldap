@@ -29,6 +29,7 @@
   </parent>
   <artifactId>ldap-authenticator</artifactId>
   <name>LDAP - Authenticator</name>
+  <description>Authenticate using a LDAP server</description>
   <properties>
     <xwiki.jacoco.instructionRatio>0.09</xwiki.jacoco.instructionRatio>
 

@@ -29,8 +29,12 @@
   </parent>
   <artifactId>ldap-legacy-authenticator</artifactId>
   <name>LDAP - Legacy - Authenticator</name>
+  <description>Legacy LDAP Authenticator</description>
   <packaging>jar</packaging>
   <properties>
+    <!-- Name to display by the Extension Manager -->
+    <xwiki.extension.name>Legacy LDAP Authenticator</xwiki.extension.name>
+
     <!-- Old name -->
     <xwiki.extension.features>
       org.xwiki.platform:xwiki-platform-legacy-ldap-authenticator,
