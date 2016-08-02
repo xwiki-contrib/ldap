@@ -33,7 +33,7 @@
   <description>UI that makes it easier to configure LDAP</description>
   <properties>
     <!-- Name to display by the Extension Manager -->
-    <xwiki.extension.name>LDAP Admin Application</xwiki.extension.name>
+    <xwiki.extension.name>LDAP Application</xwiki.extension.name>
   </properties>
   <dependencies>
     <dependency>

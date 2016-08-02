@@ -31,6 +31,9 @@
   <name>LDAP - Authenticator</name>
   <properties>
     <xwiki.jacoco.instructionRatio>0.09</xwiki.jacoco.instructionRatio>
+
+    <!-- Name to display by the Extension Manager -->
+    <xwiki.extension.name>LDAP Authenticator</xwiki.extension.name>
   </properties>
   <dependencies>
     <dependency>

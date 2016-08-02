@@ -29,6 +29,10 @@
   </parent>
   <artifactId>ldap-api</artifactId>
   <name>LDAP - API</name>
+  <properties>
+    <!-- Name to display by the Extension Manager -->
+    <xwiki.extension.name>LDAP API</xwiki.extension.name>
+  </properties>
   <dependencies>
     <dependency>
       <groupId>org.xwiki.contrib.ldap</groupId>
