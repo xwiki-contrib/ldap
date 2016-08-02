@@ -32,11 +32,26 @@
   <version>8.3-SNAPSHOT</version>
   <name>LDAP - Parent POM</name>
   <packaging>pom</packaging>
+
   <modules>
     <module>ldap-authenticator</module>
     <module>ldap-api</module>
     <module>ldap-ui</module>
   </modules>
+
+  <developers>
+    <developer>
+      <id>tmortagne</id>
+      <name>Thomas Mortagne</name>
+      <email>thomas.mortagne at xwiki.com</email>
+      <timezone>+1</timezone>
+    </developer>
+    <developer>
+      <id>xwikidev</id>
+      <name>XWiki Development Team</name>
+    </developer>
+  </developers>
+
   <profiles>
     <profile>
       <id>integration-tests</id>
@@ -51,4 +66,16 @@
       </modules>
     </profile>
   </profiles>
+
+  <scm>
+    <connection>scm:git:git://github.com/xwiki-contrib/ldap.git</connection>
+    <developerConnection>scm:git:git@github.com:xwiki-contrib/ldap.git</developerConnection>
+    <url>https://github.com/xwiki-contrib/ldap/tree/master</url>
+    <tag>HEAD</tag>
+  </scm>
+
+  <issueManagement>
+   <system>jira</system>
+   <url>http://jira.xwiki.org/jira/browse/LDAP</url>
+ </issueManagement>
 </project>
