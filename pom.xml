@@ -67,6 +67,20 @@
     </profile>
   </profiles>
 
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-release-plugin</artifactId>
+          <configuration>
+            <arguments>-Pintegration-tests,legacy -DskipTests=true</arguments>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+
   <scm>
     <connection>scm:git:git://github.com/xwiki-contrib/ldap.git</connection>
     <developerConnection>scm:git:git@github.com:xwiki-contrib/ldap.git</developerConnection>
