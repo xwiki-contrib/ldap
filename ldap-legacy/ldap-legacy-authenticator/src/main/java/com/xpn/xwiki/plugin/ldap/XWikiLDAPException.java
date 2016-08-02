@@ -17,38 +17,33 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.ldap;
-
-import org.junit.Test;
-import org.xwiki.contrib.ldap.XWikiLDAPConnection;
-import org.xwiki.contrib.ldap.XWikiLDAPException;
-import org.xwiki.ldap.framework.AbstractLDAPTestCase;
-import org.xwiki.ldap.framework.LDAPTestSetup;
-
-import static org.junit.Assert.assertTrue;
+package com.xpn.xwiki.plugin.ldap;
 
 /**
- * Tests {@link XWikiLDAPConnection}.
+ * LDAP plugin base exception.
  * 
  * @version $Id$
  */
-public class XWikiLDAPConnectionTest extends AbstractLDAPTestCase
+public class XWikiLDAPException extends org.xwiki.contrib.ldap.XWikiLDAPException
 {
     /**
-     * Test open and close of the LDAP connection.
+     * Create new instance of LDAP exception.
      * 
-     * @throws XWikiLDAPException
+     * @param message error message.
      */
-    @Test
-    public void testOpenClose() throws XWikiLDAPException
+    public XWikiLDAPException(String message)
     {
-        int port = LDAPTestSetup.getLDAPPort();
+        super(message);
+    }
 
-        XWikiLDAPConnection connection = new XWikiLDAPConnection();
-
-        assertTrue("LDAP connection failed", connection.open("localhost", port, LDAPTestSetup.HORATIOHORNBLOWER_DN,
-            LDAPTestSetup.HORATIOHORNBLOWER_PWD, null, false, this.mocker.getXWikiContext()));
-
-        connection.close();
+    /**
+     * Create new instance of LDAP exception.
+     * 
+     * @param message error message.
+     * @param e the wrapped exception.
+     */
+    public XWikiLDAPException(String message, Exception e)
+    {
+        super(message, e);
     }
 }

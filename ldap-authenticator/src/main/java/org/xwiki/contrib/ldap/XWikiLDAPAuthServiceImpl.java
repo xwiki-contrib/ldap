@@ -17,7 +17,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package com.xpn.xwiki.user.impl.LDAP;
+package org.xwiki.contrib.ldap;
 
 import java.io.UnsupportedEncodingException;
 import java.security.Principal;
@@ -33,10 +33,6 @@ import com.novell.ldap.LDAPException;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.doc.XWikiDocument;
-import com.xpn.xwiki.plugin.ldap.XWikiLDAPConfig;
-import com.xpn.xwiki.plugin.ldap.XWikiLDAPConnection;
-import com.xpn.xwiki.plugin.ldap.XWikiLDAPSearchAttribute;
-import com.xpn.xwiki.plugin.ldap.XWikiLDAPUtils;
 import com.xpn.xwiki.user.impl.xwiki.XWikiAuthServiceImpl;
 
 /**
@@ -45,7 +41,7 @@ import com.xpn.xwiki.user.impl.xwiki.XWikiAuthServiceImpl;
  * synchronizes membership to XWiki groups based on membership to LDAP groups.
  * 
  * @version $Id$
- * @since 1.3 M2
+ * @since 8.3
  */
 public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
 {

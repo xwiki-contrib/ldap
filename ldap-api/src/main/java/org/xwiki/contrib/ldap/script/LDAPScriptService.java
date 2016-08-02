@@ -17,7 +17,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.ldap.script;
+package org.xwiki.contrib.ldap.script;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -25,10 +25,10 @@ import javax.inject.Singleton;
 
 import org.xwiki.component.annotation.Component;
 import org.xwiki.context.Execution;
+import org.xwiki.contrib.ldap.XWikiLDAPUtils;
 import org.xwiki.script.service.ScriptService;
 
 import com.xpn.xwiki.XWikiContext;
-import com.xpn.xwiki.plugin.ldap.XWikiLDAPUtils;
 
 /**
  * Script service to expose LDAP utilities to script and templating languages.
@@ -58,11 +58,11 @@ public class LDAPScriptService implements ScriptService
 
     /**
      * @return {@code true} if the currently configured authentication class extends or is an instance of
-     *         {@link com.xpn.xwiki.user.impl.LDAP.XWikiLDAPAuthServiceImpl}. Returns {@code false} otherwise.
+     *         {@link org.xwiki.contrib.ldap.XWikiLDAPAuthServiceImpl}. Returns {@code false} otherwise.
      */
     public boolean isXWikiLDAPAuthenticator()
     {
-        return com.xpn.xwiki.user.impl.LDAP.XWikiLDAPAuthServiceImpl.class.isAssignableFrom(getXWikiContext().getWiki()
+        return org.xwiki.contrib.ldap.XWikiLDAPAuthServiceImpl.class.isAssignableFrom(getXWikiContext().getWiki()
             .getAuthService().getClass());
     }
 

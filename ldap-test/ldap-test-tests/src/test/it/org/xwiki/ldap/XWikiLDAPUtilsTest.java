@@ -31,6 +31,9 @@ import org.xwiki.cache.Cache;
 import org.xwiki.cache.CacheException;
 import org.xwiki.cache.config.CacheConfiguration;
 import org.xwiki.configuration.ConfigurationSource;
+import org.xwiki.contrib.ldap.XWikiLDAPConnection;
+import org.xwiki.contrib.ldap.XWikiLDAPSearchAttribute;
+import org.xwiki.contrib.ldap.XWikiLDAPUtils;
 import org.xwiki.ldap.framework.AbstractLDAPTestCase;
 import org.xwiki.ldap.framework.LDAPTestSetup;
 import org.xwiki.test.annotation.AfterComponent;
@@ -38,9 +41,6 @@ import org.xwiki.test.annotation.AllComponents;
 
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
-import com.xpn.xwiki.plugin.ldap.XWikiLDAPConnection;
-import com.xpn.xwiki.plugin.ldap.XWikiLDAPSearchAttribute;
-import com.xpn.xwiki.plugin.ldap.XWikiLDAPUtils;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

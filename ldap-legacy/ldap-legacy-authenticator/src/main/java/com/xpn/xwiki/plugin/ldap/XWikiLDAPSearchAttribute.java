@@ -19,33 +19,34 @@
  */
 package com.xpn.xwiki.plugin.ldap;
 
-import com.xpn.xwiki.XWikiException;
-
 /**
- * LDAP plugin base exception.
+ * Represent an LDAP attribute.
  * 
  * @version $Id$
+ * @since 1.3 M2
  */
-public class XWikiLDAPException extends XWikiException
+public class XWikiLDAPSearchAttribute extends org.xwiki.contrib.ldap.XWikiLDAPSearchAttribute
 {
     /**
-     * Create new instance of LDAP exception.
+     * Create attribute instance.
      * 
-     * @param message error message.
+     * @param name attribute name.
+     * @param value attribute value.
      */
-    public XWikiLDAPException(String message)
+    public XWikiLDAPSearchAttribute(String name, String value)
     {
-        super(XWikiException.MODULE_XWIKI_PLUGINS, XWikiException.ERROR_XWIKI_UNKNOWN, message);
+        super(name, value);
     }
-    
+
     /**
-     * Create new instance of LDAP exception.
+     * Create attribute instance.
      * 
-     * @param message error message.
-     * @param e the wrapped exception.
+     * @param name attribute name.
+     * @param byteValue attribute value.
+     * @since 8.1M2
      */
-    public XWikiLDAPException(String message, Exception e)
+    public XWikiLDAPSearchAttribute(String name, byte[] byteValue)
     {
-        super(XWikiException.MODULE_XWIKI_PLUGINS, XWikiException.ERROR_XWIKI_UNKNOWN, message, e);
+        super(name, byteValue);
     }
 }

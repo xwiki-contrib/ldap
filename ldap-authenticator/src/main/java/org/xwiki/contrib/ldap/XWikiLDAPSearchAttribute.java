@@ -17,13 +17,13 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package com.xpn.xwiki.plugin.ldap;
+package org.xwiki.contrib.ldap;
 
 /**
  * Represent an LDAP attribute.
  * 
  * @version $Id$
- * @since 1.3 M2
+ * @since 8.3
  */
 public class XWikiLDAPSearchAttribute
 {

@@ -37,9 +37,6 @@
 
     <!-- XWiki supports only one authenticator for the same instance -->
     <xwiki.extension.namespaces>{root}</xwiki.extension.namespaces>
-
-    <!-- Old name -->
-    <xwiki.extension.features>org.xwiki.platform:xwiki-platform-ldap-authenticator</xwiki.extension.features>
   </properties>
   <dependencies>
     <dependency>
@@ -71,6 +68,7 @@
     <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>javax.servlet-api</artifactId>
+      <scope>test</scope>
     </dependency>
     <!-- Used to mock XWiki class -->
     <dependency>
@@ -87,12 +85,14 @@
         <artifactId>maven-checkstyle-plugin</artifactId>
         <configuration>
           <excludes>
-              <!-- XWiki LDAP Utils has a fan out complexity of 21 that needs to be investigated and refactored. -->
-              **/plugin/ldap/XWikiLDAPUtils.java,
-              <!-- Small Fan-Out complexity issue but it would need a big refactor to be fixed. -->
-              **/plugin/ldap/XWikiLDAPConnection.java,
-              **/user/impl/LDAP/LDAPProfileXClass.java,
-              **/user/impl/LDAP/XWikiLDAPAuthServiceImpl.java
+             org/xwiki/contrib/ldap/LDAPPluginReferralHandler.java,
+             org/xwiki/contrib/ldap/LDAPProfileXClass.java,
+             org/xwiki/contrib/ldap/XWikiLDAPAuthServiceImpl.java,
+             org/xwiki/contrib/ldap/XWikiLDAPConfig.java,
+             org/xwiki/contrib/ldap/XWikiLDAPConnection.java,
+             org/xwiki/contrib/ldap/XWikiLDAPException.java,
+             org/xwiki/contrib/ldap/XWikiLDAPSearchAttribute.java,
+             org/xwiki/contrib/ldap/XWikiLDAPUtils.java
           </excludes>
         </configuration>
       </plugin>
