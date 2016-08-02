@@ -34,6 +34,9 @@
   <properties>
     <!-- Name to display by the Extension Manager -->
     <xwiki.extension.name>LDAP Application</xwiki.extension.name>
+
+    <!-- Old name -->
+    <xwiki.extension.features>org.xwiki.platform:xwiki-platform-ldap-ui</xwiki.extension.features>
   </properties>
   <dependencies>
     <dependency>

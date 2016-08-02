@@ -30,6 +30,10 @@
   <artifactId>ldap-legacy-authenticator</artifactId>
   <name>LDAP - Legacy - Authenticator</name>
   <packaging>jar</packaging>
+  <properties>
+    <!-- Old name -->
+    <xwiki.extension.features>org.xwiki.platform:xwiki-platform-legacy-ldap-authenticator</xwiki.extension.features>
+  </properties>
   <dependencies>
     <dependency>
       <groupId>org.xwiki.contrib.ldap</groupId>

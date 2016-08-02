@@ -34,6 +34,12 @@
 
     <!-- Name to display by the Extension Manager -->
     <xwiki.extension.name>LDAP Authenticator</xwiki.extension.name>
+
+    <!-- XWiki supports only one authenticator for the same instance -->
+    <xwiki.extension.namespaces>{root}</xwiki.extension.namespaces>
+
+    <!-- Old name -->
+    <xwiki.extension.features>org.xwiki.platform:xwiki-platform-ldap-authenticator</xwiki.extension.features>
   </properties>
   <dependencies>
     <dependency>

@@ -32,6 +32,9 @@
   <properties>
     <!-- Name to display by the Extension Manager -->
     <xwiki.extension.name>LDAP API</xwiki.extension.name>
+
+    <!-- Old name -->
+    <xwiki.extension.features>org.xwiki.platform:xwiki-platform-ldap-api</xwiki.extension.features>
   </properties>
   <dependencies>
     <dependency>
