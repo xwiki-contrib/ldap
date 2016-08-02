@@ -23,32 +23,15 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.xwiki.contrib</groupId>
-    <artifactId>parent-platform</artifactId>
-    <version>7.4-7</version>
+    <groupId>org.xwiki.contrib.ldap</groupId>
+    <artifactId>ldap</artifactId>
+    <version>8.3-SNAPSHOT</version>
   </parent>
-  <groupId>org.xwiki.contrib.ldap</groupId>
-  <artifactId>ldap</artifactId>
-  <version>8.3-SNAPSHOT</version>
-  <name>LDAP - Parent POM</name>
+  <artifactId>ldap-legacy</artifactId>
+  <name>LDAP - Legacy - Parent POM</name>
   <packaging>pom</packaging>
+  <description>LDAP - Legacy - Parent POM</description>
   <modules>
-    <module>ldap-authenticator</module>
-    <module>ldap-api</module>
-    <module>ldap-ui</module>
+    <module>ldap-legacy-authenticator</module>
   </modules>
-  <profiles>
-    <profile>
-      <id>integration-tests</id>
-      <modules>
-        <module>ldap-test</module>
-      </modules>
-    </profile>
-    <profile>
-      <id>legacy</id>
-      <modules>
-        <module>ldap-legacy</module>
-      </modules>
-    </profile>
-  </profiles>
 </project>

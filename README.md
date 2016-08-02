@@ -15,6 +15,6 @@ Various tools to manipulate LDAP servers in XWiki.
 
 # Release
 
-    mvn release:prepare -Pintegration-tests
-    mvn release:perform
+    mvn release:prepare -Pintegration-tests,legacy
+    mvn release:perform -Pintegration-tests,legacy -Darguments="-Pintegration-tests,legacy -DskipTests"
 
