@@ -23,12 +23,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.xwiki.platform</groupId>
-    <artifactId>xwiki-platform-ldap</artifactId>
+    <groupId>org.xwiki.contrib.ldap</groupId>
+    <artifactId>ldap</artifactId>
     <version>8.3-SNAPSHOT</version>
   </parent>
-  <artifactId>xwiki-platform-ldap-authenticator</artifactId>
-  <name>XWiki Platform - LDAP - Authenticator</name>
+  <artifactId>ldap-authenticator</artifactId>
+  <name>LDAP - Authenticator</name>
   <properties>
     <xwiki.jacoco.instructionRatio>0.09</xwiki.jacoco.instructionRatio>
   </properties>
@@ -36,7 +36,7 @@
     <dependency>
       <groupId>org.xwiki.platform</groupId>
       <artifactId>xwiki-platform-oldcore</artifactId>
-      <version>${project.version}</version>
+      <version>${platform.version}</version>
     </dependency>
 
     <dependency>
@@ -47,10 +47,21 @@
 
     <!-- Testing dependencies -->
     <dependency>
-      <groupId>org.xwiki.platform</groupId>
-      <artifactId>xwiki-platform-test-oldcore</artifactId>
-      <version>${project.version}</version>
+      <groupId>org.xwiki.commons</groupId>
+      <artifactId>xwiki-commons-tool-test-component</artifactId>
+      <version>${commons.version}</version>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.xwiki.platform</groupId>
+      <artifactId>xwiki-platform-oldcore</artifactId>
+      <version>${platform.version}</version>
+      <type>test-jar</type>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>javax.servlet-api</artifactId>
     </dependency>
     <!-- Used to mock XWiki class -->
     <dependency>

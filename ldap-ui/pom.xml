@@ -23,34 +23,38 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.xwiki.platform</groupId>
-    <artifactId>xwiki-platform-ldap</artifactId>
+    <groupId>org.xwiki.contrib.ldap</groupId>
+    <artifactId>ldap</artifactId>
     <version>8.3-SNAPSHOT</version>
   </parent>
-  <artifactId>xwiki-platform-ldap-api</artifactId>
-  <name>XWiki Platform - LDAP - API</name>
+  <artifactId>ldap-ui</artifactId>
+  <name>LDAP - UI</name>
+  <packaging>xar</packaging>
+  <description>UI that makes it easier to configure LDAP</description>
+  <properties>
+    <!-- Name to display by the Extension Manager -->
+    <xwiki.extension.name>LDAP Admin Application</xwiki.extension.name>
+  </properties>
   <dependencies>
     <dependency>
-      <groupId>org.xwiki.platform</groupId>
-      <artifactId>xwiki-platform-ldap-authenticator</artifactId>
+      <groupId>org.xwiki.contrib.ldap</groupId>
+      <artifactId>ldap-api</artifactId>
       <version>${project.version}</version>
+      <scope>runtime</scope>
     </dependency>
+    <!-- The Velocity Macro is used in this application's wiki pages -->
     <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-lang3</artifactId>
+      <groupId>org.xwiki.platform</groupId>
+      <artifactId>xwiki-platform-rendering-macro-velocity</artifactId>
+      <version>${platform.version}</version>
+      <scope>runtime</scope>
     </dependency>
+    <!-- The HTML Macro is used in this application's wiki pages -->
     <dependency>
-      <groupId>commons-collections</groupId>
-      <artifactId>commons-collections</artifactId>
+      <groupId>org.xwiki.rendering</groupId>
+      <artifactId>xwiki-rendering-macro-html</artifactId>
+      <version>${rendering.version}</version>
+      <scope>runtime</scope>
     </dependency>
   </dependencies>
-  <build>
-    <plugins>
-      <plugin>
-        <!-- Apply the Checkstyle configurations defined in the top level pom.xml file -->
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-checkstyle-plugin</artifactId>
-      </plugin>
-    </plugins>
-  </build>
 </project>

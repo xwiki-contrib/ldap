@@ -23,12 +23,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.xwiki.platform</groupId>
-    <artifactId>xwiki-platform-ldap-test</artifactId>
+    <groupId>org.xwiki.contrib.ldap</groupId>
+    <artifactId>ldap-test</artifactId>
     <version>8.3-SNAPSHOT</version>
   </parent>
-  <artifactId>xwiki-platform-ldap-test-tests</artifactId>
-  <name>XWiki Platform - LDAP - Tests - Functional Tests</name>
+  <artifactId>ldap-test-tests</artifactId>
+  <name>LDAP - Tests - Functional Tests</name>
   <packaging>jar</packaging>
   <properties>
     <xwikiCfgSuperadminPassword>pass</xwikiCfgSuperadminPassword>
@@ -37,8 +37,8 @@
   </properties>
   <dependencies>
     <dependency>
-      <groupId>org.xwiki.platform</groupId>
-      <artifactId>xwiki-platform-ldap-authenticator</artifactId>
+      <groupId>org.xwiki.contrib.ldap</groupId>
+      <artifactId>ldap-authenticator</artifactId>
       <version>${project.version}</version>
     </dependency>
 
@@ -46,7 +46,7 @@
     <dependency>
       <groupId>org.xwiki.platform</groupId>
       <artifactId>xwiki-platform-test-ui</artifactId>
-      <version>${project.version}</version>
+      <version>${platform.version}</version>
       <scope>test</scope>
     </dependency>
 
@@ -60,7 +60,7 @@
     <dependency>
       <groupId>org.xwiki.platform</groupId>
       <artifactId>xwiki-platform-test-oldcore</artifactId>
-      <version>${project.version}</version>
+      <version>${platform.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -86,7 +86,7 @@
       <plugin>
         <groupId>org.xwiki.platform</groupId>
         <artifactId>xwiki-platform-tool-packager-plugin</artifactId>
-        <version>${project.version}</version>
+        <version>${platform.version}</version>
         <executions>
           <execution>
             <phase>generate-test-resources</phase>
@@ -98,35 +98,4 @@
       </plugin>
     </plugins>
   </build>
-  <profiles>
-    <profile>
-      <id>clover</id>
-      <!-- Add the Clover JAR to the WAR so that it's available at runtime when XWiki executes.
-           It's needed because instrumented jars in the WAR will call Clover APIs at runtime when they execute. -->
-      <dependencies>
-        <dependency>
-          <groupId>com.atlassian.clover</groupId>
-          <artifactId>clover</artifactId>
-        </dependency>
-      </dependencies>
-      <build>
-        <plugins>
-          <!-- Add the Clover JAR to the Packager plugin runtime classpath since the Packager plugin uses java classes
-               that have been instrumented with Clover (XWiki oldcore for example) -->
-          <plugin>
-            <groupId>org.xwiki.platform</groupId>
-            <artifactId>xwiki-platform-tool-packager-plugin</artifactId>
-            <version>${project.version}</version>
-            <dependencies>
-              <dependency>
-                <groupId>com.atlassian.clover</groupId>
-                <artifactId>clover</artifactId>
-                <version>${clover.version}</version>
-              </dependency>
-            </dependencies>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-  </profiles>
 </project>
