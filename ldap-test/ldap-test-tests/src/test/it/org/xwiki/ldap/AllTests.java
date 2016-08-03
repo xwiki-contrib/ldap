@@ -24,6 +24,7 @@ import java.util.Properties;
 
 import org.junit.AfterClass;
 import org.junit.runner.RunWith;
+import org.xwiki.contrib.ldap.XWikiLDAPAuthServiceImpl;
 import org.xwiki.ldap.framework.LDAPTestSetup;
 import org.xwiki.test.integration.XWikiExecutor;
 import org.xwiki.test.integration.XWikiExecutorSuite;
@@ -51,8 +52,7 @@ public class AllTests
         Properties currentXWikiConf = executor.loadXWikiCfg();
 
         currentXWikiConf.setProperty("xwiki.authentication.ldap", "1");
-        currentXWikiConf.setProperty("xwiki.authentication.authclass",
-            "com.xpn.xwiki.user.impl.LDAP.XWikiLDAPAuthServiceImpl");
+        currentXWikiConf.setProperty("xwiki.authentication.authclass", XWikiLDAPAuthServiceImpl.class.getName());
         currentXWikiConf.setProperty("xwiki.authentication.ldap.server", LDAPTestSetup.LDAP_SERVER);
         currentXWikiConf.setProperty("xwiki.authentication.ldap.port", "" + LDAPTestSetup.getLDAPPort());
         currentXWikiConf.setProperty("xwiki.authentication.ldap.base_DN", LDAPTestSetup.LDAP_BASEDN);
