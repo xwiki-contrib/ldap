@@ -176,6 +176,30 @@ public class XWikiLDAPAuthServiceImplTest extends AbstractLDAPTestCase
     }
 
     /**
+     * Validate authentication of a user from an allowed group.
+     */
+    @Test
+    public void testAuthenticateIfInGroup() throws XWikiException
+    {
+        this.mocker.getMockXWikiCfg().setProperty("xwiki.authentication.ldap.user_group", LDAPTestSetup.HMSLYDIA_DN);
+
+        assertAuthenticate(LDAPTestSetup.HORATIOHORNBLOWER_CN, LDAPTestSetup.HORATIOHORNBLOWER_PWD,
+            LDAPTestSetup.HORATIOHORNBLOWER_DN);
+    }
+
+    /**
+     * Validate authentication of a user not from an excluded group.
+     */
+    @Test
+    public void testAuthenticateIfNotInGroup() throws XWikiException
+    {
+        this.mocker.getMockXWikiCfg().setProperty("xwiki.authentication.ldap.exclude_group", LDAPTestSetup.HMSBOUNTY_DN);
+
+        assertAuthenticate(LDAPTestSetup.HORATIOHORNBLOWER_CN, LDAPTestSetup.HORATIOHORNBLOWER_PWD,
+            LDAPTestSetup.HORATIOHORNBLOWER_DN);
+    }
+
+    /**
      * Validate "simple" LDAP authentication fail with wrong user.
      */
     @Test

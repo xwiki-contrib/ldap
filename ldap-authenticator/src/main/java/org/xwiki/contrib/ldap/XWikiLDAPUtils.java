@@ -897,11 +897,8 @@ public class XWikiLDAPUtils
      */
     protected String findDNInGroup(String userDN, Map<String, String> groupMembers)
     {
-        for (String groupMember : groupMembers.values()) {
-            // implementing it case-insensitive for now
-            if (groupMember.equalsIgnoreCase(userDN)) {
-                return groupMember;
-            }
+        if (groupMembers.containsKey(userDN.toLowerCase())) {
+            return userDN;
         }
 
         return null;

@@ -336,7 +336,7 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
 
             ldapDn = ldapUtils.isInGroup(ldapUid, ldapDn, filterGroupDN, context);
 
-            if (ldapDn != null) {
+            if (ldapDn == null) {
                 throw new XWikiException(XWikiException.MODULE_XWIKI_USER, XWikiException.ERROR_XWIKI_USER_INIT,
                     "LDAP user {0} does not belong to LDAP group {1}.", null, new Object[] {ldapUid, filterGroupDN});
             }
