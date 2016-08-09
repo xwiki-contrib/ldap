@@ -889,15 +889,35 @@ public class XWikiLDAPUtils
     }
 
     /**
-     * Check if user is in provided LDAP group.
+     * Locates the user in the Map: either the user is a value or the key starts with the LDAP syntax.
      * 
-     * @param userName the user name.
+     * @param userDN the name of the user.
+     * @param groupMembers the members of LDAP group.
+     * @return the full user name.
+     */
+    protected String findDNInGroup(String userDN, Map<String, String> groupMembers)
+    {
+        for (String groupMember : groupMembers.values()) {
+            // implementing it case-insensitive for now
+            if (groupMember.equalsIgnoreCase(userDN)) {
+                return groupMember;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Check if user is in provided LDAP group and return source DN.
+     * 
+     * @param uid the user name.
+     * @param dn the user dn.
      * @param groupDN the LDAP group DN.
      * @param context the XWiki context.
      * @return LDAP user's DN if the user is in the LDAP group, null otherwise.
      * @throws XWikiException error when getting the group cache.
      */
-    public String isUidInGroup(String userName, String groupDN, XWikiContext context) throws XWikiException
+    public String isInGroup(String uid, String dn, String groupDN, XWikiContext context) throws XWikiException
     {
         String userDN = null;
 
@@ -914,13 +934,46 @@ public class XWikiLDAPUtils
             // no match when a user does not have access to the group
             if (groupMembers != null) {
                 // check if user is in the list
-                userDN = findInGroup(userName, groupMembers, context);
+                if (dn == null) {
+                    userDN = findInGroup(uid, groupMembers, context);
+                } else {
+                    userDN = findDNInGroup(dn, groupMembers);
+                }
 
                 LOGGER.debug("Found user dn in user group [{}]", userDN);
             }
         }
 
         return userDN;
+    }
+
+    /**
+     * Check if user is in provided LDAP group and return source DN.
+     * 
+     * @param userName the user name.
+     * @param groupDN the LDAP group DN.
+     * @param context the XWiki context.
+     * @return LDAP user's DN if the user is in the LDAP group, null otherwise.
+     * @throws XWikiException error when getting the group cache.
+     */
+    public String isUidInGroup(String userName, String groupDN, XWikiContext context) throws XWikiException
+    {
+        return isInGroup(userName, null, groupDN, context);
+    }
+
+    /**
+     * Check if the DN is in provided LDAP group and return source DN.
+     * 
+     * @param dn the user DN.
+     * @param groupDN the LDAP group DN.
+     * @param context the XWiki context.
+     * @return LDAP user's DN if the user is in the LDAP group, null otherwise.
+     * @throws XWikiException error when getting the group cache.
+     * @since 8.4
+     */
+    public String isDNInGroup(String dn, String groupDN, XWikiContext context) throws XWikiException
+    {
+        return isInGroup(null, dn, groupDN, context);
     }
 
     /**

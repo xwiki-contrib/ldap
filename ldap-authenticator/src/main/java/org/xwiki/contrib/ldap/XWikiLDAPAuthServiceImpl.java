@@ -311,10 +311,22 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
         XWikiDocument userProfile = ldapUtils.getUserProfileByUid(validXWikiUserName, ldapUid, context);
 
         // ////////////////////////////////////////////////////////////////////
-        // 4. if group param, verify group membership (& get DN)
+        // 4. check if bind DN is user DN
         // ////////////////////////////////////////////////////////////////////
 
         String ldapDn = null;
+
+        String bindDNFormat = config.getLDAPBindDN(context);
+        String bindDN = config.getLDAPBindDN(ldapUid, password, context);
+
+        if (!bindDNFormat.equals(bindDN)) {
+            ldapDn = bindDN;
+        }
+
+        // ////////////////////////////////////////////////////////////////////
+        // 5. if group param, verify group membership (& get DN)
+        // ////////////////////////////////////////////////////////////////////
+
         String filterGroupDN = config.getLDAPParam("ldap_user_group", "", context);
 
         if (filterGroupDN.length() > 0) {
@@ -322,16 +334,16 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
                 LOGGER.debug("Checking if the user belongs to the user group: " + filterGroupDN);
             }
 
-            ldapDn = ldapUtils.isUidInGroup(ldapUid, filterGroupDN, context);
+            ldapDn = ldapUtils.isInGroup(ldapUid, ldapDn, filterGroupDN, context);
 
-            if (ldapDn == null) {
+            if (ldapDn != null) {
                 throw new XWikiException(XWikiException.MODULE_XWIKI_USER, XWikiException.ERROR_XWIKI_USER_INIT,
                     "LDAP user {0} does not belong to LDAP group {1}.", null, new Object[] {ldapUid, filterGroupDN});
             }
         }
 
         // ////////////////////////////////////////////////////////////////////
-        // 5. if exclude group param, verify group membership
+        // 6. if exclude group param, verify group membership
         // ////////////////////////////////////////////////////////////////////
 
         String excludeGroupDN = config.getLDAPParam("ldap_exclude_group", "", context);
@@ -341,14 +353,14 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
                 LOGGER.debug("Checking if the user does not belongs to the exclude group: " + excludeGroupDN);
             }
 
-            if (ldapUtils.isUidInGroup(ldapUid, excludeGroupDN, context) != null) {
+            if (ldapUtils.isInGroup(ldapUid, ldapDn, filterGroupDN, context) != null) {
                 throw new XWikiException(XWikiException.MODULE_XWIKI_USER, XWikiException.ERROR_XWIKI_USER_INIT,
                     "LDAP user {0} should not belong to LDAP group {1}.", null, new Object[] {ldapUid, filterGroupDN});
             }
         }
 
         // ////////////////////////////////////////////////////////////////////
-        // 6. if no dn search for user
+        // 7. if no dn search for user
         // ////////////////////////////////////////////////////////////////////
 
         List<XWikiLDAPSearchAttribute> searchAttributes = null;
@@ -375,7 +387,7 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
         }
 
         // ////////////////////////////////////////////////////////////////////
-        // 7. apply validate_password property or if user used for LDAP connection is not the one
+        // 8. apply validate_password property or if user used for LDAP connection is not the one
         // authenticated try to bind
         // ////////////////////////////////////////////////////////////////////
 
@@ -390,22 +402,16 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
                 throw new XWikiException(XWikiException.MODULE_XWIKI_USER, XWikiException.ERROR_XWIKI_USER_INIT,
                     "LDAP authentication failed:" + " could not validate the password: wrong password for " + ldapDn);
             }
-        } else {
-            String bindDNFormat = config.getLDAPBindDN(context);
-            String bindDN = config.getLDAPBindDN(ldapUid, password, context);
+        } else if (!ldapDn.equals(bindDN)) {
+            // Validate user credentials
+            connector.bind(ldapDn, password);
 
-            if (bindDNFormat.equals(bindDN)) {
-                // Validate user credentials
-                connector.bind(ldapDn, password);
-
-                // Rebind admin user
-                connector.bind(bindDN, config.getLDAPBindPassword(ldapUid, password, context));
-
-            }
+            // Rebind admin user
+            connector.bind(bindDN, config.getLDAPBindPassword(ldapUid, password, context));
         }
 
         // ////////////////////////////////////////////////////////////////////
-        // 8. sync user
+        // 9. sync user
         // ////////////////////////////////////////////////////////////////////
 
         boolean isNewUser = userProfile.isNew();
@@ -420,7 +426,7 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
         }
 
         // ////////////////////////////////////////////////////////////////////
-        // 9. sync groups membership
+        // 10. sync groups membership
         // ////////////////////////////////////////////////////////////////////
 
         try {
