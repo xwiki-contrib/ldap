@@ -353,7 +353,7 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
                 LOGGER.debug("Checking if the user does not belongs to the exclude group: " + excludeGroupDN);
             }
 
-            if (ldapUtils.isInGroup(ldapUid, ldapDn, filterGroupDN, context) != null) {
+            if (ldapUtils.isInGroup(ldapUid, ldapDn, excludeGroupDN, context) != null) {
                 throw new XWikiException(XWikiException.MODULE_XWIKI_USER, XWikiException.ERROR_XWIKI_USER_INIT,
                     "LDAP user {0} should not belong to LDAP group {1}.", null, new Object[] {ldapUid, filterGroupDN});
             }
