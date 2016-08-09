@@ -74,7 +74,9 @@ import com.xpn.xwiki.web.Utils;
  * 
  * @version $Id$
  * @since 1.3 M2
+ * @deprecated since 8.3, use {@link org.xwiki.contrib.ldap.XWikiLDAPUtils} instead
  */
+@Deprecated
 public class XWikiLDAPUtils
 {
     /**

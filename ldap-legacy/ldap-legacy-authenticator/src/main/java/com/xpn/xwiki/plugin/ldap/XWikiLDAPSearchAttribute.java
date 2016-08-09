@@ -24,7 +24,9 @@ package com.xpn.xwiki.plugin.ldap;
  * 
  * @version $Id$
  * @since 1.3 M2
+ * @deprecated since 8.3, use {@link org.xwiki.contrib.ldap.XWikiLDAPSearchAttribute} instead
  */
+@Deprecated
 public class XWikiLDAPSearchAttribute extends org.xwiki.contrib.ldap.XWikiLDAPSearchAttribute
 {
     /**

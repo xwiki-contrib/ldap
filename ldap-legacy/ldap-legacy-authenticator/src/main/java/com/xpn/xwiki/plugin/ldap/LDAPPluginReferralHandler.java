@@ -19,42 +19,17 @@
  */
 package com.xpn.xwiki.plugin.ldap;
 
-import java.text.MessageFormat;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.novell.ldap.LDAPAuthHandler;
-import com.novell.ldap.LDAPAuthProvider;
 import com.xpn.xwiki.XWikiContext;
 
 /**
  * Connected to referrals.
  * 
  * @version $Id$
+ * @deprecated since 8.3, use {@link org.xwiki.contrib.ldap.LDAPPluginReferralHandler} instead
  */
-public class LDAPPluginReferralHandler implements LDAPAuthHandler
+@Deprecated
+public class LDAPPluginReferralHandler extends org.xwiki.contrib.ldap.LDAPPluginReferralHandler
 {
-    /**
-     * Logging tool.
-     */
-    private static final Logger LOGGER = LoggerFactory.getLogger(LDAPPluginReferralHandler.class);
-
-    /**
-     * The DN to use when binding.
-     */
-    private String bindDN;
-
-    /**
-     * The password to use when binding.
-     */
-    private String bindPassword;
-
-    /**
-     * The XWiki context.
-     */
-    private XWikiContext xcontext;
-
     /**
      * @param bindDN the DN to use when binding.
      * @param bindPassword the password to use when binding.
@@ -62,22 +37,6 @@ public class LDAPPluginReferralHandler implements LDAPAuthHandler
      */
     public LDAPPluginReferralHandler(String bindDN, String bindPassword, XWikiContext context)
     {
-        this.bindDN = bindDN;
-        this.bindPassword = bindPassword;
-        this.xcontext = context;
-    }
-
-    @Override
-    public LDAPAuthProvider getAuthProvider(String host, int port)
-    {
-        try {
-            LOGGER.debug(MessageFormat.format("Looking for auth for referral to {0}:{1}", host, port));
-
-            return new LDAPAuthProvider(this.bindDN, this.bindPassword.getBytes("UTF8"));
-        } catch (Exception e) {
-            LOGGER.error(MessageFormat.format("Failed to create LDAPAuthProvider for referral {0}:{1}", host, port));
-
-            return null;
-        }
+        super(bindDN, bindPassword, context);
     }
 }

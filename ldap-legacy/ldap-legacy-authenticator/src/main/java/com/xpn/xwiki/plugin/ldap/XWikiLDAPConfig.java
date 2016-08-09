@@ -37,7 +37,9 @@ import com.xpn.xwiki.XWikiContext;
  * Access to LDAP configurations.
  * 
  * @version $Id$
+ * @deprecated since 8.3, use {@link org.xwiki.contrib.ldap.XWikiLDAPConfig} instead
  */
+@Deprecated
 public final class XWikiLDAPConfig
 {
     /**

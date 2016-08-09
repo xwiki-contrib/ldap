@@ -23,7 +23,9 @@ package com.xpn.xwiki.plugin.ldap;
  * LDAP plugin base exception.
  * 
  * @version $Id$
+ * @deprecated since 8.3, use {@link org.xwiki.contrib.ldap.XWikiLDAPException} instead
  */
+@Deprecated
 public class XWikiLDAPException extends org.xwiki.contrib.ldap.XWikiLDAPException
 {
     /**
