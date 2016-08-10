@@ -31,6 +31,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
@@ -873,14 +874,29 @@ public class XWikiLDAPUtils
      * @param groupMembers the members of LDAP group.
      * @param context the XWiki context.
      * @return the full user name.
+     * @deprecated since 8.4, use {@link #findInGroup(String, Map)} instead
      */
+    @Deprecated
     protected String findInGroup(String userName, Map<String, String> groupMembers, XWikiContext context)
     {
-        String ldapuser = getUidAttributeName() + "=" + userName.toLowerCase();
+        return findUidInGroup(userName, groupMembers);
+    }
+
+    /**
+     * Locates the user in the Map: either the user is a value or the key starts with the LDAP syntax.
+     * 
+     * @param userName the name of the user.
+     * @param groupMembers the members of LDAP group.
+     * @return the full user name.
+     */
+    protected String findUidInGroup(String userName, Map<String, String> groupMembers)
+    {
+        Pattern ldapuserPattern = Pattern
+            .compile("^" + Pattern.quote(getUidAttributeName()) + "=" + Pattern.quote(userName.toLowerCase()) + " *,");
 
         for (Map.Entry<String, String> entry : groupMembers.entrySet()) {
             // implementing it case-insensitive for now
-            if (userName.equalsIgnoreCase(entry.getValue()) || entry.getKey().startsWith(ldapuser)) {
+            if (userName.equalsIgnoreCase(entry.getValue()) || ldapuserPattern.matcher(entry.getKey()).find()) {
                 return entry.getKey();
             }
         }
@@ -932,7 +948,7 @@ public class XWikiLDAPUtils
             if (groupMembers != null) {
                 // check if user is in the list
                 if (dn == null) {
-                    userDN = findInGroup(uid, groupMembers, context);
+                    userDN = findUidInGroup(uid, groupMembers);
                 } else {
                     userDN = findDNInGroup(dn, groupMembers);
                 }
