@@ -71,6 +71,17 @@ public class XWikiLDAPSearchAttribute
         this.value = null;
     }
 
+    /**
+     * @param attribute the attribute to copy
+     * @since 8.5
+     */
+    public XWikiLDAPSearchAttribute(org.xwiki.contrib.ldap.XWikiLDAPSearchAttribute attribute)
+    {
+        this.name = attribute.name;
+        this.byteValue = attribute.byteValue;
+        this.value = attribute.value;
+    }
+
     @Override
     public String toString()
     {

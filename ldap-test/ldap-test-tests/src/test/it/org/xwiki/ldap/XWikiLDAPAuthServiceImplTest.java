@@ -159,8 +159,10 @@ public class XWikiLDAPAuthServiceImplTest extends AbstractLDAPTestCase
 
         assertNotNull("The user profile document does not contains ldap object", ldapProfileObj);
 
-        assertEquals(storedDn, ldapProfileObj.getStringValue(LDAPProfileXClass.LDAP_XFIELD_DN));
-        assertEquals(storedUid, ldapProfileObj.getStringValue(LDAPProfileXClass.LDAP_XFIELD_UID));
+        assertEquals(storedDn.toLowerCase(),
+            ldapProfileObj.getStringValue(LDAPProfileXClass.LDAP_XFIELD_DN).toLowerCase());
+        assertEquals(storedUid.toLowerCase(),
+            ldapProfileObj.getStringValue(LDAPProfileXClass.LDAP_XFIELD_UID).toLowerCase());
     }
 
     // Tests
@@ -188,12 +190,28 @@ public class XWikiLDAPAuthServiceImplTest extends AbstractLDAPTestCase
     }
 
     /**
+     * Validate authentication of a user from an allowed group.
+     */
+    @Test
+    public void testAuthenticateWithIncludeGroupAndPartialUid() throws XWikiException
+    {
+        this.mocker.getMockXWikiCfg().setProperty("xwiki.authentication.ldap.user_group", LDAPTestSetup.HMSLYDIA_DN);
+
+        Principal principal = this.ldapAuth.authenticate(LDAPTestSetup.HORATIOHORNBLOWER_CN.substring(0, 2),
+            LDAPTestSetup.HORATIOHORNBLOWER_PWD, this.mocker.getXWikiContext());
+
+        // Check that authentication return a null Principal
+        assertNull(principal);
+    }
+
+    /**
      * Validate authentication of a user not from an excluded group.
      */
     @Test
     public void testAuthenticateWithExcludeGroup() throws XWikiException
     {
-        this.mocker.getMockXWikiCfg().setProperty("xwiki.authentication.ldap.exclude_group", LDAPTestSetup.EXCLUSIONGROUP_DN);
+        this.mocker.getMockXWikiCfg().setProperty("xwiki.authentication.ldap.exclude_group",
+            LDAPTestSetup.EXCLUSIONGROUP_DN);
 
         assertAuthenticate(LDAPTestSetup.HORATIOHORNBLOWER_CN, LDAPTestSetup.HORATIOHORNBLOWER_PWD,
             LDAPTestSetup.HORATIOHORNBLOWER_DN);
@@ -206,7 +224,8 @@ public class XWikiLDAPAuthServiceImplTest extends AbstractLDAPTestCase
     public void testAuthenticateWithIncludeAndExcludeGroup() throws XWikiException
     {
         this.mocker.getMockXWikiCfg().setProperty("xwiki.authentication.ldap.user_group", LDAPTestSetup.HMSLYDIA_DN);
-        this.mocker.getMockXWikiCfg().setProperty("xwiki.authentication.ldap.exclude_group", LDAPTestSetup.EXCLUSIONGROUP_DN);
+        this.mocker.getMockXWikiCfg().setProperty("xwiki.authentication.ldap.exclude_group",
+            LDAPTestSetup.EXCLUSIONGROUP_DN);
 
         assertAuthenticate(LDAPTestSetup.HORATIOHORNBLOWER_CN, LDAPTestSetup.HORATIOHORNBLOWER_PWD,
             LDAPTestSetup.HORATIOHORNBLOWER_DN);

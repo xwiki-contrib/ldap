@@ -51,4 +51,13 @@ public class XWikiLDAPSearchAttribute extends org.xwiki.contrib.ldap.XWikiLDAPSe
     {
         super(name, byteValue);
     }
+
+    /**
+     * @param attribute the attribute to copy
+     * @since 8.5
+     */
+    public XWikiLDAPSearchAttribute(org.xwiki.contrib.ldap.XWikiLDAPSearchAttribute attribute)
+    {
+        super(attribute);
+    }
 }

@@ -24,6 +24,7 @@ import java.security.Security;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -42,7 +43,6 @@ import com.novell.ldap.LDAPSearchConstraints;
 import com.novell.ldap.LDAPSearchResults;
 import com.novell.ldap.LDAPSocketFactory;
 import com.xpn.xwiki.XWikiContext;
-import java.util.HashSet;
 
 /**
  * LDAP communication tool.
@@ -66,6 +66,22 @@ public class XWikiLDAPConnection
      * LDAP attributes that should be treated as binary data.
      */
     private Set<String> binaryAttributes = new HashSet<>();
+
+    /**
+     * Default constructor.
+     */
+    public XWikiLDAPConnection()
+    {
+    }
+
+    /**
+     * @param connection the connection to copy
+     */
+    public XWikiLDAPConnection(org.xwiki.contrib.ldap.XWikiLDAPConnection connection)
+    {
+        this.connection = connection.connection;
+        this.binaryAttributes = connection.binaryAttributes;
+    }
 
     /**
      * @param context the XWiki context.
@@ -361,8 +377,8 @@ public class XWikiLDAPConnection
     public LDAPSearchResults search(String baseDN, String filter, String[] attr, int ldapScope) throws LDAPException
     {
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("LDAP search: baseDN=[{}] query=[{}] attr=[{}] ldapScope=[{}]", new Object[] {baseDN, filter,
-            attr != null ? Arrays.asList(attr) : null, ldapScope});
+            LOGGER.debug("LDAP search: baseDN=[{}] query=[{}] attr=[{}] ldapScope=[{}]",
+                new Object[] {baseDN, filter, attr != null ? Arrays.asList(attr) : null, ldapScope});
         }
 
         return this.connection.search(baseDN, ldapScope, filter, attr, false);
@@ -380,7 +396,7 @@ public class XWikiLDAPConnection
         for (LDAPAttribute attribute : (Set<LDAPAttribute>) attributeSet) {
             String attributeName = attribute.getName();
 
-            if(!isBinaryAttribute(attributeName)) {
+            if (!isBinaryAttribute(attributeName)) {
                 LOGGER.debug("  - values for attribute [{}]", attributeName);
 
                 Enumeration<String> allValues = attribute.getStringValues();
