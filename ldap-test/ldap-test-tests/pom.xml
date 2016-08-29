@@ -25,7 +25,7 @@
   <parent>
     <groupId>org.xwiki.contrib.ldap</groupId>
     <artifactId>ldap-test</artifactId>
-    <version>9.0</version>
+    <version>9.1-SNAPSHOT</version>
   </parent>
   <artifactId>ldap-test-tests</artifactId>
   <name>LDAP - Tests - Functional Tests</name>
