@@ -21,13 +21,20 @@ package org.xwiki.contrib.ldap;
 
 import java.security.Provider;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.text.StrSubstitutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +46,7 @@ import com.xpn.xwiki.XWikiContext;
  * @version $Id$
  * @since 8.3
  */
-public final class XWikiLDAPConfig
+public class XWikiLDAPConfig
 {
     /**
      * Mapping fields separator.
@@ -153,42 +160,112 @@ public final class XWikiLDAPConfig
      */
     private static XWikiLDAPConfig instance;
 
-    /**
-     * Protected constructor. Use {@link #getInstance()}.
-     */
-    private XWikiLDAPConfig()
-    {
+    private final Map<String, String> memoryConfiguration;
 
+    /**
+     * @param userId the complete user id given
+     * @param xcontext the XWiki context
+     * @since 9.0
+     */
+    public XWikiLDAPConfig(String userId, XWikiContext xcontext)
+    {
+        this.memoryConfiguration = new HashMap<>();
+
+        if (userId != null) {
+            parseRemoteUser(userId, xcontext);
+        }
     }
 
     /**
      * @return unique instance of {@link XWikiLDAPConfig}.
+     * @deprecated since 8.5, use {@link XWikiLDAPConfig#XWikiLDAPConfig(String, XWikiContext)} instead
      */
+    @Deprecated
     public static XWikiLDAPConfig getInstance()
     {
         if (instance == null) {
-            instance = new XWikiLDAPConfig();
+            instance = new XWikiLDAPConfig(null, null);
         }
 
         return instance;
     }
 
     /**
-     * First try to retrieve value from XWiki Preferences and then from xwiki.cfg Syntax ldap_*name* (for XWiki
-     * Preferences) will be changed to ldap.*name* for xwiki.cfg.
+     * @return the custom configuration. Can be used to override any property.
+     * @since 9.0
+     */
+    public Map<String, String> getMemoryConfiguration()
+    {
+        return this.memoryConfiguration;
+    }
+
+    private void parseRemoteUser(String ssoRemoteUser, XWikiContext context)
+    {
+        this.memoryConfiguration.put("auth.input", ssoRemoteUser);
+        this.memoryConfiguration.put("uid", ssoRemoteUser);
+
+        Pattern remoteUserParser = getRemoteUserPattern(context);
+
+        LOGGER.debug("remoteUserParser: {}", remoteUserParser);
+
+        if (remoteUserParser != null) {
+            Matcher marcher = remoteUserParser.matcher(ssoRemoteUser);
+
+            if (marcher.find()) {
+                int groupCount = marcher.groupCount();
+                if (groupCount == 0) {
+                    this.memoryConfiguration.put("uid", marcher.group());
+                } else {
+                    for (int g = 1; g <= groupCount; ++g) {
+                        String groupValue = marcher.group(g);
+
+                        List<String> remoteUserMapping = getRemoteUserMapping(g, context);
+
+                        for (String configName : remoteUserMapping) {
+                            this.memoryConfiguration.put(configName,
+                                convertRemoteUserMapping(configName, groupValue, context));
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private String convertRemoteUserMapping(String propertyName, String propertyValue, XWikiContext context)
+    {
+        Map<String, String> hostConvertor = getRemoteUserMapping(propertyName, true, context);
+
+        LOGGER.debug("hostConvertor: {}", hostConvertor);
+
+        String converted = hostConvertor.get(propertyValue.toLowerCase());
+
+        return converted != null ? converted : propertyValue;
+    }
+
+    /**
+     * Try to find the configuration in the following order:
+     * <ul>
+     * <li>Local configuration stored in this {@link XWikiLDAPConfig} instance (ldap_*name*)</li>
+     * <li>XWiki Preferences page (ldap_*name*)</li>
+     * <li>xwiki.cfg configuration file (ldap.*name*)</li>
+     * </ul>
      * 
-     * @param prefName the name of the property in XWikiPreferences.
+     * @param name the name of the property in XWikiPreferences.
      * @param cfgName the name of the property in xwiki.cfg.
      * @param def default value.
      * @param context the XWiki context.
      * @return the value of the property.
      */
-    public String getLDAPParam(String prefName, String cfgName, String def, XWikiContext context)
+    public String getLDAPParam(String name, String cfgName, String def, XWikiContext context)
     {
+        if (this.memoryConfiguration.containsKey(name)) {
+            return this.memoryConfiguration.get(name);
+        }
+
         String param = null;
 
         try {
-            param = context.getWiki().getXWikiPreference(prefName, context);
+            param = context.getWiki().getXWikiPreference(name, context);
         } catch (Exception e) {
             LOGGER.error("Failed to get preferences", e);
         }
@@ -366,9 +443,9 @@ public final class XWikiLDAPConfig
      */
     public Map<String, Set<String>> getGroupMappings(XWikiContext context)
     {
-        Map<String, Set<String>> groupMappings = new HashMap<String, Set<String>>();
-
         String param = getLDAPParam("ldap_group_mapping", "", context);
+
+        Map<String, Set<String>> groupMappings = new HashMap<String, Set<String>>();
 
         if (param.trim().length() > 0) {
             char[] buffer = param.trim().toCharArray();
@@ -492,14 +569,14 @@ public final class XWikiLDAPConfig
     }
 
     /**
-     * @param login the login provided by the user
+     * @param input the login provided by the user
      * @param password the password provided by the user
      * @param context the XWiki context.
      * @return the login to use to connect to LDAP server.
      */
-    public String getLDAPBindDN(String login, String password, XWikiContext context)
+    public String getLDAPBindDN(String input, String password, XWikiContext context)
     {
-        return MessageFormat.format(getLDAPBindDN(context), XWikiLDAPConnection.escapeLDAPDNValue(login),
+        return MessageFormat.format(getLDAPBindDN(context), XWikiLDAPConnection.escapeLDAPDNValue(input),
             XWikiLDAPConnection.escapeLDAPDNValue(password));
     }
 
@@ -515,14 +592,14 @@ public final class XWikiLDAPConfig
     }
 
     /**
-     * @param login the login provided by the user
+     * @param input the login provided by the user
      * @param password the password provided by the user
      * @param context the XWiki context.
      * @return the password to use to connect to LDAP server.
      */
-    public String getLDAPBindPassword(String login, String password, XWikiContext context)
+    public String getLDAPBindPassword(String input, String password, XWikiContext context)
     {
-        return MessageFormat.format(getLDAPBindPassword(context), login, password);
+        return MessageFormat.format(getLDAPBindPassword(context), input, password);
     }
 
     /**
@@ -558,5 +635,180 @@ public final class XWikiLDAPConfig
         binaryAttributes.add(getLDAPParam(XWikiLDAPConfig.PREF_LDAP_PHOTO_ATTRIBUTE, DEFAULT_PHOTO_ATTRIBUTE, context));
 
         return binaryAttributes;
+    }
+
+    /**
+     * @param name the name of the property in XWikiPreferences.
+     * @param def the default value
+     * @param context the XWiki context.
+     * @return the configuration value as {@link List}
+     * @since 9.0
+     */
+    public List<String> getLDAPListParam(String name, List<String> def, XWikiContext context)
+    {
+        return getLDAPListParam(name, ',', def, context);
+    }
+
+    /**
+     * @param name the name of the property in XWikiPreferences.
+     * @param separator the separator used to cut each element of the list
+     * @param def the default value
+     * @param context the XWiki context.
+     * @return the configuration value as {@link List}
+     * @since 9.0
+     */
+    public List<String> getLDAPListParam(String name, char separator, List<String> def, XWikiContext context)
+    {
+        List<String> list = def;
+
+        String str = getLDAPParam(name, null, context);
+
+        if (str != null) {
+            if (!StringUtils.isEmpty(str)) {
+                list = splitParam(str, separator);
+            } else {
+                list = Collections.emptyList();
+            }
+        }
+
+        return list;
+    }
+
+    /**
+     * @param name the name of the property in XWikiPreferences.
+     * @param def the default value
+     * @param forceLowerCaseKey
+     * @param context the XWiki context.
+     * @return the configuration value as {@link Map}
+     * @since 9.0
+     */
+    public Map<String, String> getLDAPMapParam(String name, Map<String, String> def, boolean forceLowerCaseKey,
+        XWikiContext context)
+    {
+        return getLDAPMapParam(name, '|', def, forceLowerCaseKey, context);
+    }
+
+    /**
+     * @param name the name of the property in XWikiPreferences.
+     * @param separator the separator used to cut each element of the list
+     * @param def the default value
+     * @param forceLowerCaseKey
+     * @param context the XWiki context.
+     * @return the configuration value as {@link Map}
+     * @since 9.0
+     */
+    public Map<String, String> getLDAPMapParam(String name, char separator, Map<String, String> def,
+        boolean forceLowerCaseKey, XWikiContext context)
+    {
+        Map<String, String> mappings = def;
+
+        List<String> list = getLDAPListParam(name, separator, null, context);
+
+        if (list != null) {
+            if (list.isEmpty()) {
+                mappings = Collections.emptyMap();
+            } else {
+                mappings = new LinkedHashMap<>();
+
+                for (String fieldStr : list) {
+                    int index = fieldStr.indexOf('=');
+                    if (index != -1) {
+                        String key = fieldStr.substring(0, index);
+                        String value = index + 1 == fieldStr.length() ? "" : fieldStr.substring(index + 1);
+
+                        mappings.put(forceLowerCaseKey ? key.toLowerCase() : key, value);
+                    } else {
+                        LOGGER.warn("Error parsing [{}] attribute in xwiki.cfg: {}", name, fieldStr);
+                    }
+                }
+            }
+        }
+
+        return mappings;
+    }
+
+    private List<String> splitParam(String text, char delimiter)
+    {
+        List<String> tokens = new ArrayList<>();
+        boolean escaped = false;
+        StringBuilder sb = new StringBuilder();
+
+        for (char ch : text.toCharArray()) {
+            if (escaped) {
+                sb.append(ch);
+                escaped = false;
+            } else if (ch == delimiter) {
+                if (sb.length() > 0) {
+                    tokens.add(sb.toString());
+                    sb.delete(0, sb.length());
+                }
+            } else if (ch == '\\') {
+                escaped = true;
+            } else {
+                sb.append(ch);
+            }
+        }
+
+        if (sb.length() > 0) {
+            tokens.add(sb.toString());
+        }
+
+        return tokens;
+    }
+
+    /**
+     * @param context the XWiki context
+     * @return a Java regexp used to parse the remote user provided by JAAS.
+     * @since 9.0
+     */
+    public Pattern getRemoteUserPattern(XWikiContext context)
+    {
+        String param = getLDAPParam("ldap_remoteUserParser", null, context);
+
+        return param != null ? Pattern.compile(param) : null;
+    }
+
+    /**
+     * @param groupId the identifier of the group matched by the REMOTE_USER regexp
+     * @param context the XWiki context
+     * @return the properties associated to the passed group
+     * @since 9.0
+     */
+    public List<String> getRemoteUserMapping(int groupId, XWikiContext context)
+    {
+        return getLDAPListParam("ldap_remoteUserMapping." + groupId, ',', Collections.<String>emptyList(), context);
+    }
+
+    /**
+     * @param propertyName the name of the property
+     * @param forceLowerCaseKey if true the keys will be stored lowered cased in the {@link Map}
+     * @param context the XWiki context
+     * @return the mapping (the value for each domain) associated to the passed property
+     * @since 9.0
+     */
+    public Map<String, String> getRemoteUserMapping(String propertyName, boolean forceLowerCaseKey,
+        XWikiContext context)
+    {
+        return getLDAPMapParam("ldap_remoteUserMapping." + propertyName, '|', Collections.<String, String>emptyMap(),
+            forceLowerCaseKey, context);
+    }
+
+    /**
+     * @param context the XWiki context
+     * @return try to find existing XWiki user with both complete user id and user login
+     * @since 9.0
+     */
+    public Set<String> getTestLoginFor(XWikiContext context)
+    {
+        List<String> list = getLDAPListParam("testLoginFor", ',', Collections.<String>emptyList(), context);
+
+        Set<String> set = new HashSet<>(list.size());
+        for (String uid : list) {
+            set.add(StrSubstitutor.replace(uid, this.memoryConfiguration));
+        }
+
+        LOGGER.debug("TestLoginFor: {}", set);
+
+        return set;
     }
 }

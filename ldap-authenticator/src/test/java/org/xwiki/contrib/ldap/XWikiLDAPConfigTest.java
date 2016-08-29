@@ -62,33 +62,42 @@ public class XWikiLDAPConfigTest extends AbstractBridgedComponentTestCase
 
     private static final String LDAPTOTOGRP2_DN = "cn=HMS Toto,ou=crews,ou=groups,o=sevenSeas2";
 
-    private static final Map<String, String> PREFERENCES = new HashMap<String, String>();
+    private Map<String, String> PREFERENCES = new HashMap<String, String>();
 
-    private static final XWikiConfig CONFIG = new XWikiConfig();
+    private XWikiConfig CONFIG = new XWikiConfig();
 
-    private static final Map<String, String> RESULT_CFG_USERMAPPING = new HashMap<String, String>();
+    private Map<String, String> RESULT_CFG_USERMAPPING = new HashMap<String, String>();
 
-    private static final Map<String, String> RESULT_PREF_USERMAPPING = new HashMap<String, String>();
+    private Map<String, String> RESULT_PREF_USERMAPPING = new HashMap<String, String>();
 
-    private static final Map<String, Set<String>> RESULT_CFG_GROUPMAPPING = new HashMap<String, Set<String>>();
+    private Map<String, Set<String>> RESULT_CFG_GROUPMAPPING = new HashMap<String, Set<String>>();
 
-    private static final Map<String, Set<String>> RESULT_PREF_GROUPMAPPING = new HashMap<String, Set<String>>();
+    private Map<String, Set<String>> RESULT_PREF_GROUPMAPPING = new HashMap<String, Set<String>>();
 
-    private static final Collection<String> RESULT_CFG_GROUPCLASSES = new HashSet<String>();
+    private Collection<String> RESULT_CFG_GROUPCLASSES = new HashSet<String>();
 
-    private static final Collection<String> RESULT_PREF_GROUPCLASSES = new HashSet<String>();
+    private Collection<String> RESULT_PREF_GROUPCLASSES = new HashSet<String>();
 
-    private static final Collection<String> RESULT_CFG_GROUPMEMBERFIELDS = new HashSet<String>();
+    private Collection<String> RESULT_CFG_GROUPMEMBERFIELDS = new HashSet<String>();
 
-    private static final Collection<String> RESULT_PREF_GROUPMEMBERFIELDS = new HashSet<String>();
+    private Collection<String> RESULT_PREF_GROUPMEMBERFIELDS = new HashSet<String>();
 
-    private static void addProperty(String prefName, String cfgName, String prefValue, String cfgValue)
+    private void addProperty(String prefName, String cfgName, String prefValue, String cfgValue)
     {
-        PREFERENCES.put(prefName, prefValue);
+        setPreference(prefName, prefValue);
         CONFIG.setProperty(cfgName, cfgValue);
     }
 
-    static {
+    private void setPreference(String prefName, String prefValue)
+    {
+        PREFERENCES.put(prefName, prefValue);
+    }
+
+    @Override
+    public void setUp() throws Exception
+    {
+        super.setUp();
+
         CONFIG.setProperty("xwiki.authentication.ldap.authclass", "com.xpn.xwiki.user.impl.LDAP.LDAPAuthServiceImpl");
 
         addProperty("ldap", "xwiki.authentication.ldap", "0", "1");
@@ -161,12 +170,6 @@ public class XWikiLDAPConfigTest extends AbstractBridgedComponentTestCase
 
         addProperty("ldap_group_memberfields", "xwiki.authentication.ldap.group_memberfields",
             "groupmemberfield1,groupmemberfield2", "groupmemberfield12");
-    }
-
-    @Override
-    public void setUp() throws Exception
-    {
-        super.setUp();
 
         this.prefContext = new XWikiContext();
 
@@ -301,7 +304,84 @@ public class XWikiLDAPConfigTest extends AbstractBridgedComponentTestCase
     {
         Assert.assertEquals(RESULT_PREF_GROUPMEMBERFIELDS,
             XWikiLDAPConfig.getInstance().getGroupMemberFields(prefContext));
-        Assert.assertEquals(RESULT_CFG_GROUPMEMBERFIELDS, XWikiLDAPConfig.getInstance()
-            .getGroupMemberFields(cfgContext));
+        Assert.assertEquals(RESULT_CFG_GROUPMEMBERFIELDS,
+            XWikiLDAPConfig.getInstance().getGroupMemberFields(cfgContext));
+    }
+
+    @Test
+    public void testParseRemoteUserWithNoConfiguration() throws Exception
+    {
+        XWikiLDAPConfig config = new XWikiLDAPConfig("remoteuser", this.prefContext);
+
+        Assert.assertEquals("remoteuser", config.getMemoryConfiguration().get("auth.input"));
+        Assert.assertEquals("remoteuser", config.getMemoryConfiguration().get("uid"));
+    }
+
+    @Test
+    public void testParseRemoteUserWithSimplePattern() throws Exception
+    {
+        setPreference("ldap_remoteUserParser", "remote");
+
+        XWikiLDAPConfig config = new XWikiLDAPConfig("remoteuser", this.prefContext);
+
+        Assert.assertEquals("remoteuser", config.getMemoryConfiguration().get("auth.input"));
+        Assert.assertEquals("remote", config.getMemoryConfiguration().get("uid"));
+    }
+
+    @Test
+    public void testParseRemoteUserWithGroupsPattern() throws Exception
+    {
+        setPreference("ldap_remoteUserParser", "(remote)(user)");
+        setPreference("ldap_remoteUserMapping.1", "uid");
+        setPreference("ldap_remoteUserMapping.2",
+            "ldap_server,ldap_port,ldap_base_DN,ldap_bind_DN,ldap_bind_pass,ldap_group_mapping");
+
+        XWikiLDAPConfig config = new XWikiLDAPConfig("remoteuser", this.prefContext);
+
+        Assert.assertEquals("remoteuser", config.getMemoryConfiguration().get("auth.input"));
+        Assert.assertEquals("remote", config.getMemoryConfiguration().get("uid"));
+        Assert.assertEquals("user", config.getMemoryConfiguration().get("ldap_server"));
+        Assert.assertEquals("user", config.getMemoryConfiguration().get("ldap_base_DN"));
+        Assert.assertEquals("user", config.getMemoryConfiguration().get("ldap_group_mapping"));
+    }
+
+    @Test
+    public void testParseRemoteUserWithGroupsPatternandConversions() throws Exception
+    {
+        setPreference("ldap_remoteUserParser", "(.+)@(.+)");
+        setPreference("ldap_remoteUserMapping.1", "uid");
+        setPreference("ldap_remoteUserMapping.2",
+            "ldap_server,ldap_port,ldap_base_DN,ldap_bind_DN,ldap_bind_pass,ldap_group_mapping");
+        setPreference("ldap_remoteUserMapping.ldap_server", "doMain=my.domain.com|domain2=my.domain2.com");
+        setPreference("ldap_remoteUserMapping.ldap_port", "doMain=388|domain2=387");
+        setPreference("ldap_remoteUserMapping.ldap_base_DN",
+            "dOmain=dc=my,dc=domain,dc=com|domain2=dc=my,dc=domain2,dc=com");
+        setPreference("ldap_remoteUserMapping.ldap_bind_DN",
+            "doMain=cn=bind,dc=my,dc=domain,dc=com|domain2=cn=bind,dc=my,dc=domain2,dc=com");
+        setPreference("ldap_remoteUserMapping.ldap_bind_pass", "doMain=password|domain2=password2");
+        setPreference("ldap_remoteUserMapping.ldap_group_mapping",
+            "doMain=xgroup11=lgroup11\\|xgroup12=lgroup12|domain2=xgroup21=lgroup21\\|xgroup22=lgroup22");
+
+        XWikiLDAPConfig config = new XWikiLDAPConfig("user@domain", this.prefContext);
+
+        Assert.assertEquals("user", config.getMemoryConfiguration().get("uid"));
+        Assert.assertEquals("my.domain.com", config.getMemoryConfiguration().get("ldap_server"));
+        Assert.assertEquals("388", config.getMemoryConfiguration().get("ldap_port"));
+        Assert.assertEquals("dc=my,dc=domain,dc=com", config.getMemoryConfiguration().get("ldap_base_DN"));
+        Assert.assertEquals("cn=bind,dc=my,dc=domain,dc=com", config.getMemoryConfiguration().get("ldap_bind_DN"));
+        Assert.assertEquals("password", config.getMemoryConfiguration().get("ldap_bind_pass"));
+        Assert.assertEquals("xgroup11=lgroup11|xgroup12=lgroup12",
+            config.getMemoryConfiguration().get("ldap_group_mapping"));
+
+        config = new XWikiLDAPConfig("user@domain2", this.prefContext);
+
+        Assert.assertEquals("user", config.getMemoryConfiguration().get("uid"));
+        Assert.assertEquals("my.domain2.com", config.getMemoryConfiguration().get("ldap_server"));
+        Assert.assertEquals("387", config.getMemoryConfiguration().get("ldap_port"));
+        Assert.assertEquals("dc=my,dc=domain2,dc=com", config.getMemoryConfiguration().get("ldap_base_DN"));
+        Assert.assertEquals("cn=bind,dc=my,dc=domain2,dc=com", config.getMemoryConfiguration().get("ldap_bind_DN"));
+        Assert.assertEquals("password2", config.getMemoryConfiguration().get("ldap_bind_pass"));
+        Assert.assertEquals("xgroup21=lgroup21|xgroup22=lgroup22",
+            config.getMemoryConfiguration().get("ldap_group_mapping"));
     }
 }

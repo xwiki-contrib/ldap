@@ -17,27 +17,43 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.ldap;
+package org.xwiki.contrib.ldap.framework;
 
-import org.junit.Before;
-import org.xwiki.ldap.framework.LDAPTestSetup;
-import org.xwiki.test.annotation.AllComponents;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Rule;
+
+import com.xpn.xwiki.test.MockitoOldcoreRule;
 
 /**
- * Unit tests using embedded LDAP server (Apache DS). Theses test can be launched directly from JUnit plugin of EDI.
+ * Start LDAP embedded server if it's not already started.
  * 
  * @version $Id$
  */
-// TODO: get rid of @AllComponents
-@AllComponents
-public class XWikiLDAPAuthServiceImplSearchTest extends XWikiLDAPAuthServiceImplTest
+public abstract class AbstractLDAPTestCase
 {
-    @Before
-    public void before() throws Exception
-    {
-        super.before();
+    @Rule
+    public MockitoOldcoreRule mocker = new MockitoOldcoreRule();
 
-        this.mocker.getMockXWikiCfg().setProperty("xwiki.authentication.ldap.bind_DN",
-            LDAPTestSetup.HORATIOHORNBLOWER_DN);
+    /**
+     * Tool to start and stop embedded LDAP server.
+     */
+    private static LDAPRunner ldap;
+
+    @BeforeClass
+    public static void beforeClass() throws Exception
+    {
+        if (System.getProperty(LDAPTestSetup.SYSPROPNAME_LDAPPORT) == null) {
+            ldap = new LDAPRunner();
+            ldap.start();
+        }
+    }
+
+    @AfterClass
+    public static void afterClass() throws Exception
+    {
+        if (ldap != null) {
+            ldap.stop();
+        }
     }
 }

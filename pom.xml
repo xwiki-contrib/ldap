@@ -80,6 +80,46 @@
         </plugin>
       </plugins>
     </pluginManagement>
+    <plugins>
+     <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>clirr-maven-plugin</artifactId>
+        <configuration>
+          <!-- List of specific CLIRR excludes. Example:
+            <difference>
+              <differenceType>7012</differenceType>
+              <className>org/xwiki/ircbot/IRCBot</className>
+              <method>void initialize(java.lang.String)</method>
+              <justification>IRCBot is still a young API. Added a new initialize() method to support installing the
+                IRC Bot application in a subwiki</justification>
+            </difference>
+             See http://www.mojohaus.org/clirr-maven-plugin/examples/ignored-differences.html
+          -->
+          <ignored>
+            <!-- Minor breackages introduced in 9.0 -->
+            <difference>
+              <differenceType>7006</differenceType>
+              <className>org/xwiki/contrib/ldap/XWikiLDAPAuthServiceImpl</className>
+              <method>void syncUser(com.xpn.xwiki.doc.XWikiDocument, java.util.List, java.lang.String, java.lang.String, org.xwiki.contrib.ldap.XWikiLDAPUtils, com.xpn.xwiki.XWikiContext)</method>
+              <to>com.xpn.xwiki.doc.XWikiDocument</to>
+              <justification>Make syncUser return the potentially new XWikiDocument. Should not break anyone in practice since nobody is expecting this method to return anything</justification>
+            </difference>
+            <difference>
+              <differenceType>7006</differenceType>
+              <className>org/xwiki/contrib/ldap/XWikiLDAPUtils</className>
+              <method>void syncUser(com.xpn.xwiki.doc.XWikiDocument, java.util.List, java.lang.String, java.lang.String, com.xpn.xwiki.XWikiContext)</method>
+              <to>com.xpn.xwiki.doc.XWikiDocument</to>
+              <justification>Make syncUser return the potentially new XWikiDocument. Should not break anyone in practice since nobody is expecting this method to return anything</justification>
+            </difference>
+          </ignored>
+          <excludes>
+            <exclude>**/internal/**</exclude>
+            <exclude>**/test/**</exclude>
+            <!-- Remove the following excludes after we release the current version as final -->
+          </excludes>
+        </configuration>
+      </plugin>
+    </plugins>
   </build>
 
   <scm>

@@ -17,13 +17,13 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.ldap.ui;
+package org.xwiki.contrib.ldap.ui;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.xwiki.ldap.framework.LDAPRunner;
-import org.xwiki.ldap.framework.LDAPTestSetup;
+import org.xwiki.contrib.ldap.framework.LDAPRunner;
+import org.xwiki.contrib.ldap.framework.LDAPTestSetup;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.LocalDocumentReference;
 import org.xwiki.model.reference.ObjectReference;

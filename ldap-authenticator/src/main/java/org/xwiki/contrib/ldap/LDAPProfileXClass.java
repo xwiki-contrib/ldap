@@ -56,8 +56,8 @@ public class LDAPProfileXClass
 
     public static final String LDAP_XFIELDPN_UID = "LDAP user unique identifier";
 
-    public static final EntityReference LDAPPROFILECLASS_REFERENCE = new EntityReference("LDAPProfileClass",
-        EntityType.DOCUMENT, new EntityReference("XWiki", EntityType.SPACE));
+    public static final EntityReference LDAPPROFILECLASS_REFERENCE =
+        new EntityReference("LDAPProfileClass", EntityType.DOCUMENT, new EntityReference("XWiki", EntityType.SPACE));
 
     /**
      * The XWiki space where users are stored.
@@ -130,9 +130,17 @@ public class LDAPProfileXClass
      */
     public String getUid(XWikiDocument userDocument)
     {
-        BaseObject ldapObject = userDocument.getXObject(this.ldapClass.getDocumentReference());
+        String uid = null;
 
-        return ldapObject == null ? null : getUid(ldapObject);
+        if (userDocument != null) {
+            BaseObject ldapObject = userDocument.getXObject(this.ldapClass.getDocumentReference());
+
+            if (ldapObject != null) {
+                uid = getUid(ldapObject);
+            }
+        }
+
+        return uid;
     }
 
     /**
@@ -156,9 +164,8 @@ public class LDAPProfileXClass
      */
     public void updateLDAPObject(String xwikiUserName, String dn, String uid) throws XWikiException
     {
-        XWikiDocument userDocument =
-            this.context.getWiki().getDocument(new LocalDocumentReference(XWIKI_USER_SPACE, xwikiUserName),
-                this.context);
+        XWikiDocument userDocument = this.context.getWiki()
+            .getDocument(new LocalDocumentReference(XWIKI_USER_SPACE, xwikiUserName), this.context);
 
         boolean needsUpdate = updateLDAPObject(userDocument, dn, uid);
 
@@ -221,12 +228,8 @@ public class LDAPProfileXClass
             String sql =
                 ", BaseObject as obj, StringProperty as prop where doc.fullName=obj.name and obj.className=? and obj.id=prop.id.id and prop.name=? and lower(prop.value)=?";
 
-            documentList =
-                this.context
-                    .getWiki()
-                    .getStore()
-                    .searchDocuments(sql, false, false, false, 0, 0,
-                        Arrays.asList(LDAP_XCLASS, LDAP_XFIELD_UID, uid.toLowerCase()), this.context);
+            documentList = this.context.getWiki().getStore().searchDocuments(sql, false, false, false, 0, 0,
+                Arrays.asList(LDAP_XCLASS, LDAP_XFIELD_UID, uid.toLowerCase()), this.context);
         } catch (XWikiException e) {
             LOGGER.error("Fail to search for document containing ldap uid [" + uid + "]", e);
 

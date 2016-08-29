@@ -41,6 +41,10 @@
   </properties>
   <dependencies>
     <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>javax.servlet-api</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.xwiki.platform</groupId>
       <artifactId>xwiki-platform-oldcore</artifactId>
       <version>${platform.version}</version>
@@ -64,11 +68,6 @@
       <artifactId>xwiki-platform-oldcore</artifactId>
       <version>${platform.version}</version>
       <type>test-jar</type>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>javax.servlet-api</artifactId>
       <scope>test</scope>
     </dependency>
     <!-- Used to mock XWiki class -->

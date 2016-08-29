@@ -17,7 +17,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.ldap;
+package org.xwiki.contrib.ldap;
 
 import java.util.List;
 import java.util.Properties;
@@ -25,7 +25,7 @@ import java.util.Properties;
 import org.junit.AfterClass;
 import org.junit.runner.RunWith;
 import org.xwiki.contrib.ldap.XWikiLDAPAuthServiceImpl;
-import org.xwiki.ldap.framework.LDAPTestSetup;
+import org.xwiki.contrib.ldap.framework.LDAPTestSetup;
 import org.xwiki.test.integration.XWikiExecutor;
 import org.xwiki.test.integration.XWikiExecutorSuite;
 import org.xwiki.test.ui.PageObjectSuite;

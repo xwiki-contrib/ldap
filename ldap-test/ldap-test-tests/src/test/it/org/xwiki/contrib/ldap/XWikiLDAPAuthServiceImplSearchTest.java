@@ -1,7 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
-
-<!--
- *
+/*
  * See the NOTICE file distributed with this work for additional
  * information regarding copyright ownership.
  *
@@ -19,25 +16,28 @@
  * License along with this software; if not, write to the Free
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
- *
--->
+ */
+package org.xwiki.contrib.ldap;
 
-<configuration>
-  <appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
-    <Target>System.out</Target>
-    <encoder>
-      <pattern>%d [%t] [%t] %-5p %-30.30c{2} - %m %n</pattern>
-    </encoder>
-  </appender>
-  
-  <logger name="org.xwiki.test" level="info" />
+import org.junit.Before;
+import org.xwiki.contrib.ldap.framework.LDAPTestSetup;
+import org.xwiki.test.annotation.AllComponents;
 
-  <!-- Special logging for LDAP to see the maximum of details in the test results -->
-  <logger name="com.xpn.xwiki.user.impl.LDAP" level="trace"/>
-  <logger name="com.xpn.xwiki.plugin.ldap" level="trace"/>
-  
-  <!-- By default everything that is of severity WARN, ERROR or FATAL is logged to the console. -->
-  <root level="warn">
-    <appender-ref ref="stdout" />
-  </root>
-</configuration>
+/**
+ * Unit tests using embedded LDAP server (Apache DS). Theses test can be launched directly from JUnit plugin of EDI.
+ * 
+ * @version $Id$
+ */
+// TODO: get rid of @AllComponents
+@AllComponents
+public class XWikiLDAPAuthServiceImplSearchTest extends XWikiLDAPAuthServiceImplTest
+{
+    @Before
+    public void before() throws Exception
+    {
+        super.before();
+
+        this.mocker.getMockXWikiCfg().setProperty("xwiki.authentication.ldap.bind_DN",
+            LDAPTestSetup.HORATIOHORNBLOWER_DN);
+    }
+}

@@ -67,11 +67,24 @@ public class XWikiLDAPConnection
      */
     private Set<String> binaryAttributes = new HashSet<>();
 
+    private final XWikiLDAPConfig configuration;
+
     /**
-     * Default constructor.
+     * @deprecated since 8.5, use {@link #XWikiLDAPConnection(XWikiLDAPConfig)} instead
      */
+    @Deprecated
     public XWikiLDAPConnection()
     {
+        this(new XWikiLDAPConfig(null, null));
+    }
+
+    /**
+     * @param configuration the configuration to use
+     * @since 9.0
+     */
+    public XWikiLDAPConnection(XWikiLDAPConfig configuration)
+    {
+        this.configuration = configuration;
     }
 
     /**
@@ -79,6 +92,8 @@ public class XWikiLDAPConnection
      */
     public XWikiLDAPConnection(org.xwiki.contrib.ldap.XWikiLDAPConnection connection)
     {
+        this();
+
         this.connection = connection.connection;
         this.binaryAttributes = connection.binaryAttributes;
     }
@@ -90,9 +105,7 @@ public class XWikiLDAPConnection
      */
     private int getTimeout(XWikiContext context)
     {
-        XWikiLDAPConfig config = XWikiLDAPConfig.getInstance();
-
-        return config.getLDAPTimeout(context);
+        return this.configuration.getLDAPTimeout(context);
     }
 
     /**
@@ -101,9 +114,7 @@ public class XWikiLDAPConnection
      */
     private int getMaxResults(XWikiContext context)
     {
-        XWikiLDAPConfig config = XWikiLDAPConfig.getInstance();
-
-        return config.getLDAPMaxResults(context);
+        return this.configuration.getLDAPMaxResults(context);
     }
 
     /**
@@ -125,19 +136,17 @@ public class XWikiLDAPConnection
      */
     public boolean open(String ldapUserName, String password, XWikiContext context) throws XWikiLDAPException
     {
-        XWikiLDAPConfig config = XWikiLDAPConfig.getInstance();
-
         // open LDAP
-        int ldapPort = config.getLDAPPort(context);
-        String ldapHost = config.getLDAPParam("ldap_server", "localhost", context);
+        int ldapPort = this.configuration.getLDAPPort(context);
+        String ldapHost = this.configuration.getLDAPParam("ldap_server", "localhost", context);
 
         // allow to use the given user and password also as the LDAP bind user and password
-        String bindDN = config.getLDAPBindDN(ldapUserName, password, context);
-        String bindPassword = config.getLDAPBindPassword(ldapUserName, password, context);
+        String bindDN = this.configuration.getLDAPBindDN(ldapUserName, password, context);
+        String bindPassword = this.configuration.getLDAPBindPassword(ldapUserName, password, context);
 
         boolean bind;
-        if ("1".equals(config.getLDAPParam("ldap_ssl", "0", context))) {
-            String keyStore = config.getLDAPParam("ldap_ssl.keystore", "", context);
+        if ("1".equals(this.configuration.getLDAPParam("ldap_ssl", "0", context))) {
+            String keyStore = this.configuration.getLDAPParam("ldap_ssl.keystore", "", context);
 
             LOGGER.debug("Connecting to LDAP using SSL");
 
@@ -171,13 +180,12 @@ public class XWikiLDAPConnection
             port = ssl ? LDAPConnection.DEFAULT_SSL_PORT : LDAPConnection.DEFAULT_PORT;
         }
 
-        XWikiLDAPConfig config = XWikiLDAPConfig.getInstance();
-        setBinaryAttributes(config.getBinaryAttributes(context));
+        setBinaryAttributes(this.configuration.getBinaryAttributes(context));
 
         try {
             if (ssl) {
                 // Dynamically set JSSE as a security provider
-                Security.addProvider(config.getSecureProvider(context));
+                Security.addProvider(this.configuration.getSecureProvider(context));
 
                 if (pathToKeys != null && pathToKeys.length() > 0) {
                     // Dynamically set the property that JSSE uses to identify

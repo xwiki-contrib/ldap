@@ -73,7 +73,7 @@ public class XWikiLDAPSearchAttribute
 
     /**
      * @param attribute the attribute to copy
-     * @since 8.5
+     * @since 9.0
      */
     public XWikiLDAPSearchAttribute(org.xwiki.contrib.ldap.XWikiLDAPSearchAttribute attribute)
     {
