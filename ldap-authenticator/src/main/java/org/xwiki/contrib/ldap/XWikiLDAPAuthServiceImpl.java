@@ -74,15 +74,19 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
         return this.execution.getContext();
     }
 
-    protected void initConfiguration(String userId, XWikiContext xcontext)
+    protected XWikiLDAPConfig initConfiguration(String authInput, XWikiContext xcontext)
     {
         ExecutionContext econtext = getExecutionContext();
 
         if (econtext != null) {
-            XWikiLDAPConfig configuration = new XWikiLDAPConfig(userId, xcontext);
+            XWikiLDAPConfig configuration = new XWikiLDAPConfig(authInput, xcontext);
 
             econtext.setProperty(CONTEXT_CONFIGURATION, configuration);
+
+            return configuration;
         }
+
+        return XWikiLDAPConfig.getInstance();
     }
 
     protected void removeConfiguration()
@@ -224,14 +228,7 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
         }
 
         // Try authentication against ldap
-        Principal principal;
-        try {
-            initConfiguration(userId, context);
-
-            principal = ldapAuthenticate(userId, password, context);
-        } finally {
-            removeConfiguration();
-        }
+        Principal principal = ldapAuthenticate(userId, password, false, context);
 
         if (principal == null) {
             // Fallback to local DB only if trylocal is true
@@ -317,6 +314,8 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
                 context.setWikiId(db);
             }
         }
+
+        removeConfiguration();
 
         return principal;
     }
@@ -444,7 +443,7 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
     {
         Principal principal = null;
 
-        XWikiLDAPConfig configuration = getConfiguration();
+        XWikiLDAPConfig configuration = initConfiguration(authInput, context);
         XWikiLDAPConnection connector = new XWikiLDAPConnection(configuration);
         XWikiLDAPUtils ldapUtils = new XWikiLDAPUtils(connector, configuration);
 
