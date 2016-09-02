@@ -99,7 +99,7 @@ public class XWikiLDAPAuthServiceImplTest extends AbstractLDAPTestCase
         this.mocker.getMockXWikiCfg().setProperty("xwiki.authentication.ldap.try_local", "0");
         this.mocker.getMockXWikiCfg().setProperty("xwiki.authentication.ldap.update_user", "1");
         this.mocker.getMockXWikiCfg().setProperty("xwiki.authentication.ldap.fields_mapping",
-            "last_name=sn,first_name=givenName,fullname=cn,email=mail,listfield=description");
+            "last_name=sn,first_name=givenName,fullname=cn,email=mail,listfield=description,numberfield=postalCode");
 
         // Add a list field to user class
         this.mocker.getSpyXWiki().getUserClass(this.mocker.getXWikiContext());
@@ -107,6 +107,7 @@ public class XWikiLDAPAuthServiceImplTest extends AbstractLDAPTestCase
             this.mocker.getSpyXWiki().getDocument(USER_XCLASS_REFERENCE, this.mocker.getXWikiContext());
         BaseClass userClass = userDocument.getXClass();
         userClass.addStaticListField("listfield", "List field", 30, true, "");
+        userClass.addNumberField("numberfield", "Number field", 30, "integer");
         this.mocker.getSpyXWiki().saveDocument(userDocument, this.mocker.getXWikiContext());
 
         this.ldapAuth = new XWikiLDAPAuthServiceImpl();
@@ -439,6 +440,7 @@ public class XWikiLDAPAuthServiceImplTest extends AbstractLDAPTestCase
         assertEquals(LDAPTestSetup.HORATIOHORNBLOWER_GIVENNAME, userProfileObj.getStringValue("first_name"));
         assertEquals(LDAPTestSetup.HORATIOHORNBLOWER_MAIL, userProfileObj.getStringValue("email"));
         assertEquals(LDAPTestSetup.HORATIOHORNBLOWER_DESCRIPTION, userProfileObj.getListValue("listfield"));
+        assertEquals(LDAPTestSetup.HORATIOHORNBLOWER_NUMBER, userProfileObj.getIntValue("numberfield"));
 
         // Check non mapped properties are not touched
 

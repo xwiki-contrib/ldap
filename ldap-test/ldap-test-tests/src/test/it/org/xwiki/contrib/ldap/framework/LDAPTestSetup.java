@@ -94,7 +94,10 @@ public class LDAPTestSetup
      */
     public static final String HORATIOHORNBLOWER_MAIL = "hhornblo@royalnavy.mod.uk";
 
-    public static final List<String> HORATIOHORNBLOWER_DESCRIPTION = Arrays.<String>asList("Capt. Horatio Hornblower, R.N", "value2", "value3");
+    public static final List<String> HORATIOHORNBLOWER_DESCRIPTION =
+        Arrays.<String>asList("Capt. Horatio Hornblower, R.N", "value2", "value3");
+
+    public static final int HORATIOHORNBLOWER_NUMBER = 42;
 
     /**
      * The LDAP DN of user Thomas Quist.

@@ -1193,7 +1193,7 @@ public class XWikiLDAPUtils
             Map<String, Object> map = toMap(searchAttributes, userMappings, xcontext);
 
             // Set properties in the user object
-            userObject.getXClass(xcontext).fromValueMap(map, userObject);
+            userObject.getXClass(xcontext).fromMap(map, userObject);
         }
     }
 
@@ -1248,7 +1248,7 @@ public class XWikiLDAPUtils
                             mapValue = new ArrayList<>();
                             map.put(xattr, mapValue);
                         }
-                        ((List) mapValue).add(lval.toString());
+                        ((List) mapValue).add(lval);
                     } else {
                         map.put(xattr, lval);
                     }
