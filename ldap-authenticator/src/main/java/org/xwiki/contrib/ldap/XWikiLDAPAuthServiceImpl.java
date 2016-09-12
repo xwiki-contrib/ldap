@@ -600,7 +600,7 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
 
         boolean isNewUser = userProfile == null || userProfile.isNew();
 
-        userProfile = syncUser(userProfile, searchAttributes, ldapDn, uid, ldapUtils, context);
+        userProfile = syncUser(userProfile, searchAttributes, ldapDn, authInput, ldapUtils, context);
 
         // from now on we can enter the application
         if (local) {
@@ -628,16 +628,16 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
      * @param userProfile the XWiki user profile page.
      * @param searchAttributeListIn the attributes.
      * @param ldapDn the LDAP user DN.
-     * @param uid the uid of the user in LDAP
+     * @param authInput the input used to identify the user
      * @param ldapUtils the LDAP communication tool.
      * @param context the XWiki context.
      * @return the XWiki user document
      * @throws XWikiException error when updating or creating XWiki user.
      */
     protected XWikiDocument syncUser(XWikiDocument userProfile, List<XWikiLDAPSearchAttribute> searchAttributeListIn,
-        String ldapDn, String uid, XWikiLDAPUtils ldapUtils, XWikiContext context) throws XWikiException
+        String ldapDn, String authInput, XWikiLDAPUtils ldapUtils, XWikiContext context) throws XWikiException
     {
-        return ldapUtils.syncUser(userProfile, searchAttributeListIn, ldapDn, uid, context);
+        return ldapUtils.syncUser(userProfile, searchAttributeListIn, ldapDn, authInput, context);
     }
 
     /**
