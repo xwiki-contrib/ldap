@@ -800,7 +800,7 @@ public class XWikiLDAPConfig
      */
     public Set<String> getTestLoginFor(XWikiContext context)
     {
-        List<String> list = getLDAPListParam("testLoginFor", ',', Collections.<String>emptyList(), context);
+        List<String> list = getLDAPListParam("ldap_testLoginFor", ',', Collections.<String>emptyList(), context);
 
         Set<String> set = new HashSet<>(list.size());
         for (String uid : list) {
