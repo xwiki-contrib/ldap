@@ -456,6 +456,8 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
         ldapUtils.setResolveSubgroups(
             configuration.getLDAPParamAsLong("ldap_group_sync_resolve_subgroups", 1, context) == 1);
 
+        String uid = configuration.getMemoryConfiguration().get("uid");
+
         // ////////////////////////////////////////////////////////////////////
         // 1. check if ldap authentication is off => authenticate against db
         // ////////////////////////////////////////////////////////////////////
@@ -484,7 +486,6 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
         XWikiDocument userProfile = ldapUtils.getUserProfileByUid(validXWikiUserName, authInput, context);
         if (userProfile == null) {
             // Try to search just the UID (in case this user was created before a move to multidomain)
-            String uid = configuration.getMemoryConfiguration().get("uid");
             if (!authInput.equals(uid) && getConfiguration().getTestLoginFor(context).contains(authInput)) {
                 userProfile = ldapUtils.getUserProfileByUid(validXWikiUserName, uid, context);
             }
@@ -514,11 +515,11 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
                 LOGGER.debug("Checking if the user belongs to the user group: {}", filterGroupDN);
             }
 
-            ldapDn = ldapUtils.isInGroup(authInput, ldapDn, filterGroupDN, context);
+            ldapDn = ldapUtils.isInGroup(uid, ldapDn, filterGroupDN, context);
 
             if (ldapDn == null) {
                 throw new XWikiException(XWikiException.MODULE_XWIKI_USER, XWikiException.ERROR_XWIKI_USER_INIT,
-                    "LDAP user {0} does not belong to LDAP group {1}.", null, new Object[] {authInput, filterGroupDN});
+                    "LDAP user {0} does not belong to LDAP group {1}.", null, new Object[] {uid, filterGroupDN});
             }
         }
 
@@ -533,10 +534,9 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
                 LOGGER.debug("Checking if the user does not belongs to the exclude group: {}", excludeGroupDN);
             }
 
-            if (ldapUtils.isInGroup(authInput, ldapDn, excludeGroupDN, context) != null) {
+            if (ldapUtils.isInGroup(uid, ldapDn, excludeGroupDN, context) != null) {
                 throw new XWikiException(XWikiException.MODULE_XWIKI_USER, XWikiException.ERROR_XWIKI_USER_INIT,
-                    "LDAP user {0} should not belong to LDAP group {1}.", null,
-                    new Object[] {authInput, filterGroupDN});
+                    "LDAP user {0} should not belong to LDAP group {1}.", null, new Object[] {uid, filterGroupDN});
             }
         }
 
@@ -549,7 +549,7 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
         // if we still don't have a dn, search for it. Also get the attributes, we might need
         // them
         if (ldapDn == null) {
-            searchAttributes = ldapUtils.searchUserAttributesByUid(authInput, ldapUtils.getAttributeNameTable(context));
+            searchAttributes = ldapUtils.searchUserAttributesByUid(uid, ldapUtils.getAttributeNameTable(context));
 
             if (searchAttributes != null) {
                 for (XWikiLDAPSearchAttribute searchAttribute : searchAttributes) {
@@ -564,7 +564,7 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
 
         if (ldapDn == null) {
             throw new XWikiException(XWikiException.MODULE_XWIKI_USER, XWikiException.ERROR_XWIKI_USER_INIT,
-                "Can't find LDAP user DN for [" + authInput + "]");
+                "Can't find LDAP user DN for input [" + authInput + "]");
         }
 
         // ////////////////////////////////////////////////////////////////////
@@ -600,7 +600,7 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
 
         boolean isNewUser = userProfile == null || userProfile.isNew();
 
-        userProfile = syncUser(userProfile, searchAttributes, ldapDn, authInput, ldapUtils, context);
+        userProfile = syncUser(userProfile, searchAttributes, ldapDn, uid, ldapUtils, context);
 
         // from now on we can enter the application
         if (local) {
@@ -628,16 +628,16 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
      * @param userProfile the XWiki user profile page.
      * @param searchAttributeListIn the attributes.
      * @param ldapDn the LDAP user DN.
-     * @param ldapUid the uid of the user in LDAP
+     * @param uid the uid of the user in LDAP
      * @param ldapUtils the LDAP communication tool.
      * @param context the XWiki context.
      * @return the XWiki user document
      * @throws XWikiException error when updating or creating XWiki user.
      */
     protected XWikiDocument syncUser(XWikiDocument userProfile, List<XWikiLDAPSearchAttribute> searchAttributeListIn,
-        String ldapDn, String ldapUid, XWikiLDAPUtils ldapUtils, XWikiContext context) throws XWikiException
+        String ldapDn, String uid, XWikiLDAPUtils ldapUtils, XWikiContext context) throws XWikiException
     {
-        return ldapUtils.syncUser(userProfile, searchAttributeListIn, ldapDn, ldapUid, context);
+        return ldapUtils.syncUser(userProfile, searchAttributeListIn, ldapDn, uid, context);
     }
 
     /**

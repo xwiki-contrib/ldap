@@ -1056,14 +1056,14 @@ public class XWikiLDAPUtils
      * 
      * @param userProfile the name of the user.
      * @param ldapDn the LDAP user DN.
-     * @param ldapUid the UID field.
+     * @param uid the UID field.
      * @param attributes the attributes of the LDAP user.
      * @param context the XWiki context.
      * @return the XWiki user document
      * @throws XWikiException error when updating or creating XWiki user.
      */
     public XWikiDocument syncUser(XWikiDocument userProfile, List<XWikiLDAPSearchAttribute> attributes, String ldapDn,
-        String ldapUid, XWikiContext context) throws XWikiException
+        String uid, XWikiContext context) throws XWikiException
     {
         // check if we have to create the user
         if (userProfile == null || userProfile.isNew()
@@ -1091,14 +1091,14 @@ public class XWikiLDAPUtils
             if (userProfile.isNew()) {
                 LOGGER.debug("Creating new XWiki user based on LDAP attribues located at [{}]", ldapDn);
 
-                createUserFromLDAP(userProfile, attributes, ldapDn, ldapUid, context);
+                createUserFromLDAP(userProfile, attributes, ldapDn, uid, context);
 
                 LOGGER.debug("New XWiki user created: [{}]", userProfile.getDocumentReference());
             } else {
                 LOGGER.debug("Updating existing user with LDAP attribues located at [{}]", ldapDn);
 
                 try {
-                    updateUserFromLDAP(userProfile, attributes, ldapDn, ldapUid, context);
+                    updateUserFromLDAP(userProfile, attributes, ldapDn, uid, context);
                 } catch (XWikiException e) {
                     LOGGER.error("Failed to synchronise user's informations", e);
                 }
