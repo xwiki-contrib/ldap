@@ -134,7 +134,7 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
         return user;
     }
 
-    private XWikiUser checkAuthSSO(String remoteUser, XWikiContext context) throws XWikiException
+    private XWikiUser checkAuthSSO(String remoteUser, XWikiContext context)
     {
         // Remember various stuff in the session so that callback can access it
         XWikiRequest request = context.getRequest();
@@ -165,8 +165,8 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
 
             user = new XWikiUser(principal.getName());
         } else {
-            user = new XWikiUser(principal.getName().startsWith(context.getDatabase())
-                ? principal.getName().substring(context.getDatabase().length() + 1) : principal.getName());
+            user = new XWikiUser(principal.getName().startsWith(context.getWikiId())
+                ? principal.getName().substring(context.getWikiId().length() + 1) : principal.getName());
         }
 
         LOGGER.debug("XWikiUser=" + user);
