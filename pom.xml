@@ -42,6 +42,12 @@
 
   <developers>
     <developer>
+      <id>dgervalle</id>
+      <name>Denis Gervalle</name>
+      <email>dgl@softec.lu</email>
+      <timezone>+1</timezone>
+    </developer>
+    <developer>
       <id>tmortagne</id>
       <name>Thomas Mortagne</name>
       <email>thomas.mortagne at xwiki.com</email>
