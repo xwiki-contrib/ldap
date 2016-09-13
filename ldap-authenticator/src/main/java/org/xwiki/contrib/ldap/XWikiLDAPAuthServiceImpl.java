@@ -31,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xwiki.context.Execution;
 import org.xwiki.context.ExecutionContext;
+import org.xwiki.text.StringUtils;
 
 import com.novell.ldap.LDAPException;
 import com.xpn.xwiki.XWikiContext;
@@ -118,10 +119,19 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
     @Override
     public XWikiUser checkAuth(XWikiContext context) throws XWikiException
     {
-        XWikiUser user = null;
+        String httpHeader = getConfiguration().getHttpHeader(context);
 
-        String remoteUser = context.getRequest().getRemoteUser();
-        if (context.getRequest().getRemoteUser() != null) {
+        XWikiUser user = null;
+        String remoteUser;
+
+        if (StringUtils.isEmpty(httpHeader)) {
+            remoteUser = context.getRequest().getRemoteUser();
+        } else {
+            remoteUser = context.getRequest().getHeader(httpHeader);
+        }
+
+        if (remoteUser != null) {
+            LOGGER.debug("RemoteUser: {}", remoteUser);
             user = checkAuthSSO(remoteUser, context);
         }
 

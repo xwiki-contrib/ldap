@@ -811,4 +811,14 @@ public class XWikiLDAPConfig
 
         return set;
     }
+
+    /**
+     * @param context the XWiki context
+     * @return an HTTP header that could be used to retrieve the authenticated user (only in xwiki.cfg).
+     * @since 9.1
+     */
+    public String getHttpHeader(XWikiContext context)
+    {
+        return context.getWiki().Param("xwiki.authentication.ldap.httpHeader");
+    }
 }
