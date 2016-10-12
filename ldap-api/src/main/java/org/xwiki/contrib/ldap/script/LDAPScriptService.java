@@ -72,10 +72,10 @@ public class LDAPScriptService implements ScriptService
      * @throws XWikiLDAPException error when trying to open connection.
      */
     public boolean checkConnection(String ldapHost, int ldapPort, String loginDN, String password, String pathToKeys,
-        boolean ssl) throws XWikiLDAPException
+        boolean ssl, XWikiContext xcontext) throws XWikiLDAPException
     {
         XWikiLDAPConnection connection = new XWikiLDAPConnection(new XWikiLDAPConfig(null, null));
-        boolean connected = connection.open(ldapHost, ldapPort, loginDN, password, pathToKeys, ssl, getXWikiContext());
+        boolean connected = connection.open(ldapHost, ldapPort, loginDN, password, pathToKeys, ssl, xcontext);
         connection.close();
         return connected;
     }
