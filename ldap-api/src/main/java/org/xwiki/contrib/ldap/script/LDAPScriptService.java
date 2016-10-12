@@ -68,7 +68,7 @@ public class LDAPScriptService implements ScriptService
      * @param password the password to connect to LDAP server.
      * @param pathToKeys the path to SSL keystore to use.
      * @param ssl if true connect using SSL.
-     * @param context the XWiki context.
+     * @param xcontext the XWiki context.
      * @return true if the connection succeed, false otherwise.
      * @throws XWikiLDAPException error when trying to open connection.
      * @since 9.1.1
