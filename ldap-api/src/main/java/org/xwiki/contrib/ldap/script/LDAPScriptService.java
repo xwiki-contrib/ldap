@@ -25,6 +25,7 @@ import javax.inject.Singleton;
 
 import org.xwiki.component.annotation.Component;
 import org.xwiki.context.Execution;
+import org.xwiki.contrib.ldap.XWikiLDAPConfig;
 import org.xwiki.contrib.ldap.XWikiLDAPConnection;
 import org.xwiki.contrib.ldap.XWikiLDAPException;
 import org.xwiki.contrib.ldap.XWikiLDAPUtils;
@@ -47,9 +48,6 @@ public class LDAPScriptService implements ScriptService
      */
     @Inject
     private Execution execution;
-    
-    @Inject
-    private XWikiLDAPConnection xwikiLdapConnection;
 
     /**
      * @return the XWiki context associated with this execution.
@@ -57,6 +55,11 @@ public class LDAPScriptService implements ScriptService
     private XWikiContext getXWikiContext()
     {
         return (XWikiContext) this.execution.getContext().getProperty("xwikicontext");
+    }
+    
+    private XWikiLDAPConnection getXWikiLDAPConnection()
+    {
+        return new XWikiLDAPConnection(new XWikiLDAPConfig(null, null));
     }
 
     // API
@@ -76,7 +79,10 @@ public class LDAPScriptService implements ScriptService
     public boolean checkConnection(String ldapHost, int ldapPort, String loginDN, String password, String pathToKeys,
         boolean ssl) throws XWikiLDAPException
     {
-        return xwikiLdapConnection.open(ldapHost, ldapPort, loginDN, password, pathToKeys, ssl, getXWikiContext());
+        XWikiLDAPConnection connection = new XWikiLDAPConnection(new XWikiLDAPConfig(null, null));
+        boolean connected = connection.open(ldapHost, ldapPort, loginDN, password, pathToKeys, ssl, getXWikiContext());
+        connection.close();
+        return connected;
     }
 
     /**
