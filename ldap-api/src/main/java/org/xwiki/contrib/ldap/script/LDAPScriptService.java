@@ -56,11 +56,6 @@ public class LDAPScriptService implements ScriptService
     {
         return (XWikiContext) this.execution.getContext().getProperty("xwikicontext");
     }
-    
-    private XWikiLDAPConnection getXWikiLDAPConnection()
-    {
-        return new XWikiLDAPConnection(new XWikiLDAPConfig(null, null));
-    }
 
     // API
     
