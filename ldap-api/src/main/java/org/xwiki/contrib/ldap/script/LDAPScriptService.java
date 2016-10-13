@@ -81,7 +81,7 @@ public class LDAPScriptService implements ScriptService
         try {
             connection.open(ldapHost, ldapPort, loginDN, password, pathToKeys, ssl, xcontext);
             return true;
-        } catch (XWikiLDAPException e ) {
+        } catch (XWikiLDAPException e) {
             return false;
         } finally {
             connection.close();
