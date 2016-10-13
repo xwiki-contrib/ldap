@@ -43,13 +43,22 @@ public class LDAPScriptServiceTest extends AbstractLDAPTestCase
         LDAPScriptService.class);
 
     @Test
-    public void testCheckConnection() throws Exception
+    public void testCheckConnectionSuccess() throws Exception
     {
         LDAPScriptService ldapSS = (LDAPScriptService) mocker.getComponentUnderTest();
         
         int port = LDAPTestSetup.getLDAPPort();
 
         assertEquals(true, ldapSS.checkConnection("localhost", port, LDAPTestSetup.HORATIOHORNBLOWER_DN,
+            LDAPTestSetup.HORATIOHORNBLOWER_PWD, null, false, new XWikiContext()));
+    }
+    
+    @Test
+    public void testCheckConnectionFail() throws Exception
+    {
+        LDAPScriptService ldapSS = (LDAPScriptService) mocker.getComponentUnderTest();
+
+        assertEquals(false, ldapSS.checkConnection("localhost", 444, LDAPTestSetup.HORATIOHORNBLOWER_DN,
             LDAPTestSetup.HORATIOHORNBLOWER_PWD, null, false, new XWikiContext()));
     }
 }
