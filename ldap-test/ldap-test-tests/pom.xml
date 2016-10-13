@@ -41,6 +41,11 @@
       <artifactId>ldap-authenticator</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.xwiki.contrib.ldap</groupId>
+      <artifactId>ldap-api</artifactId>
+      <version>${project.version}</version>
+    </dependency>
 
     <!-- Test dependencies -->
     <dependency>

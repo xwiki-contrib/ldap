@@ -25,6 +25,9 @@ import javax.inject.Singleton;
 
 import org.xwiki.component.annotation.Component;
 import org.xwiki.context.Execution;
+import org.xwiki.contrib.ldap.XWikiLDAPConfig;
+import org.xwiki.contrib.ldap.XWikiLDAPConnection;
+import org.xwiki.contrib.ldap.XWikiLDAPException;
 import org.xwiki.contrib.ldap.XWikiLDAPUtils;
 import org.xwiki.script.service.ScriptService;
 
@@ -55,6 +58,35 @@ public class LDAPScriptService implements ScriptService
     }
 
     // API
+    
+    /**
+     * Check the LDAP connection.
+     * 
+     * @param ldapHost the host of the server to connect to.
+     * @param ldapPort the port of the server to connect to.
+     * @param loginDN the user DN to connect to LDAP server.
+     * @param password the password to connect to LDAP server.
+     * @param pathToKeys the path to SSL keystore to use.
+     * @param ssl if true connect using SSL.
+     * @param xcontext the XWiki context.
+     * @return true if the connection succeed, false otherwise.
+     * @throws XWikiLDAPException error when trying to open connection.
+     * @since 9.2
+     */
+    
+    public boolean checkConnection(String ldapHost, int ldapPort, String loginDN, String password, String pathToKeys,
+        boolean ssl, XWikiContext xcontext)
+    {
+        XWikiLDAPConnection connection = new XWikiLDAPConnection(new XWikiLDAPConfig(null, null));
+        try {
+            connection.open(ldapHost, ldapPort, loginDN, password, pathToKeys, ssl, xcontext);
+            return true;
+        } catch (XWikiLDAPException e ) {
+            return false;
+        } finally {
+            connection.close();
+        }
+    }
 
     /**
      * @return {@code true} if the currently configured authentication class extends or is an instance of
