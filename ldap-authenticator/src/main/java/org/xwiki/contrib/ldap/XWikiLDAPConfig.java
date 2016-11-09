@@ -186,21 +186,26 @@ public class XWikiLDAPConfig
      */
     public XWikiLDAPConfig(String userId)
     {
-        this(userId, Utils.getComponent(ConfigurationSource.class, "wiki"));
+        this(userId, (ConfigurationSource) null);
     }
 
     /**
      * @param userId the complete user id given
      * @param configurationSource the Configuration source to use to find LDAP parameters first (if not found in this
-     *        source then the parameter will be searched for in xwiki.cfg).
+     *        source then the parameter will be searched for in xwiki.cfg). If null then defaults to looking for LDAP
+     *        parameters in {@code XWiki.XWikiPreferences}
+     *
      * @since 9.1.1
      */
     public XWikiLDAPConfig(String userId, ConfigurationSource configurationSource)
     {
         this.memoryConfiguration = new HashMap<>();
 
-        // Look for LDAP parameters first in the XWikiPreferences document from the current wiki
-        this.configurationSource = configurationSource;
+        if (configurationSource == null) {
+            this.configurationSource = Utils.getComponent(ConfigurationSource.class, "wiki");
+        } else {
+            this.configurationSource = configurationSource;
+        }
 
         this.cfgConfigurationSource = Utils.getComponent(ConfigurationSource.class, "xwikicfg");
 
