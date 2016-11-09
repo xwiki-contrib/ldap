@@ -29,7 +29,6 @@ import org.securityfilter.filter.SecurityRequestWrapper;
 import org.securityfilter.realm.SimplePrincipal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xwiki.configuration.ConfigurationSource;
 import org.xwiki.context.Execution;
 import org.xwiki.context.ExecutionContext;
 import org.xwiki.text.StringUtils;
@@ -67,8 +66,6 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
 
     private Execution execution;
 
-    private ConfigurationSource configurationSource;
-
     protected ExecutionContext getExecutionContext()
     {
         if (this.execution == null) {
@@ -95,7 +92,7 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
         ExecutionContext econtext = getExecutionContext();
 
         if (econtext != null) {
-            XWikiLDAPConfig configuration = new XWikiLDAPConfig(authInput, this.configurationSource);
+            XWikiLDAPConfig configuration = createXWikiLDAPConfig(authInput);
 
             econtext.setProperty(CONTEXT_CONFIGURATION, configuration);
 
@@ -106,13 +103,14 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
     }
 
     /**
-     * @param configurationSource the source where LDAP parameters are found in the wiki. This allows storing the LDAP
-     *        configuration in a location other than {@code XWiki.XWikiPreferences} in a wiki.
+     * Allow extenders of this class to override this method and provide their own XWikiLDAPConfig instance (for
+     * example in order to use a different configuration source).
+     *
      * @since 9.1.1
      */
-    public void setConfigurationSource(ConfigurationSource configurationSource)
+    protected XWikiLDAPConfig createXWikiLDAPConfig(String authInput)
     {
-        this.configurationSource = configurationSource;
+        return new XWikiLDAPConfig(authInput);
     }
 
     protected void removeConfiguration()
