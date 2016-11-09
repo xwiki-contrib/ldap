@@ -77,7 +77,7 @@ public class LDAPScriptService implements ScriptService
     public boolean checkConnection(String ldapHost, int ldapPort, String loginDN, String password, String pathToKeys,
         boolean ssl, XWikiContext xcontext)
     {
-        XWikiLDAPConnection connection = new XWikiLDAPConnection(new XWikiLDAPConfig(null, null));
+        XWikiLDAPConnection connection = new XWikiLDAPConnection(new XWikiLDAPConfig(null));
         try {
             connection.open(ldapHost, ldapPort, loginDN, password, pathToKeys, ssl, xcontext);
             return true;

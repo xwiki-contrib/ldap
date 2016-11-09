@@ -170,7 +170,7 @@ public class XWikiLDAPUtils
     @Deprecated
     public XWikiLDAPUtils(XWikiLDAPConnection connection)
     {
-        this(connection, new XWikiLDAPConfig(null, null));
+        this(connection, new XWikiLDAPConfig(null));
     }
 
     /**
@@ -884,7 +884,7 @@ public class XWikiLDAPUtils
             XWikiLDAPConfig config = XWikiLDAPConfig.getInstance();
 
             cacheConfigurationGroups = new LRUCacheConfiguration(CACHE_NAME_GROUPS);
-            cacheConfigurationGroups.getLRUEvictionConfiguration().setLifespan(config.getCacheExpiration(context));
+            cacheConfigurationGroups.getLRUEvictionConfiguration().setLifespan(config.getCacheExpiration());
         }
 
         return cacheConfigurationGroups;

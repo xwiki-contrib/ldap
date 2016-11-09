@@ -75,7 +75,7 @@ public class XWikiLDAPConnection
     @Deprecated
     public XWikiLDAPConnection()
     {
-        this(new XWikiLDAPConfig(null, null));
+        this(new XWikiLDAPConfig(null));
     }
 
     /**
@@ -105,7 +105,7 @@ public class XWikiLDAPConnection
      */
     private int getTimeout(XWikiContext context)
     {
-        return this.configuration.getLDAPTimeout(context);
+        return this.configuration.getLDAPTimeout();
     }
 
     /**
@@ -114,7 +114,7 @@ public class XWikiLDAPConnection
      */
     private int getMaxResults(XWikiContext context)
     {
-        return this.configuration.getLDAPMaxResults(context);
+        return this.configuration.getLDAPMaxResults();
     }
 
     /**
@@ -137,16 +137,16 @@ public class XWikiLDAPConnection
     public boolean open(String ldapUserName, String password, XWikiContext context) throws XWikiLDAPException
     {
         // open LDAP
-        int ldapPort = this.configuration.getLDAPPort(context);
-        String ldapHost = this.configuration.getLDAPParam("ldap_server", "localhost", context);
+        int ldapPort = this.configuration.getLDAPPort();
+        String ldapHost = this.configuration.getLDAPParam("ldap_server", "localhost");
 
         // allow to use the given user and password also as the LDAP bind user and password
-        String bindDN = this.configuration.getLDAPBindDN(ldapUserName, password, context);
-        String bindPassword = this.configuration.getLDAPBindPassword(ldapUserName, password, context);
+        String bindDN = this.configuration.getLDAPBindDN(ldapUserName, password);
+        String bindPassword = this.configuration.getLDAPBindPassword(ldapUserName, password);
 
         boolean bind;
-        if ("1".equals(this.configuration.getLDAPParam("ldap_ssl", "0", context))) {
-            String keyStore = this.configuration.getLDAPParam("ldap_ssl.keystore", "", context);
+        if ("1".equals(this.configuration.getLDAPParam("ldap_ssl", "0"))) {
+            String keyStore = this.configuration.getLDAPParam("ldap_ssl.keystore", "");
 
             LOGGER.debug("Connecting to LDAP using SSL");
 
@@ -180,12 +180,12 @@ public class XWikiLDAPConnection
             port = ssl ? LDAPConnection.DEFAULT_SSL_PORT : LDAPConnection.DEFAULT_PORT;
         }
 
-        setBinaryAttributes(this.configuration.getBinaryAttributes(context));
+        setBinaryAttributes(this.configuration.getBinaryAttributes());
 
         try {
             if (ssl) {
                 // Dynamically set JSSE as a security provider
-                Security.addProvider(this.configuration.getSecureProvider(context));
+                Security.addProvider(this.configuration.getSecureProvider());
 
                 if (pathToKeys != null && pathToKeys.length() > 0) {
                     // Dynamically set the property that JSSE uses to identify

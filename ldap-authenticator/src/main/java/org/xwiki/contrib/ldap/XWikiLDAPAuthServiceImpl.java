@@ -75,12 +75,24 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
         return this.execution.getContext();
     }
 
+    /**
+     * @deprecated since 9.1.1, use {@link #initConfiguration(String)} instead
+     */
+    @Deprecated
     protected XWikiLDAPConfig initConfiguration(String authInput, XWikiContext xcontext)
+    {
+        return initConfiguration(authInput);
+    }
+
+    /**
+     * @since 9.1.1
+     */
+    protected XWikiLDAPConfig initConfiguration(String authInput)
     {
         ExecutionContext econtext = getExecutionContext();
 
         if (econtext != null) {
-            XWikiLDAPConfig configuration = new XWikiLDAPConfig(authInput, xcontext);
+            XWikiLDAPConfig configuration = createXWikiLDAPConfig(authInput);
 
             econtext.setProperty(CONTEXT_CONFIGURATION, configuration);
 
@@ -88,6 +100,17 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
         }
 
         return XWikiLDAPConfig.getInstance();
+    }
+
+    /**
+     * Allow extenders of this class to override this method and provide their own XWikiLDAPConfig instance (for
+     * example in order to use a different configuration source).
+     *
+     * @since 9.1.1
+     */
+    protected XWikiLDAPConfig createXWikiLDAPConfig(String authInput)
+    {
+        return new XWikiLDAPConfig(authInput);
     }
 
     protected void removeConfiguration()
@@ -119,7 +142,7 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
     @Override
     public XWikiUser checkAuth(XWikiContext context) throws XWikiException
     {
-        String httpHeader = getConfiguration().getHttpHeader(context);
+        String httpHeader = getConfiguration().getHttpHeader();
 
         XWikiUser user = null;
         String remoteUser;
@@ -344,7 +367,7 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
     {
         Principal principal = null;
 
-        String trylocal = getConfiguration().getLDAPParam("ldap_trylocal", "0", context);
+        String trylocal = getConfiguration().getLDAPParam("ldap_trylocal", "0");
 
         if ("1".equals(trylocal)) {
             if (LOGGER.isDebugEnabled()) {
@@ -453,18 +476,18 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
     {
         Principal principal = null;
 
-        XWikiLDAPConfig configuration = initConfiguration(authInput, context);
+        XWikiLDAPConfig configuration = initConfiguration(authInput);
         XWikiLDAPConnection connector = new XWikiLDAPConnection(configuration);
         XWikiLDAPUtils ldapUtils = new XWikiLDAPUtils(connector, configuration);
 
         ldapUtils
-            .setUidAttributeName(configuration.getLDAPParam(XWikiLDAPConfig.PREF_LDAP_UID, LDAP_DEFAULT_UID, context));
-        ldapUtils.setGroupClasses(configuration.getGroupClasses(context));
-        ldapUtils.setGroupMemberFields(configuration.getGroupMemberFields(context));
-        ldapUtils.setBaseDN(configuration.getLDAPParam("ldap_base_DN", "", context));
-        ldapUtils.setUserSearchFormatString(configuration.getLDAPParam("ldap_user_search_fmt", "({0}={1})", context));
+            .setUidAttributeName(configuration.getLDAPParam(XWikiLDAPConfig.PREF_LDAP_UID, LDAP_DEFAULT_UID));
+        ldapUtils.setGroupClasses(configuration.getGroupClasses());
+        ldapUtils.setGroupMemberFields(configuration.getGroupMemberFields());
+        ldapUtils.setBaseDN(configuration.getLDAPParam("ldap_base_DN", ""));
+        ldapUtils.setUserSearchFormatString(configuration.getLDAPParam("ldap_user_search_fmt", "({0}={1})"));
         ldapUtils.setResolveSubgroups(
-            configuration.getLDAPParamAsLong("ldap_group_sync_resolve_subgroups", 1, context) == 1);
+            configuration.getLDAPParamAsLong("ldap_group_sync_resolve_subgroups", 1) == 1);
 
         String uid = configuration.getMemoryConfiguration().get("uid");
 
@@ -472,7 +495,7 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
         // 1. check if ldap authentication is off => authenticate against db
         // ////////////////////////////////////////////////////////////////////
 
-        if (!configuration.isLDAPEnabled(context)) {
+        if (!configuration.isLDAPEnabled()) {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("LDAP authentication failed: LDAP not activ");
             }
@@ -496,7 +519,7 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
         XWikiDocument userProfile = ldapUtils.getUserProfileByUid(validXWikiUserName, authInput, context);
         if (userProfile == null) {
             // Try to search just the UID (in case this user was created before a move to multidomain)
-            if (!authInput.equals(uid) && getConfiguration().getTestLoginFor(context).contains(authInput)) {
+            if (!authInput.equals(uid) && getConfiguration().getTestLoginFor().contains(authInput)) {
                 userProfile = ldapUtils.getUserProfileByUid(validXWikiUserName, uid, context);
             }
         }
@@ -507,8 +530,8 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
 
         String ldapDn = null;
 
-        String bindDNFormat = configuration.getLDAPBindDN(context);
-        String bindDN = configuration.getLDAPBindDN(authInput, password, context);
+        String bindDNFormat = configuration.getLDAPBindDN();
+        String bindDN = configuration.getLDAPBindDN(authInput, password);
 
         if (!bindDNFormat.equals(bindDN)) {
             ldapDn = bindDN;
@@ -518,7 +541,7 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
         // 5. if group param, verify group membership (& get DN)
         // ////////////////////////////////////////////////////////////////////
 
-        String filterGroupDN = configuration.getLDAPParam("ldap_user_group", "", context);
+        String filterGroupDN = configuration.getLDAPParam("ldap_user_group", "");
 
         if (filterGroupDN.length() > 0) {
             if (LOGGER.isDebugEnabled()) {
@@ -583,8 +606,8 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
         // ////////////////////////////////////////////////////////////////////
 
         if (!trusted) {
-            if ("1".equals(configuration.getLDAPParam("ldap_validate_password", "0", context))) {
-                String passwordField = configuration.getLDAPParam("ldap_password_field", "userPassword", context);
+            if ("1".equals(configuration.getLDAPParam("ldap_validate_password", "0"))) {
+                String passwordField = configuration.getLDAPParam("ldap_password_field", "userPassword");
                 if (!connector.checkPassword(ldapDn, password, passwordField)) {
                     LOGGER.debug("Password comparison failed, are you really sure you need validate_password ?"
                         + " If you don't enable it, it does not mean user credentials are not validated."
@@ -600,7 +623,7 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
                 connector.bind(ldapDn, password);
 
                 // Rebind admin user
-                connector.bind(bindDN, configuration.getLDAPBindPassword(authInput, password, context));
+                connector.bind(bindDN, configuration.getLDAPBindPassword(authInput, password));
             }
         }
 
@@ -666,13 +689,13 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
         XWikiLDAPConfig configuration = getConfiguration();
 
         // got valid group mappings
-        Map<String, Set<String>> groupMappings = configuration.getGroupMappings(context);
+        Map<String, Set<String>> groupMappings = configuration.getGroupMappings();
 
         // update group membership, join and remove from given groups
         // sync group membership for this user
         if (groupMappings.size() > 0) {
             // flag if always sync or just on create of the user
-            String syncmode = configuration.getLDAPParam("ldap_mode_group_sync", "always", context);
+            String syncmode = configuration.getLDAPParam("ldap_mode_group_sync", "always");
 
             if (!syncmode.equalsIgnoreCase("create") || createuser) {
                 syncGroupsMembership(xwikiUserName, ldapDn, groupMappings, ldapUtils, context);
