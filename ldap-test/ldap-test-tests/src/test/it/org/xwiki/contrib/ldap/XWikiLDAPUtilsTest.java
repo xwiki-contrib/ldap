@@ -31,9 +31,6 @@ import org.xwiki.cache.Cache;
 import org.xwiki.cache.CacheException;
 import org.xwiki.cache.config.CacheConfiguration;
 import org.xwiki.configuration.ConfigurationSource;
-import org.xwiki.contrib.ldap.XWikiLDAPConnection;
-import org.xwiki.contrib.ldap.XWikiLDAPSearchAttribute;
-import org.xwiki.contrib.ldap.XWikiLDAPUtils;
 import org.xwiki.contrib.ldap.framework.AbstractLDAPTestCase;
 import org.xwiki.contrib.ldap.framework.LDAPTestSetup;
 import org.xwiki.test.annotation.AfterComponent;
@@ -61,12 +58,12 @@ public class XWikiLDAPUtilsTest extends AbstractLDAPTestCase
     /**
      * The LDAP connection tool.
      */
-    private XWikiLDAPConnection connection = new XWikiLDAPConnection();
+    private XWikiLDAPConnection connection;
 
     /**
      * The LDAP tool.
      */
-    private XWikiLDAPUtils ldapUtils = new XWikiLDAPUtils(connection);
+    private XWikiLDAPUtils ldapUtils;
 
     @AfterComponent
     public void afterComponent()
@@ -92,6 +89,9 @@ public class XWikiLDAPUtilsTest extends AbstractLDAPTestCase
             LDAPTestSetup.LDAP_USERUID_FIELD);
         this.mocker.getMockXWikiCfg().setProperty("xwiki.authentication.ldap.groupcache_expiration", "1");
 
+        this.connection = new XWikiLDAPConnection();
+
+        this.ldapUtils = new XWikiLDAPUtils(this.connection);
         this.ldapUtils.setUidAttributeName(LDAPTestSetup.LDAP_USERUID_FIELD);
         this.ldapUtils.setBaseDN(LDAPTestSetup.LDAP_BASEDN);
 

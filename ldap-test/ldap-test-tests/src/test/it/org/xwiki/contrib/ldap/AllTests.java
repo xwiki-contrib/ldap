@@ -24,7 +24,6 @@ import java.util.Properties;
 
 import org.junit.AfterClass;
 import org.junit.runner.RunWith;
-import org.xwiki.contrib.ldap.XWikiLDAPAuthServiceImpl;
 import org.xwiki.contrib.ldap.framework.LDAPTestSetup;
 import org.xwiki.test.integration.XWikiExecutor;
 import org.xwiki.test.integration.XWikiExecutorSuite;

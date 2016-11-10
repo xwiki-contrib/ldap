@@ -21,15 +21,17 @@ package org.xwiki.contrib.ldap.api;
 
 import static org.junit.Assert.*;
 
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.xwiki.configuration.ConfigurationSource;
 import org.xwiki.contrib.ldap.framework.AbstractLDAPTestCase;
 import org.xwiki.contrib.ldap.framework.LDAPTestSetup;
 import org.xwiki.contrib.ldap.script.LDAPScriptService;
-import org.xwiki.script.service.ScriptService;
 import org.xwiki.test.mockito.MockitoComponentMockingRule;
 
 import com.xpn.xwiki.XWikiContext;
+import com.xpn.xwiki.web.Utils;
 
 /**
  * Test {@link LDAPScriptService}.
@@ -39,26 +41,33 @@ import com.xpn.xwiki.XWikiContext;
 public class LDAPScriptServiceTest extends AbstractLDAPTestCase
 {
     @Rule
-    public MockitoComponentMockingRule<ScriptService> mocker = new MockitoComponentMockingRule<ScriptService>(
-        LDAPScriptService.class);
+    public MockitoComponentMockingRule<LDAPScriptService> mocker =
+        new MockitoComponentMockingRule<>(LDAPScriptService.class);
+
+    @Before
+    public void setUp() throws Exception
+    {
+        // Setup mock  configuration sources since they're used by XWikiLDAPConfig.
+        Utils.setComponentManager(mocker);
+        mocker.registerMockComponent(ConfigurationSource.class, "wiki");
+        mocker.registerMockComponent(ConfigurationSource.class, "xwikicfg");
+    }
 
     @Test
-    public void testCheckConnectionSuccess() throws Exception
+    public void connectionSuccess() throws Exception
     {
-        LDAPScriptService ldapSS = (LDAPScriptService) mocker.getComponentUnderTest();
-        
         int port = LDAPTestSetup.getLDAPPort();
 
-        assertEquals(true, ldapSS.checkConnection("localhost", port, LDAPTestSetup.HORATIOHORNBLOWER_DN,
-            LDAPTestSetup.HORATIOHORNBLOWER_PWD, null, false, new XWikiContext()));
+        assertEquals(true, mocker.getComponentUnderTest().checkConnection("localhost", port,
+            LDAPTestSetup.HORATIOHORNBLOWER_DN, LDAPTestSetup.HORATIOHORNBLOWER_PWD, null, false,
+            new XWikiContext()));
     }
     
     @Test
-    public void testCheckConnectionFail() throws Exception
+    public void connectionFailure() throws Exception
     {
-        LDAPScriptService ldapSS = (LDAPScriptService) mocker.getComponentUnderTest();
-
-        assertEquals(false, ldapSS.checkConnection("localhost", 444, LDAPTestSetup.HORATIOHORNBLOWER_DN,
-            LDAPTestSetup.HORATIOHORNBLOWER_PWD, null, false, new XWikiContext()));
+        assertEquals(false, mocker.getComponentUnderTest().checkConnection("localhost", 444,
+            LDAPTestSetup.HORATIOHORNBLOWER_DN, LDAPTestSetup.HORATIOHORNBLOWER_PWD, null, false,
+            new XWikiContext()));
     }
 }

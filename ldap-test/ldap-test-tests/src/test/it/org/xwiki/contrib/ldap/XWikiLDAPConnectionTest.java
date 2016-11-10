@@ -20,8 +20,6 @@
 package org.xwiki.contrib.ldap;
 
 import org.junit.Test;
-import org.xwiki.contrib.ldap.XWikiLDAPConnection;
-import org.xwiki.contrib.ldap.XWikiLDAPException;
 import org.xwiki.contrib.ldap.framework.AbstractLDAPTestCase;
 import org.xwiki.contrib.ldap.framework.LDAPTestSetup;
 
@@ -40,14 +38,15 @@ public class XWikiLDAPConnectionTest extends AbstractLDAPTestCase
      * @throws XWikiLDAPException
      */
     @Test
-    public void testOpenClose() throws XWikiLDAPException
+    public void openConnectionAndClose() throws XWikiLDAPException
     {
         int port = LDAPTestSetup.getLDAPPort();
 
         XWikiLDAPConnection connection = new XWikiLDAPConnection();
 
-        assertTrue("LDAP connection failed", connection.open("localhost", port, LDAPTestSetup.HORATIOHORNBLOWER_DN,
-            LDAPTestSetup.HORATIOHORNBLOWER_PWD, null, false, this.mocker.getXWikiContext()));
+        assertTrue("LDAP connection failed", connection.open("localhost", port,
+            LDAPTestSetup.HORATIOHORNBLOWER_DN, LDAPTestSetup.HORATIOHORNBLOWER_PWD, null, false,
+            this.mocker.getXWikiContext()));
 
         connection.close();
     }

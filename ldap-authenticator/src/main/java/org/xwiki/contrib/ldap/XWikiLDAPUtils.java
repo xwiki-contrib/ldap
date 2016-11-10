@@ -309,8 +309,8 @@ public class XWikiLDAPUtils
     {
         Cache<Map<String, String>> cache;
 
-        String cacheKey = getUidAttributeName() + "." + this.connection.getConnection().getHost() + ":"
-            + this.connection.getConnection().getPort();
+        String cacheKey = getUidAttributeName() + "." + getConnection().getConnection().getHost() + ":"
+            + getConnection().getConnection().getPort();
 
         synchronized (cachePool) {
             Map<String, Cache<Map<String, String>>> cacheMap;
@@ -1030,7 +1030,7 @@ public class XWikiLDAPUtils
                 new Object[] {uid, this.baseDN, filter, this.uidAttributeName});
         }
 
-        return this.connection.searchLDAP(this.baseDN, filter, attributeNameTable, LDAPConnection.SCOPE_SUB);
+        return getConnection().searchLDAP(this.baseDN, filter, attributeNameTable, LDAPConnection.SCOPE_SUB);
     }
 
     /**
