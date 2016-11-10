@@ -130,7 +130,7 @@ public final class XWikiLDAPConfig extends org.xwiki.contrib.ldap.XWikiLDAPConfi
      */
     private XWikiLDAPConfig()
     {
-        super(null, null);
+        super(null);
     }
 
     /**
