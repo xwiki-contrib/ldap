@@ -205,6 +205,8 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
 
         LOGGER.debug("XWikiUser=" + user);
 
+        removeConfiguration();
+
         return user;
     }
 
@@ -277,6 +279,8 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
             }
         }
 
+        removeConfiguration();
+
         return principal;
     }
 
@@ -304,7 +308,9 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
      */
     protected Principal ldapAuthenticate(String userId, String password, XWikiContext context)
     {
-        return ldapAuthenticate(userId, password, false, context);
+        Principal principal = ldapAuthenticate(userId, password, false, context);
+        removeConfiguration();
+        return principal;
     }
 
     /**
@@ -348,8 +354,6 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
                 context.setWikiId(db);
             }
         }
-
-        removeConfiguration();
 
         return principal;
     }
