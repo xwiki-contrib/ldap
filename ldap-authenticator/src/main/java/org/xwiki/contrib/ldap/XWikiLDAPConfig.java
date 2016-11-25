@@ -318,7 +318,7 @@ public class XWikiLDAPConfig
 
         // First look for the parameter in the defined configuration source (by default in XWikiPreferences document
         // from the current wiki).
-        String param = this.configurationSource.getProperty(name);
+        String param = this.configurationSource.getProperty(name, String.class);
 
         // If not found, check in xwiki.cfg
         if (param == null || "".equals(param)) {

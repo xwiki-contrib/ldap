@@ -76,7 +76,7 @@ public class XWikiLDAPConfigTest
 
     private void setWikiPreference(String prefName, String prefValue)
     {
-        when(this.wikiConfigurationSource.getProperty(prefName)).thenReturn(prefValue);
+        when(this.wikiConfigurationSource.getProperty(prefName, String.class)).thenReturn(prefValue);
     }
 
     @Before
