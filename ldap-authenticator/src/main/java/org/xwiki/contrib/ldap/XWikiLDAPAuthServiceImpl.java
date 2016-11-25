@@ -33,6 +33,7 @@ import org.xwiki.context.Execution;
 import org.xwiki.context.ExecutionContext;
 import org.xwiki.text.StringUtils;
 
+import com.novell.ldap.LDAPDN;
 import com.novell.ldap.LDAPException;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
@@ -533,7 +534,8 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
         String bindDNFormat = configuration.getLDAPBindDN();
         String bindDN = configuration.getLDAPBindDN(authInput, password);
 
-        if (!bindDNFormat.equals(bindDN)) {
+        // Active directory support a special non DN form for bind but does not accept it at search level
+        if (!bindDNFormat.equals(bindDN) && LDAPDN.isValid(bindDN)) {
             ldapDn = bindDN;
         }
 
