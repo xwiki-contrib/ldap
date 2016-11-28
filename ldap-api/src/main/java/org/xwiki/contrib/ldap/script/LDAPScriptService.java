@@ -71,9 +71,8 @@ public class LDAPScriptService implements ScriptService
      * @param xcontext the XWiki context.
      * @return true if the connection succeed, false otherwise.
      * @throws XWikiLDAPException error when trying to open connection.
-     * @since 9.2
+     * @since 9.1.1
      */
-    
     public boolean checkConnection(String ldapHost, int ldapPort, String loginDN, String password, String pathToKeys,
         boolean ssl, XWikiContext xcontext)
     {
