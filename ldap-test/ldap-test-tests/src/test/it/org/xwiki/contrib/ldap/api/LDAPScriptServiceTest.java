@@ -20,11 +20,14 @@
 package org.xwiki.contrib.ldap.api;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.xwiki.configuration.ConfigurationSource;
+import org.xwiki.context.Execution;
+import org.xwiki.context.ExecutionContext;
 import org.xwiki.contrib.ldap.framework.AbstractLDAPTestCase;
 import org.xwiki.contrib.ldap.framework.LDAPTestSetup;
 import org.xwiki.contrib.ldap.script.LDAPScriptService;
@@ -51,6 +54,9 @@ public class LDAPScriptServiceTest extends AbstractLDAPTestCase
         Utils.setComponentManager(mocker);
         mocker.registerMockComponent(ConfigurationSource.class, "wiki");
         mocker.registerMockComponent(ConfigurationSource.class, "xwikicfg");
+
+        Execution execution = this.mocker.getInstance(Execution.class);
+        when(execution.getContext()).thenReturn(mock(ExecutionContext.class));
     }
 
     @Test

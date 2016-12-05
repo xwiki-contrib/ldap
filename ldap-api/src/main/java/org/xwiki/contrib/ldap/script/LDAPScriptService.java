@@ -44,6 +44,11 @@ import com.xpn.xwiki.XWikiContext;
 public class LDAPScriptService implements ScriptService
 {
     /**
+     * The key under which the last encountered error is stored in the current execution context.
+     */
+    private static final String ERROR_KEY = "scriptservice.ldap.error";
+
+    /**
      * Execution, needed to retrieve the legacy XWiki context.
      */
     @Inject
@@ -74,13 +79,15 @@ public class LDAPScriptService implements ScriptService
      * @since 9.1.1
      */
     public boolean checkConnection(String ldapHost, int ldapPort, String loginDN, String password, String pathToKeys,
-        boolean ssl, XWikiContext xcontext)
+        boolean ssl, XWikiContext xcontext) throws XWikiLDAPException
     {
+        setError(null);
         XWikiLDAPConnection connection = new XWikiLDAPConnection(new XWikiLDAPConfig(null));
         try {
             connection.open(ldapHost, ldapPort, loginDN, password, pathToKeys, ssl, xcontext);
             return true;
         } catch (XWikiLDAPException e) {
+            setError(e);
             return false;
         } finally {
             connection.close();
@@ -105,5 +112,26 @@ public class LDAPScriptService implements ScriptService
     public void resetGroupCache()
     {
         XWikiLDAPUtils.resetGroupCache();
+    }
+
+    /**
+     * Get the error generated while performing the previously called action.
+     *
+     * @return an eventual exception or {@code null} if no exception was thrown
+     */
+    public Exception getError()
+    {
+        return (Exception) this.execution.getContext().getProperty(ERROR_KEY);
+    }
+
+    /**
+     * Store a caught exception in the context, so that it can be later retrieved using {@link #getError()}.
+     *
+     * @param e the exception to store, can be {@code null} to clear the previously stored exception
+     * @see #getError()
+     */
+    private void setError(Exception e)
+    {
+        this.execution.getContext().setProperty(ERROR_KEY, e);
     }
 }
