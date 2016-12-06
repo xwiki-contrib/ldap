@@ -102,14 +102,6 @@
              See http://www.mojohaus.org/clirr-maven-plugin/examples/ignored-differences.html
           -->
           <ignored>
-            <!-- Minor breackages introduced in 9.0.1 -->
-            <difference>
-              <differenceType>7006</differenceType>
-              <className>org/xwiki/contrib/ldap/XWikiLDAPAuthServiceImpl</className>
-              <method>void initConfiguration(java.lang.String, com.xpn.xwiki.XWikiContext)</method>
-              <to>org.xwiki.contrib.ldap.XWikiLDAPConfig</to>
-              <justification>Should not break anyone in practice since nobody is expecting this method to return anything (plus it existed 2 days in this form)</justification>
-            </difference>
             <difference>
               <differenceType>7004</differenceType>
               <className>org/xwiki/contrib/ldap/script/LDAPScriptService</className>
