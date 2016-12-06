@@ -110,6 +110,12 @@
               <to>org.xwiki.contrib.ldap.XWikiLDAPConfig</to>
               <justification>Should not break anyone in practice since nobody is expecting this method to return anything (plus it existed 2 days in this form)</justification>
             </difference>
+            <difference>
+              <differenceType>7004</differenceType>
+              <className>org/xwiki/contrib/ldap/script/LDAPScriptService</className>
+              <method>boolean checkConnection(java.lang.String, int, java.lang.String, java.lang.String, java.lang.String, boolean, com.xpn.xwiki.XWikiContext)</method>
+              <justification>It is useless to pass the com.xpn.xwiki.XWikiContext parameter from velocity.</justification>
+            </difference>
           </ignored>
           <excludes>
             <exclude>**/internal/**</exclude>

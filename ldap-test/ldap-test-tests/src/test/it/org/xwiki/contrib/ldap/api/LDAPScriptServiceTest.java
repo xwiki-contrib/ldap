@@ -33,7 +33,6 @@ import org.xwiki.contrib.ldap.framework.LDAPTestSetup;
 import org.xwiki.contrib.ldap.script.LDAPScriptService;
 import org.xwiki.test.mockito.MockitoComponentMockingRule;
 
-import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.web.Utils;
 
 /**
@@ -65,15 +64,13 @@ public class LDAPScriptServiceTest extends AbstractLDAPTestCase
         int port = LDAPTestSetup.getLDAPPort();
 
         assertEquals(true, mocker.getComponentUnderTest().checkConnection("localhost", port,
-            LDAPTestSetup.HORATIOHORNBLOWER_DN, LDAPTestSetup.HORATIOHORNBLOWER_PWD, null, false,
-            new XWikiContext()));
+            LDAPTestSetup.HORATIOHORNBLOWER_DN, LDAPTestSetup.HORATIOHORNBLOWER_PWD, null, false));
     }
     
     @Test
     public void connectionFailure() throws Exception
     {
         assertEquals(false, mocker.getComponentUnderTest().checkConnection("localhost", 444,
-            LDAPTestSetup.HORATIOHORNBLOWER_DN, LDAPTestSetup.HORATIOHORNBLOWER_PWD, null, false,
-            new XWikiContext()));
+            LDAPTestSetup.HORATIOHORNBLOWER_DN, LDAPTestSetup.HORATIOHORNBLOWER_PWD, null, false));
     }
 }
