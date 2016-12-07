@@ -29,6 +29,7 @@ import org.junit.Test;
 import org.xwiki.configuration.ConfigurationSource;
 import org.xwiki.contrib.ldap.framework.AbstractLDAPTestCase;
 import org.xwiki.contrib.ldap.framework.LDAPTestSetup;
+import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.LocalDocumentReference;
 import org.xwiki.test.annotation.AfterComponent;
 import org.xwiki.test.annotation.AllComponents;
@@ -189,6 +190,25 @@ public class XWikiLDAPAuthServiceImplTest extends AbstractLDAPTestCase
     {
         assertAuthenticate(LDAPTestSetup.HORATIOHORNBLOWER_CN, LDAPTestSetup.HORATIOHORNBLOWER_PWD,
             LDAPTestSetup.HORATIOHORNBLOWER_DN);
+    }
+
+    /**
+     * Validate LDAP don't reuse existing XWiki user (unless it's already the same LDAP user).
+     */
+    @Test
+    public void testAuthenticateTwiceWithExistingNonLDAPUser() throws XWikiException
+    {
+        // Create user conflicting with LDAP login
+        XWikiDocument existingUser = new XWikiDocument(new DocumentReference(this.mocker.getXWikiContext().getWikiId(),
+            "XWiki", XWikiLDAPUtils.cleanXWikiUserPageName(LDAPTestSetup.HORATIOHORNBLOWER_CN)));
+        existingUser.newXObject(USER_XCLASS_REFERENCE, this.mocker.getXWikiContext());
+        this.mocker.getSpyXWiki().saveDocument(existingUser, this.mocker.getXWikiContext());
+
+        assertAuthenticate(LDAPTestSetup.HORATIOHORNBLOWER_CN, LDAPTestSetup.HORATIOHORNBLOWER_PWD,
+            userProfileName(LDAPTestSetup.HORATIOHORNBLOWER_CN) + "_1", LDAPTestSetup.HORATIOHORNBLOWER_DN);
+
+        assertAuthenticate(LDAPTestSetup.HORATIOHORNBLOWER_CN, LDAPTestSetup.HORATIOHORNBLOWER_PWD,
+            userProfileName(LDAPTestSetup.HORATIOHORNBLOWER_CN) + "_1", LDAPTestSetup.HORATIOHORNBLOWER_DN);
     }
 
     /**
