@@ -37,7 +37,7 @@
   <title/>
   <comment/>
   <minorEdit>false</minorEdit>
-  <syntaxId>xwiki/2.1</syntaxId>
+  <syntaxId>plain/1.0</syntaxId>
   <hidden>true</hidden>
   <content>ldap.missingLdapService=LDAP service is not available. Please verify your installation.
 ldap.ldapAuthenticationIsNotEnabledWarning=LDAP authentication is not enabled. Please set LDAP as authentication service in ##xwiki.cfg##
