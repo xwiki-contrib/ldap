@@ -38,6 +38,7 @@ import org.apache.commons.lang3.text.StrSubstitutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xwiki.configuration.ConfigurationSource;
+import org.xwiki.stability.Unstable;
 
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.web.Utils;
@@ -168,6 +169,8 @@ public class XWikiLDAPConfig
 
     private ConfigurationSource cfgConfigurationSource;
 
+    private final Map<String, String> defaultConfiguration;
+
     /**
      * @param userId the complete user id given
      * @param xcontext the XWiki context
@@ -203,6 +206,9 @@ public class XWikiLDAPConfig
         this.configurationSource = configurationSource;
 
         this.cfgConfigurationSource = Utils.getComponent(ConfigurationSource.class, "xwikicfg");
+
+        // The enabled authenticator can provide its own defaults
+        this.defaultConfiguration = new HashMap<>();
 
         if (userId != null) {
             parseRemoteUser(userId);
@@ -323,6 +329,11 @@ public class XWikiLDAPConfig
         // If not found, check in xwiki.cfg
         if (param == null || "".equals(param)) {
             param = this.cfgConfigurationSource.getProperty(cfgName);
+        }
+
+        // Look in the default configuration that might be provided by the enabled authenticator
+        if (param == null || "".equals(param)) {
+            param = this.defaultConfiguration.get(name);
         }
 
         if (param == null) {
@@ -1189,6 +1200,7 @@ public class XWikiLDAPConfig
      * @since 9.1
      * @deprecated since 9.1.1, use {@link #getHttpHeader()} instead
      */
+
     @Deprecated
     public String getHttpHeader(XWikiContext context)
     {
@@ -1202,5 +1214,16 @@ public class XWikiLDAPConfig
     public String getHttpHeader()
     {
         return this.cfgConfigurationSource.getProperty("xwiki.authentication.ldap.httpHeader");
+    }
+
+    /**
+     * @param key the key added to the map
+     * @param value the value of the key added to the map
+     * @since 9.1.4
+     */
+    @Unstable
+    public String setDefault(String key, String value)
+    {
+        return this.defaultConfiguration.put(key, value);
     }
 }
