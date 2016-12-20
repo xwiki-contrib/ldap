@@ -169,7 +169,12 @@ public class XWikiLDAPConfig
 
     private ConfigurationSource cfgConfigurationSource;
 
-    private final Map<String, String> defaultConfiguration;
+    /**
+     * Represents the map containing the default values for ldap properties.
+     *
+     * @since 9.1.4
+     */
+    private Map<String, Object> defaults;
 
     /**
      * @param userId the complete user id given
@@ -207,12 +212,40 @@ public class XWikiLDAPConfig
 
         this.cfgConfigurationSource = Utils.getComponent(ConfigurationSource.class, "xwikicfg");
 
-        // The enabled authenticator can provide its own defaults
-        this.defaultConfiguration = new HashMap<>();
+        this.defaults = new HashMap<>();
+
+        setDefaults();
 
         if (userId != null) {
             parseRemoteUser(userId);
         }
+    }
+
+    private void setDefaults()
+    {
+        setDefault("ldap_group_classes", null);
+        setDefault("ldap_group_memberfields", null);
+        setDefault("ldap_ssl.secure_provider", DEFAULT_SECUREPROVIDER);
+        setDefault("ldap", "0");
+        setDefault("ldap_port", 0);
+        setDefault("ldap_UID_attr", "cn");
+        setDefault("ldap_base_DN", "");
+        setDefault("ldap_group_mapping", "");
+        setDefault("ldap_fields_mapping", null);
+        setDefault("ldap_user_search_fmt", "({0}={1})");
+        setDefault("ldap_groupcache_expiration", 21600);
+        setDefault("ldap_bind_DN", "{0}");
+        setDefault("ldap_bind_pass", "{1}");
+        setDefault("ldap_trylocal", "0");
+        setDefault("ldap_timeout", 1000);
+        setDefault("ldap_timeout", 1000);
+        setDefault("ldap_maxresults", 1000);
+        setDefault("ldap_photo_attribute", DEFAULT_PHOTO_ATTRIBUTE);
+        setDefault("ldap_remoteUserParser", null);
+        setDefault("ldap_remoteUserMapping_list", Collections.<String>emptyList());
+        setDefault("ldap_remoteUserMapping_map", Collections.<String, String>emptyMap());
+        setDefault("ldap_testLoginFor", Collections.<String>emptyList());
+        setDefault("ldap_group_sync_resolve_subgroups", 1);
     }
 
     /**
@@ -331,11 +364,6 @@ public class XWikiLDAPConfig
             param = this.cfgConfigurationSource.getProperty(cfgName);
         }
 
-        // Look in the default configuration that might be provided by the enabled authenticator
-        if (param == null) {
-            param = this.defaultConfiguration.get(name);
-        }
-
         if (param == null) {
             param = def;
         }
@@ -446,7 +474,7 @@ public class XWikiLDAPConfig
      */
     public Collection<String> getGroupClasses()
     {
-        String param = getLDAPParam("ldap_group_classes", null);
+        String param = getLDAPParam("ldap_group_classes", (String) defaults.get("ldap_group_classes"));
 
         Collection<String> set;
 
@@ -486,7 +514,7 @@ public class XWikiLDAPConfig
      */
     public Collection<String> getGroupMemberFields()
     {
-        String param = getLDAPParam("ldap_group_memberfields", null);
+        String param = getLDAPParam("ldap_group_memberfields", (String) defaults.get("ldap_group_memberfields"));
 
         Collection<String> set;
 
@@ -531,7 +559,7 @@ public class XWikiLDAPConfig
         Provider provider;
 
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
-        String className = getLDAPParam("ldap_ssl.secure_provider", DEFAULT_SECUREPROVIDER);
+        String className = getLDAPParam("ldap_ssl.secure_provider", (String) defaults.get("ldap_ssl.secure_provider"));
 
         try {
             provider = (java.security.Provider) cl.loadClass(className).newInstance();
@@ -559,7 +587,7 @@ public class XWikiLDAPConfig
      */
     public boolean isLDAPEnabled()
     {
-        String param = getLDAPParam("ldap", "xwiki.authentication.ldap", "0");
+        String param = getLDAPParam("ldap", "xwiki.authentication.ldap", (String) defaults.get("ldap"));
 
         return param != null && param.equals("1");
     }
@@ -572,7 +600,7 @@ public class XWikiLDAPConfig
      */
     public int getLDAPPort()
     {
-        return (int) getLDAPParamAsLong(PREF_LDAP_PORT, CFG_LDAP_PORT, 0);
+        return (int) getLDAPParamAsLong(PREF_LDAP_PORT, CFG_LDAP_PORT, (Integer) defaults.get("ldap_port"));
     }
 
     /**
@@ -607,11 +635,11 @@ public class XWikiLDAPConfig
      *
      * @return the mapping between XWiki users and LDAP users. The key is the XWiki group, and the value is the list of
      *         mapped LDAP groups.
-     *         @since 9.1.1
+     * @since 9.1.1
      */
     public Map<String, Set<String>> getGroupMappings()
     {
-        String param = getLDAPParam("ldap_group_mapping", "");
+        String param = getLDAPParam("ldap_group_mapping", (String) defaults.get("ldap_group_mapping"));
 
         Map<String, Set<String>> groupMappings = new HashMap<String, Set<String>>();
 
@@ -700,8 +728,7 @@ public class XWikiLDAPConfig
     public Map<String, String> getUserMappings(List<String> attrListToFill)
     {
         Map<String, String> userMappings = new HashMap<>();
-
-        String ldapFieldMapping = getLDAPParam("ldap_fields_mapping", null);
+        String ldapFieldMapping = getLDAPParam("ldap_fields_mapping", (String) defaults.get("ldap_fields_mapping"));
 
         if (ldapFieldMapping != null && ldapFieldMapping.length() > 0) {
             String[] fields = ldapFieldMapping.split(USERMAPPING_SEP);
@@ -744,7 +771,8 @@ public class XWikiLDAPConfig
      */
     public int getCacheExpiration()
     {
-        return (int) getLDAPParamAsLong("ldap_groupcache_expiration", 21600);
+        return (int) getLDAPParamAsLong("ldap_groupcache_expiration",
+            (Integer) defaults.get("ldap_groupcache_expiration"));
     }
 
     /**
@@ -770,7 +798,7 @@ public class XWikiLDAPConfig
      */
     public String getLDAPBindDN()
     {
-        return getLDAPParam("ldap_bind_DN", "{0}");
+        return getLDAPParam("ldap_bind_DN", (String) defaults.get("ldap_bind_DN"));
     }
 
     /**
@@ -819,7 +847,7 @@ public class XWikiLDAPConfig
      */
     public String getLDAPBindPassword()
     {
-        return getLDAPParam("ldap_bind_pass", "{1}");
+        return getLDAPParam("ldap_bind_pass", (String) defaults.get("ldap_bind_pass"));
     }
 
     /**
@@ -856,7 +884,7 @@ public class XWikiLDAPConfig
     @Deprecated
     public int getLDAPTimeout(XWikiContext context)
     {
-        return (int) getLDAPParamAsLong("ldap_timeout", 1000);
+        return (int) getLDAPParamAsLong("ldap_timeout", (Integer) defaults.get("ldap_timeout"));
     }
 
     /**
@@ -866,7 +894,7 @@ public class XWikiLDAPConfig
      */
     public int getLDAPTimeout()
     {
-        return (int) getLDAPParamAsLong("ldap_timeout", 1000);
+        return (int) getLDAPParamAsLong("ldap_timeout", (Integer) defaults.get("ldap_timeout"));
     }
 
     /**
@@ -887,7 +915,7 @@ public class XWikiLDAPConfig
      */
     public int getLDAPMaxResults()
     {
-        return (int) getLDAPParamAsLong("ldap_maxresults", 1000);
+        return (int) getLDAPParamAsLong("ldap_maxresults", (Integer) defaults.get("ldap_maxresults"));
     }
 
     /**
@@ -910,7 +938,7 @@ public class XWikiLDAPConfig
     {
         Set<String> binaryAttributes = new HashSet<>();
 
-        binaryAttributes.add(getLDAPParam(XWikiLDAPConfig.PREF_LDAP_PHOTO_ATTRIBUTE, DEFAULT_PHOTO_ATTRIBUTE));
+        binaryAttributes.add(getLDAPParam(PREF_LDAP_PHOTO_ATTRIBUTE, (String) defaults.get("ldap_photo_attribute")));
 
         return binaryAttributes;
     }
@@ -1109,7 +1137,7 @@ public class XWikiLDAPConfig
      */
     public Pattern getRemoteUserPattern()
     {
-        String param = getLDAPParam("ldap_remoteUserParser", null);
+        String param = getLDAPParam("ldap_remoteUserParser", (String) defaults.get("ldap_remoteUserParser"));
 
         return param != null ? Pattern.compile(param) : null;
     }
@@ -1134,7 +1162,8 @@ public class XWikiLDAPConfig
      */
     public List<String> getRemoteUserMapping(int groupId)
     {
-        return getLDAPListParam("ldap_remoteUserMapping." + groupId, ',', Collections.<String>emptyList());
+        return getLDAPListParam("ldap_remoteUserMapping." + groupId, ',',
+            (List<String>) defaults.get("ldap_remoteUserMapping_list"));
     }
 
     /**
@@ -1160,8 +1189,8 @@ public class XWikiLDAPConfig
      */
     public Map<String, String> getRemoteUserMapping(String propertyName, boolean forceLowerCaseKey)
     {
-        return getLDAPMapParam("ldap_remoteUserMapping." + propertyName, '|', Collections.<String, String>emptyMap(),
-            forceLowerCaseKey);
+        return getLDAPMapParam("ldap_remoteUserMapping." + propertyName, '|',
+            (Map<String, String>) defaults.get("ldap_remoteUserMapping_map"), forceLowerCaseKey);
     }
 
     /**
@@ -1182,7 +1211,8 @@ public class XWikiLDAPConfig
      */
     public Set<String> getTestLoginFor()
     {
-        List<String> list = getLDAPListParam("ldap_testLoginFor", ',', Collections.<String>emptyList());
+        List<String> list =
+            getLDAPListParam("ldap_testLoginFor", ',', (List<String>) defaults.get("ldap_testLoginFor"));
 
         Set<String> set = new HashSet<>(list.size());
         for (String uid : list) {
@@ -1222,8 +1252,59 @@ public class XWikiLDAPConfig
      * @since 9.1.4
      */
     @Unstable
-    public void setDefault(String key, String value)
+    public void setDefault(String key, Object value)
     {
-        this.defaultConfiguration.put(key, value);
+        this.defaults.put(key, value);
+    }
+
+    /**
+     * @return the default unique user field name.
+     * @since 9.1.4
+     */
+    @Unstable
+    public String getUidAttributeName()
+    {
+        return getLDAPParam("ldap_UID_attr", (String) defaults.get("ldap_UID_attr"));
+    }
+
+    /**
+     * @return the ldap base DN
+     * @since 9.1.4
+     */
+    @Unstable
+    public String getBaseDN()
+    {
+        return getLDAPParam("ldap_base_DN", (String) defaults.get("ldap_base_DN"));
+    }
+
+    /**
+     * @return the user search format string
+     * @since 9.1.4
+     */
+    @Unstable
+    public String getUserSearchFormatString()
+    {
+        return getLDAPParam("ldap_user_search_fmt", (String) defaults.get("ldap_user_search_fmt"));
+    }
+
+    /**
+     * @return 1 if sub groups should be resolved too
+     * @since 9.1.4ldap_trylocal
+     */
+    @Unstable
+    public int getResolveSubgroups()
+    {
+        return (int) getLDAPParamAsLong("ldap_group_sync_resolve_subgroups",
+            (Integer) defaults.get("ldap_group_sync_resolve_subgroups"));
+    }
+
+    /**
+     * @return 1 if local DB login should be tried
+     * @since 9.1.4
+     */
+    @Unstable
+    public String getTryLocal()
+    {
+        return getLDAPParam("ldap_trylocal", (String) defaults.get("ldap_trylocal"));
     }
 }

@@ -372,7 +372,7 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
     {
         Principal principal = null;
 
-        String trylocal = getConfiguration().getLDAPParam("ldap_trylocal", "0");
+        String trylocal = getConfiguration().getTryLocal();
 
         if ("1".equals(trylocal)) {
             if (LOGGER.isDebugEnabled()) {
@@ -485,14 +485,12 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
         XWikiLDAPConnection connector = new XWikiLDAPConnection(configuration);
         XWikiLDAPUtils ldapUtils = new XWikiLDAPUtils(connector, configuration);
 
-        ldapUtils
-            .setUidAttributeName(configuration.getLDAPParam(XWikiLDAPConfig.PREF_LDAP_UID, LDAP_DEFAULT_UID));
+        ldapUtils.setUidAttributeName(configuration.getUidAttributeName());
         ldapUtils.setGroupClasses(configuration.getGroupClasses());
         ldapUtils.setGroupMemberFields(configuration.getGroupMemberFields());
-        ldapUtils.setBaseDN(configuration.getLDAPParam("ldap_base_DN", ""));
-        ldapUtils.setUserSearchFormatString(configuration.getLDAPParam("ldap_user_search_fmt", "({0}={1})"));
-        ldapUtils.setResolveSubgroups(
-            configuration.getLDAPParamAsLong("ldap_group_sync_resolve_subgroups", 1) == 1);
+        ldapUtils.setBaseDN(configuration.getBaseDN());
+        ldapUtils.setUserSearchFormatString(configuration.getUserSearchFormatString());
+        ldapUtils.setResolveSubgroups(configuration.getResolveSubgroups() == 1);
 
         String uid = configuration.getMemoryConfiguration().get("uid");
 
