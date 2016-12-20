@@ -170,7 +170,7 @@ public class XWikiLDAPConfig
     private ConfigurationSource cfgConfigurationSource;
 
     /**
-     * @since 9.1.4
+     * @since 9.2
      */
     private final Map<String, String> finalMemoryConfiguration;
 
@@ -1221,10 +1221,10 @@ public class XWikiLDAPConfig
     /**
      * @param key the key added to the map
      * @param value the value of the key added to the map
-     * @since 9.1.4
+     * @since 9.2
      */
     @Unstable
-    public void setDefault(String key, String value)
+    public void setFinalProperty(String key, String value)
     {
         this.finalMemoryConfiguration.put(key, value);
     }
