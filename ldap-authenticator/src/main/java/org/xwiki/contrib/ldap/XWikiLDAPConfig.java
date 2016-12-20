@@ -38,6 +38,7 @@ import org.apache.commons.lang3.text.StrSubstitutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xwiki.configuration.ConfigurationSource;
+import org.xwiki.stability.Unstable;
 
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.web.Utils;
@@ -168,6 +169,8 @@ public class XWikiLDAPConfig
 
     private ConfigurationSource cfgConfigurationSource;
 
+    private final Map<String, String> finalMemoryConfiguration;
+
     /**
      * @param userId the complete user id given
      * @param xcontext the XWiki context
@@ -203,6 +206,8 @@ public class XWikiLDAPConfig
         this.configurationSource = configurationSource;
 
         this.cfgConfigurationSource = Utils.getComponent(ConfigurationSource.class, "xwikicfg");
+
+        this.finalMemoryConfiguration = new HashMap<>();
 
         if (userId != null) {
             parseRemoteUser(userId);
@@ -302,6 +307,7 @@ public class XWikiLDAPConfig
      * <li>Local configuration stored in this {@link XWikiLDAPConfig} instance (ldap_*name*)</li>
      * <li>XWiki Preferences page (ldap_*name*)</li>
      * <li>xwiki.cfg configuration file (ldap.*name*)</li>
+     * <li>A final configuration that could be overriden by extended authenticators</li>
      * </ul>
      *
      * @param name the name of the property in XWikiPreferences.
@@ -323,6 +329,10 @@ public class XWikiLDAPConfig
         // If not found, check in xwiki.cfg
         if (param == null || "".equals(param)) {
             param = this.cfgConfigurationSource.getProperty(cfgName);
+        }
+
+        if (param == null) {
+            param = this.finalMemoryConfiguration.get(name);
         }
 
         if (param == null) {
@@ -1189,6 +1199,7 @@ public class XWikiLDAPConfig
      * @since 9.1
      * @deprecated since 9.1.1, use {@link #getHttpHeader()} instead
      */
+
     @Deprecated
     public String getHttpHeader(XWikiContext context)
     {
@@ -1202,5 +1213,16 @@ public class XWikiLDAPConfig
     public String getHttpHeader()
     {
         return this.cfgConfigurationSource.getProperty("xwiki.authentication.ldap.httpHeader");
+    }
+
+    /**
+     * @param key the key added to the map
+     * @param value the value of the key added to the map
+     * @since 9.2
+     */
+    @Unstable
+    public void setFinalProperty(String key, String value)
+    {
+        this.finalMemoryConfiguration.put(key, value);
     }
 }
