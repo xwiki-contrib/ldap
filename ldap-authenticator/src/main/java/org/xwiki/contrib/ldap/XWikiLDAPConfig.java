@@ -332,7 +332,7 @@ public class XWikiLDAPConfig
         }
 
         // Look in the default configuration that might be provided by the enabled authenticator
-        if (param == null || "".equals(param)) {
+        if (param == null) {
             param = this.defaultConfiguration.get(name);
         }
 
@@ -1222,8 +1222,8 @@ public class XWikiLDAPConfig
      * @since 9.1.4
      */
     @Unstable
-    public String setDefault(String key, String value)
+    public void setDefault(String key, String value)
     {
-        return this.defaultConfiguration.put(key, value);
+        this.defaultConfiguration.put(key, value);
     }
 }
