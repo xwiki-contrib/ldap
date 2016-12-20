@@ -169,7 +169,10 @@ public class XWikiLDAPConfig
 
     private ConfigurationSource cfgConfigurationSource;
 
-    private final Map<String, String> defaultConfiguration;
+    /**
+     * @since 9.1.4
+     */
+    private final Map<String, String> finalMemoryConfiguration;
 
     /**
      * @param userId the complete user id given
@@ -207,8 +210,7 @@ public class XWikiLDAPConfig
 
         this.cfgConfigurationSource = Utils.getComponent(ConfigurationSource.class, "xwikicfg");
 
-        // The enabled authenticator can provide its own defaults
-        this.defaultConfiguration = new HashMap<>();
+        this.finalMemoryConfiguration = new HashMap<>();
 
         if (userId != null) {
             parseRemoteUser(userId);
@@ -308,6 +310,7 @@ public class XWikiLDAPConfig
      * <li>Local configuration stored in this {@link XWikiLDAPConfig} instance (ldap_*name*)</li>
      * <li>XWiki Preferences page (ldap_*name*)</li>
      * <li>xwiki.cfg configuration file (ldap.*name*)</li>
+     * <li>A final configuration that could be overriden by extended authenticators</li>
      * </ul>
      *
      * @param name the name of the property in XWikiPreferences.
@@ -331,9 +334,8 @@ public class XWikiLDAPConfig
             param = this.cfgConfigurationSource.getProperty(cfgName);
         }
 
-        // Look in the default configuration that might be provided by the enabled authenticator
         if (param == null) {
-            param = this.defaultConfiguration.get(name);
+            param = this.finalMemoryConfiguration.get(name);
         }
 
         if (param == null) {
@@ -1224,6 +1226,6 @@ public class XWikiLDAPConfig
     @Unstable
     public void setDefault(String key, String value)
     {
-        this.defaultConfiguration.put(key, value);
+        this.finalMemoryConfiguration.put(key, value);
     }
 }
