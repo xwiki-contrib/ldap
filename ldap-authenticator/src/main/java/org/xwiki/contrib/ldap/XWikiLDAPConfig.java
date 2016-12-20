@@ -169,9 +169,6 @@ public class XWikiLDAPConfig
 
     private ConfigurationSource cfgConfigurationSource;
 
-    /**
-     * @since 9.2
-     */
     private final Map<String, String> finalMemoryConfiguration;
 
     /**
