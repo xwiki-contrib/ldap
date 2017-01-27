@@ -458,11 +458,13 @@ public class XWikiLDAPUtils
                 while (values.hasMoreElements()) {
                     String member = values.nextElement();
 
-                    LOGGER.debug("  |- Member value [{}] found. Trying to resolve it.", member);
+                    if (StringUtils.isNotBlank(member)) {
+                        LOGGER.debug("  |- Member value [{}] found. Trying to resolve it.", member);
 
-                    // we check for subgroups recursive call to scan all subgroups and identify members
-                    // and their uid
-                    getGroupMembers(member, memberMap, subgroups, context);
+                        // we check for subgroups recursive call to scan all subgroups and identify members
+                        // and their uid
+                        getGroupMembers(member, memberMap, subgroups, context);
+                    }
                 }
             }
         }
