@@ -431,9 +431,11 @@ public class XWikiLDAPUtils
                 // or subgroup
                 String member = searchAttribute.value;
 
-                // we check for subgroups recursive call to scan all subgroups and identify members
-                // and their uid
-                getGroupMembers(member, memberMap, subgroups, context);
+                if (StringUtils.isNotBlank(member)) {
+                    // we check for subgroups recursive call to scan all subgroups and identify members
+                    // and their uid
+                    getGroupMembers(member, memberMap, subgroups, context);
+                }
             }
         }
     }
