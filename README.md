@@ -11,7 +11,7 @@ Various tools to manipulate LDAP servers in XWiki.
 * License: LGPL 2.1
 * Translations: http://l10n.xwiki.org/xwiki/bin/view/Contrib/LDAPApplication
 * Sonar Dashboard: N/A
-* Continuous Integration Status: [![Build Status](http://ci.xwiki.org/buildStatus/icon?job=Contrib%20-%20LDAP)](http://ci.xwiki.org/job/Contrib%20-%20LDAP/)
+* Continuous Integration Status: [![Build Status](http://ci.xwiki.org/buildStatus/icon?job=XWiki Contrib/ldap/master)](http://ci.xwiki.org/job/XWiki%20Contrib/job/ldap/job/master/)
 
 # Release
 
