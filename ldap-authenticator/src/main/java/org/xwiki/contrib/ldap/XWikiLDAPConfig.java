@@ -240,7 +240,7 @@ public class XWikiLDAPConfig
     private void parseRemoteUser(String ssoRemoteUser)
     {
         this.memoryConfiguration.put("auth.input", ssoRemoteUser);
-        this.memoryConfiguration.put("uid", ssoRemoteUser);
+        this.memoryConfiguration.put("uid", ssoRemoteUser.trim());
 
         Pattern remoteUserParser = getRemoteUserPattern();
 
@@ -252,7 +252,7 @@ public class XWikiLDAPConfig
             if (marcher.find()) {
                 int groupCount = marcher.groupCount();
                 if (groupCount == 0) {
-                    this.memoryConfiguration.put("uid", marcher.group());
+                    this.memoryConfiguration.put("uid", marcher.group().trim());
                 } else {
                     for (int g = 1; g <= groupCount; ++g) {
                         String groupValue = marcher.group(g);

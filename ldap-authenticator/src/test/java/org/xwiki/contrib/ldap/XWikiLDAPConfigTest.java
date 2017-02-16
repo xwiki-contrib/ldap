@@ -329,6 +329,14 @@ public class XWikiLDAPConfigTest
     }
 
     @Test
+    public void parseRemoteUserWithWhiteSpaces() throws Exception
+    {
+        XWikiLDAPConfig config = new XWikiLDAPConfig(" remoteuser ");
+        assertEquals(" remoteuser ", config.getMemoryConfiguration().get("auth.input"));
+        assertEquals("remoteuser", config.getMemoryConfiguration().get("uid"));
+    }
+
+    @Test
     public void parseRemoteUserWithSimplePattern() throws Exception
     {
         setWikiPreference("ldap_remoteUserParser", "remote");
