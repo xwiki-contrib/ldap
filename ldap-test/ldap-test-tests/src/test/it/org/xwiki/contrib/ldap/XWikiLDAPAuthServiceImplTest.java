@@ -327,6 +327,24 @@ public class XWikiLDAPAuthServiceImplTest extends AbstractLDAPTestCase
     }
 
     /**
+     * Validate the same user profile is used when authentication is called twice for same user even the uid have white
+     * spaces before or after.
+     */
+    @Test
+    public void testAuthenticateTwiceAndWithWhiteSpaces() throws XWikiException
+    {
+        XWikiDocument document = assertAuthenticate(LDAPTestSetup.HORATIOHORNBLOWER_CN,
+            LDAPTestSetup.HORATIOHORNBLOWER_PWD, LDAPTestSetup.HORATIOHORNBLOWER_DN);
+
+        when(this.mocker.getMockStore().searchDocuments(anyString(), anyBoolean(), anyBoolean(), anyBoolean(), anyInt(),
+            anyInt(), anyList(), anyXWikiContext())).thenReturn(Collections.singletonList(document));
+
+        assertAuthenticate(" " + LDAPTestSetup.HORATIOHORNBLOWER_CN + " ", LDAPTestSetup.HORATIOHORNBLOWER_PWD,
+            userProfileName(LDAPTestSetup.HORATIOHORNBLOWER_CN), LDAPTestSetup.HORATIOHORNBLOWER_DN,
+            LDAPTestSetup.HORATIOHORNBLOWER_CN);
+    }
+
+    /**
      * Validate "simple" LDAP authentication when uid contains point(s).
      */
     @Test

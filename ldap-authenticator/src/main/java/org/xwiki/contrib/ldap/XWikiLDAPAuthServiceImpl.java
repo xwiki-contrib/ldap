@@ -104,8 +104,8 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
     }
 
     /**
-     * Allow extenders of this class to override this method and provide their own XWikiLDAPConfig instance (for
-     * example in order to use a different configuration source).
+     * Allow extenders of this class to override this method and provide their own XWikiLDAPConfig instance (for example
+     * in order to use a different configuration source).
      *
      * @since 9.1.1
      */
@@ -481,18 +481,18 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
     {
         Principal principal = null;
 
-        XWikiLDAPConfig configuration = initConfiguration(authInput);
+        String trimedAuthInput = authInput.trim();
+
+        XWikiLDAPConfig configuration = initConfiguration(trimedAuthInput);
         XWikiLDAPConnection connector = new XWikiLDAPConnection(configuration);
         XWikiLDAPUtils ldapUtils = new XWikiLDAPUtils(connector, configuration);
 
-        ldapUtils
-            .setUidAttributeName(configuration.getLDAPParam(XWikiLDAPConfig.PREF_LDAP_UID, LDAP_DEFAULT_UID));
+        ldapUtils.setUidAttributeName(configuration.getLDAPParam(XWikiLDAPConfig.PREF_LDAP_UID, LDAP_DEFAULT_UID));
         ldapUtils.setGroupClasses(configuration.getGroupClasses());
         ldapUtils.setGroupMemberFields(configuration.getGroupMemberFields());
         ldapUtils.setBaseDN(configuration.getLDAPParam("ldap_base_DN", ""));
         ldapUtils.setUserSearchFormatString(configuration.getLDAPParam("ldap_user_search_fmt", "({0}={1})"));
-        ldapUtils.setResolveSubgroups(
-            configuration.getLDAPParamAsLong("ldap_group_sync_resolve_subgroups", 1) == 1);
+        ldapUtils.setResolveSubgroups(configuration.getLDAPParamAsLong("ldap_group_sync_resolve_subgroups", 1) == 1);
 
         String uid = configuration.getMemoryConfiguration().get("uid");
 
@@ -512,7 +512,7 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
         // 2. bind to LDAP => if failed try db
         // ////////////////////////////////////////////////////////////////////
 
-        if (!connector.open(authInput, password, context)) {
+        if (!connector.open(trimedAuthInput, password, context)) {
             throw new XWikiException(XWikiException.MODULE_XWIKI_USER, XWikiException.ERROR_XWIKI_USER_INIT,
                 "Bind to LDAP server failed.");
         }
@@ -521,10 +521,10 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
         // 3. find XWiki user profile page
         // ////////////////////////////////////////////////////////////////////
 
-        XWikiDocument userProfile = ldapUtils.getUserProfileByUid(validXWikiUserName, authInput, context);
+        XWikiDocument userProfile = ldapUtils.getUserProfileByUid(validXWikiUserName, trimedAuthInput, context);
         if (userProfile == null) {
             // Try to search just the UID (in case this user was created before a move to multidomain)
-            if (!authInput.equals(uid) && getConfiguration().getTestLoginFor().contains(authInput)) {
+            if (!trimedAuthInput.equals(uid) && getConfiguration().getTestLoginFor().contains(trimedAuthInput)) {
                 userProfile = ldapUtils.getUserProfileByUid(validXWikiUserName, uid, context);
             }
         }
@@ -536,7 +536,7 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
         String ldapDn = null;
 
         String bindDNFormat = configuration.getLDAPBindDN();
-        String bindDN = configuration.getLDAPBindDN(authInput, password);
+        String bindDN = configuration.getLDAPBindDN(trimedAuthInput, password);
 
         // Active directory support a special non DN form for bind but does not accept it at search level
         if (!bindDNFormat.equals(bindDN) && LDAPDN.isValid(bindDN)) {
@@ -603,7 +603,7 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
 
         if (ldapDn == null) {
             throw new XWikiException(XWikiException.MODULE_XWIKI_USER, XWikiException.ERROR_XWIKI_USER_INIT,
-                "Can't find LDAP user DN for input [" + authInput + "]");
+                "Can't find LDAP user DN for input [" + trimedAuthInput + "]");
         }
 
         // ////////////////////////////////////////////////////////////////////
@@ -629,7 +629,7 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
                 connector.bind(ldapDn, password);
 
                 // Rebind admin user
-                connector.bind(bindDN, configuration.getLDAPBindPassword(authInput, password));
+                connector.bind(bindDN, configuration.getLDAPBindPassword(trimedAuthInput, password));
             }
         }
 
@@ -639,7 +639,7 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
 
         boolean isNewUser = userProfile == null || userProfile.isNew();
 
-        userProfile = syncUser(userProfile, searchAttributes, ldapDn, authInput, ldapUtils, context);
+        userProfile = syncUser(userProfile, searchAttributes, ldapDn, trimedAuthInput, ldapUtils, context);
 
         // from now on we can enter the application
         if (local) {
