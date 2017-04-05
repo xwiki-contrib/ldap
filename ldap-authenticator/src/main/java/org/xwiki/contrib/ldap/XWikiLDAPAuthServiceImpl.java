@@ -188,7 +188,8 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
 
         // Authenticate
         if (principal == null) {
-            principal = ldapAuthenticate(remoteUser, null, true, context);
+            // Force always getting full reference (including the wiki)
+            principal = ldapAuthenticate(remoteUser, null, true, false, context);
             if (principal == null) {
                 return null;
             }
@@ -264,7 +265,7 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
         }
 
         // Try authentication against ldap
-        Principal principal = ldapAuthenticate(userId, password, false, context);
+        Principal principal = ldapAuthenticate(userId, password, false, true, context);
 
         if (principal == null) {
             // Fallback to local DB only if trylocal is true
@@ -308,7 +309,7 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
      */
     protected Principal ldapAuthenticate(String userId, String password, XWikiContext context)
     {
-        Principal principal = ldapAuthenticate(userId, password, false, context);
+        Principal principal = ldapAuthenticate(userId, password, false, true, context);
         removeConfiguration();
         return principal;
     }
@@ -319,16 +320,18 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
      * @param userId the id of the user provided in input
      * @param password the password of the user to log in.
      * @param trusted is it a trusted authentication (should the credentials be validated)
+     * @param compactPrincipal if true the user principal should not contain the wiki in case of local authentication
      * @param context the XWiki context.
      * @return the {@link Principal}.
      */
-    private Principal ldapAuthenticate(String userId, String password, boolean trusted, XWikiContext context)
+    private Principal ldapAuthenticate(String userId, String password, boolean trusted, boolean compactPrincipal,
+        XWikiContext context)
     {
         Principal principal = null;
 
         // First we check in the local context for a valid ldap user
         try {
-            principal = ldapAuthenticateInContext(userId, null, password, trusted, context, true);
+            principal = ldapAuthenticateInContext(userId, null, password, trusted, context, compactPrincipal);
         } catch (Exception e) {
             // continue
             if (LOGGER.isDebugEnabled()) {
