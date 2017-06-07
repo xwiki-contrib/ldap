@@ -36,6 +36,7 @@ import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.doc.XWikiDocument;
 import com.xpn.xwiki.objects.BaseObject;
 import com.xpn.xwiki.objects.classes.BaseClass;
+import com.xpn.xwiki.objects.classes.TextAreaClass;
 import com.xpn.xwiki.user.api.XWikiRightService;
 
 /**
@@ -81,8 +82,8 @@ public class LDAPProfileXClass
 
         this.ldapClass = ldapClassDoc.getXClass();
 
-        boolean needsUpdate = this.ldapClass.addTextField(LDAP_XFIELD_DN, LDAP_XFIELDPN_DN, 80);
-        needsUpdate |= this.ldapClass.addTextField(LDAP_XFIELD_UID, LDAP_XFIELDPN_UID, 80);
+        // Make sure the current class contains required properties
+        boolean needsUpdate = updateClass();
 
         if (ldapClassDoc.getCreatorReference() == null) {
             needsUpdate = true;
@@ -100,6 +101,28 @@ public class LDAPProfileXClass
         if (needsUpdate) {
             context.getWiki().saveDocument(ldapClassDoc, "Update LDAP user profile class", context);
         }
+    }
+
+    private boolean updateClass()
+    {
+        // Generate the class from scratch
+        BaseClass newClass = new BaseClass();
+        newClass.setDocumentReference(this.ldapClass.getDocumentReference());
+        createClass(newClass);
+
+        // Apply standard class to current one
+        return this.ldapClass.apply(newClass, false);
+    }
+
+    private void createClass(BaseClass newClass)
+    {
+        // TODO: when upgrading to 8.4+ replace all that with
+        // BaseClass#addTextAreaField(LDAP_XFIELD_DN, LDAP_XFIELDPN_DN, 80, 1, ContentType.PURE_TEXT);
+        newClass.addTextAreaField(LDAP_XFIELD_DN, LDAP_XFIELDPN_DN, 80, 1);
+        TextAreaClass textAreaClass = (TextAreaClass) newClass.get(LDAP_XFIELD_DN);
+        textAreaClass.setContentType("PureText");
+
+        newClass.addTextField(LDAP_XFIELD_UID, LDAP_XFIELDPN_UID, 80);
     }
 
     /**
