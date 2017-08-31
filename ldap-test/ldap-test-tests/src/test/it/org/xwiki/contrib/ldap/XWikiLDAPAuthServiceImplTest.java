@@ -345,10 +345,10 @@ public class XWikiLDAPAuthServiceImplTest extends AbstractLDAPTestCase
     }
 
     /**
-     * Validate "simple" LDAP authentication when uid contains point(s).
+     * Validate "simple" LDAP authentication when uid contains dot(s).
      */
     @Test
-    public void testAuthenticateWhenUidContainsPoints() throws XWikiException
+    public void testAuthenticateWhenUidContainsDots() throws XWikiException
     {
         assertAuthenticate(LDAPTestSetup.USERWITHPOINTS_CN, LDAPTestSetup.USERWITHPOINTS_PWD,
             "XWiki." + LDAPTestSetup.USERWITHPOINTS_CN.replaceAll("\\.", ""), LDAPTestSetup.USERWITHPOINTS_DN);
