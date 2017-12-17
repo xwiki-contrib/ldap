@@ -47,7 +47,7 @@ ldap.ldapUserField=LDAP field...
 ldap.xwikiUserField=XWiki user property...
 ldap.adminHeadingConfiguration=Configuration
 ldap.adminHeadingMiscellaneous=Miscellaneous
-ldap.resetGroupCacheSuccess=Groups cache has been reseted
+ldap.resetGroupCacheSuccess=Groups cache has been reset
 ldap.resetGroupCacheButton=Reset group cache
 </content>
   <object>
