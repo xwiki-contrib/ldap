@@ -39,7 +39,9 @@
   <minorEdit>false</minorEdit>
   <syntaxId>plain/1.0</syntaxId>
   <hidden>true</hidden>
-  <content>ldap.adminHeadingConfiguration=Configuração
+  <content>## XWiki Translation for language pt_BR generated from http://www.l10n.xwiki.org
+ldap.adminHeadingConfiguration=Configuração
+ldap.adminHeadingMiscellaneous=Aleatórios
 ldap.ldapAuthenticationIsNotEnabledWarning=Atenticação LDAP não está habilitada. Por favor configure LDAP como serviço de autenticação em \#\#xwiki.cfg\#\#
 ldap.ldapGroupTip=Grupo LDAP...
 ldap.ldapUserField=Campo LDAP...
