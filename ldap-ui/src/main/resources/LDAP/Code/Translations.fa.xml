@@ -20,10 +20,10 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 -->
 
-<xwikidoc version="1.3" reference="LDAP.Code.Translations" locale="pt_BR">
+<xwikidoc version="1.3" reference="LDAP.Code.Translations" locale="fa">
   <web>LDAP.Code</web>
   <name>Translations</name>
-  <language>pt_BR</language>
+  <language>fa</language>
   <defaultLanguage>en</defaultLanguage>
   <translation>1</translation>
   <creator>xwiki:XWiki.Admin</creator>
@@ -39,14 +39,7 @@
   <minorEdit>false</minorEdit>
   <syntaxId>plain/1.0</syntaxId>
   <hidden>true</hidden>
-  <content>ldap.adminHeadingConfiguration=Configuração
-ldap.ldapAuthenticationIsNotEnabledWarning=Atenticação LDAP não está habilitada. Por favor configure LDAP como serviço de autenticação em \#\#xwiki.cfg\#\#
-ldap.ldapGroupTip=Grupo LDAP...
-ldap.ldapUserField=Campo LDAP...
-ldap.missingLdapService=Serviço LDAP não está disponível. Por favor, verifique sua instalação.
-ldap.resetGroupCacheButton=Reiniciar cache de grupo
-ldap.resetGroupCacheSuccess=Cache de grupos foi reiniciado
-ldap.xwikiGroupTip=Grupo XWiki...
-ldap.xwikiUserField=Propriedade de usuário XWiki...
+  <content>## XWiki Translation for language fa generated from http://www.l10n.xwiki.org
+ldap.adminHeadingMiscellaneous=متفرقه
 </content>
 </xwikidoc>
