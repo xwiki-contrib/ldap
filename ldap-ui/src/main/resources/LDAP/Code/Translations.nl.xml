@@ -39,14 +39,15 @@
   <minorEdit>false</minorEdit>
   <syntaxId>plain/1.0</syntaxId>
   <hidden>true</hidden>
-  <content>ldap.adminHeadingConfiguration=Configuratie
+  <content>ldap.missingLdapService=LDAP service is niet beschikbaar. Controleer uw installatie.
 ldap.ldapAuthenticationIsNotEnabledWarning=LDAP authenticatie is niet ingeschakeld. Configureer LDAP als authenticatie-service in \#\#xwiki.cfg\#\#
 ldap.ldapGroupTip=LDAP groep...
-ldap.ldapUserField=LDAP veld...
-ldap.missingLdapService=LDAP service is niet beschikbaar. Controleer uw installatie.
-ldap.resetGroupCacheButton=Cache van groepen resetten
-ldap.resetGroupCacheSuccess=Cache van groepen is gereset
 ldap.xwikiGroupTip=XWiki groep...
+ldap.ldapUserField=LDAP veld...
 ldap.xwikiUserField=XWiki property van gebruiker...
+ldap.adminHeadingConfiguration=Configuratie
+### Missing: ldap.adminHeadingMiscellaneous=Miscellaneous
+ldap.resetGroupCacheSuccess=Cache van groepen is gereset
+ldap.resetGroupCacheButton=Cache van groepen resetten
 </content>
 </xwikidoc>

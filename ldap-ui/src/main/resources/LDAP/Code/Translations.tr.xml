@@ -39,14 +39,15 @@
   <minorEdit>false</minorEdit>
   <syntaxId>plain/1.0</syntaxId>
   <hidden>true</hidden>
-  <content>ldap.adminHeadingConfiguration=Yapılandırma
+  <content>ldap.missingLdapService=LDAP hizmeti kullanılabilir değil . Kurulumunu doğrulayın .
 ldap.ldapAuthenticationIsNotEnabledWarning=LDAP kimlik doğrulaması etkin değildir . \# \# \# \# Xwiki.cfg kimlik doğrulama hizmeti olarak LDAP'ı set Lütfen
 ldap.ldapGroupTip=LDAP grup ...
-ldap.ldapUserField=LDAP alan ...
-ldap.missingLdapService=LDAP hizmeti kullanılabilir değil . Kurulumunu doğrulayın .
-ldap.resetGroupCacheButton=Reset grup önbellek
-ldap.resetGroupCacheSuccess=Gruplar önbellek reseted olmuştur
 ldap.xwikiGroupTip=XWiki grup ...
+ldap.ldapUserField=LDAP alan ...
 ldap.xwikiUserField=XWiki kullanıcı özelliği ...
+ldap.adminHeadingConfiguration=Yapılandırma
+### Missing: ldap.adminHeadingMiscellaneous=Miscellaneous
+ldap.resetGroupCacheSuccess=Gruplar önbellek reseted olmuştur
+ldap.resetGroupCacheButton=Reset grup önbellek
 </content>
 </xwikidoc>

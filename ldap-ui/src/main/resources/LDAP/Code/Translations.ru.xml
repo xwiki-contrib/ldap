@@ -39,7 +39,15 @@
   <minorEdit>false</minorEdit>
   <syntaxId>plain/1.0</syntaxId>
   <hidden>true</hidden>
-  <content>ldap.adminHeadingConfiguration=Настройки
-ldap.xwikiGroupTip=Группа XWiki... 
+  <content>### Missing: ldap.missingLdapService=LDAP service is not available. Please verify your installation.
+### Missing: ldap.ldapAuthenticationIsNotEnabledWarning=LDAP authentication is not enabled. Please set LDAP as authentication service in ##xwiki.cfg##
+### Missing: ldap.ldapGroupTip=LDAP group...
+ldap.xwikiGroupTip=Группа XWiki...
+### Missing: ldap.ldapUserField=LDAP field...
+### Missing: ldap.xwikiUserField=XWiki user property...
+ldap.adminHeadingConfiguration=Настройки
+### Missing: ldap.adminHeadingMiscellaneous=Miscellaneous
+### Missing: ldap.resetGroupCacheSuccess=Groups cache has been reset
+### Missing: ldap.resetGroupCacheButton=Reset group cache 
 </content>
 </xwikidoc>

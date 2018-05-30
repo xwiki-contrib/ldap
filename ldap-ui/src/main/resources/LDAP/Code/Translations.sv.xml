@@ -39,14 +39,15 @@
   <minorEdit>false</minorEdit>
   <syntaxId>plain/1.0</syntaxId>
   <hidden>true</hidden>
-  <content>ldap.adminHeadingConfiguration=Konfiguration
+  <content>ldap.missingLdapService=LDAP-service finns ej tillgänglig. Kontrollera installationen.
 ldap.ldapAuthenticationIsNotEnabledWarning=LDAP-autenticering är ej aktiverad. För att aktivera LDAP-autenticering måste du redigera \#\#xwiki.cfg\#\# och ange LDAP som autenticeringsservice.
 ldap.ldapGroupTip=LDAP-grupp...
-ldap.ldapUserField=LDAP-fält...
-ldap.missingLdapService=LDAP-service finns ej tillgänglig. Kontrollera installationen.
-ldap.resetGroupCacheButton=Töm gruppcache.
-ldap.resetGroupCacheSuccess=Gruppcache\:n har tömts.
 ldap.xwikiGroupTip=XWiki-grupp...
+ldap.ldapUserField=LDAP-fält...
 ldap.xwikiUserField=XWiki-användarfält...
+ldap.adminHeadingConfiguration=Konfiguration
+### Missing: ldap.adminHeadingMiscellaneous=Miscellaneous
+ldap.resetGroupCacheSuccess=Gruppcache\:n har tömts.
+ldap.resetGroupCacheButton=Töm gruppcache.
 </content>
 </xwikidoc>
