@@ -40,13 +40,13 @@
   <syntaxId>plain/1.0</syntaxId>
   <hidden>true</hidden>
   <content>ldap.missingLdapService=LDAP serviss nav pieejams. Lūdzu pārbaudiet savu instalāciju.
-ldap.ldapAuthenticationIsNotEnabledWarning=LDAP autentifikācija nav iespējota. Lūdzu iestatiet LDAP autentifikācijas servisu  \#\#xwiki.cfg\#\# failā.
+ldap.ldapAuthenticationIsNotEnabledWarning=LDAP autentifikācija nav iespējota. Lūdzu iestatiet LDAP autentifikācijas servisu  ##xwiki.cfg## failā.
 ldap.ldapGroupTip=LDAP grupa...
 ldap.xwikiGroupTip=XWiki grupa...
 ldap.ldapUserField=LDAP lauks...
 ldap.xwikiUserField=XWiki lietotāja īpašība...
 ldap.adminHeadingConfiguration=Iestatījumi
-### Missing: ldap.adminHeadingMiscellaneous=Miscellaneous
+ldap.adminHeadingMiscellaneous=Dažādi
 ldap.resetGroupCacheSuccess=Grupu kešs ir atstatīts
 ldap.resetGroupCacheButton=Atstatīt grupas kešu
 </content>
