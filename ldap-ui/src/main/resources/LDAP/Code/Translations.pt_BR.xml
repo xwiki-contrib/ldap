@@ -39,16 +39,15 @@
   <minorEdit>false</minorEdit>
   <syntaxId>plain/1.0</syntaxId>
   <hidden>true</hidden>
-  <content>## XWiki Translation for language pt_BR generated from http://www.l10n.xwiki.org
-ldap.adminHeadingConfiguration=Configuração
-ldap.adminHeadingMiscellaneous=Aleatórios
+  <content>ldap.missingLdapService=Serviço LDAP não está disponível. Por favor, verifique sua instalação.
 ldap.ldapAuthenticationIsNotEnabledWarning=Atenticação LDAP não está habilitada. Por favor configure LDAP como serviço de autenticação em \#\#xwiki.cfg\#\#
 ldap.ldapGroupTip=Grupo LDAP...
-ldap.ldapUserField=Campo LDAP...
-ldap.missingLdapService=Serviço LDAP não está disponível. Por favor, verifique sua instalação.
-ldap.resetGroupCacheButton=Reiniciar cache de grupo
-ldap.resetGroupCacheSuccess=Cache de grupos foi reiniciado
 ldap.xwikiGroupTip=Grupo XWiki...
+ldap.ldapUserField=Campo LDAP...
 ldap.xwikiUserField=Propriedade de usuário XWiki...
+ldap.adminHeadingConfiguration=Configuração
+### Missing: ldap.adminHeadingMiscellaneous=Miscellaneous
+ldap.resetGroupCacheSuccess=Cache de grupos foi reiniciado
+ldap.resetGroupCacheButton=Reiniciar cache de grupo
 </content>
 </xwikidoc>

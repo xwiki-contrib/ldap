@@ -39,16 +39,15 @@
   <minorEdit>false</minorEdit>
   <syntaxId>plain/1.0</syntaxId>
   <hidden>true</hidden>
-  <content>## XWiki Translation for language hr generated from http://www.l10n.xwiki.org
-ldap.adminHeadingConfiguration=Konfiguracija
-ldap.adminHeadingMiscellaneous=Razno
+  <content>ldap.missingLdapService=LDAP usluga nije dostupna. Molim verificirajte vašu instalaciju.
 ldap.ldapAuthenticationIsNotEnabledWarning=LDAP autentikacija nije omogućena. Molim postavite LDAP kao autentikacijski servis u \#\#xwiki.cfg\#\#
 ldap.ldapGroupTip=LDAP grupa...
-ldap.ldapUserField=LDAP polje...
-ldap.missingLdapService=LDAP usluga nije dostupna. Molim verificirajte vašu instalaciju.
-ldap.resetGroupCacheButton=Ponovo postavi međuspremnik grupa
-ldap.resetGroupCacheSuccess=Međuspremnik grupa je ponovo postavljen
 ldap.xwikiGroupTip=XWiki grupa...
+ldap.ldapUserField=LDAP polje...
 ldap.xwikiUserField=XWiki korisničko svojstvo...
+ldap.adminHeadingConfiguration=Konfiguracija
+ldap.adminHeadingMiscellaneous=Razno
+ldap.resetGroupCacheSuccess=Međuspremnik grupa je ponovo postavljen
+ldap.resetGroupCacheButton=Ponovo postavi međuspremnik grupa
 </content>
 </xwikidoc>

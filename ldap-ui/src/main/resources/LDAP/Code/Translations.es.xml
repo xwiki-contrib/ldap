@@ -39,10 +39,15 @@
   <minorEdit>false</minorEdit>
   <syntaxId>plain/1.0</syntaxId>
   <hidden>true</hidden>
-  <content>## XWiki Translation for language es generated from http://www.l10n.xwiki.org
-ldap.adminHeadingConfiguration=Configuración
+  <content>### Missing: ldap.missingLdapService=LDAP service is not available. Please verify your installation.
+### Missing: ldap.ldapAuthenticationIsNotEnabledWarning=LDAP authentication is not enabled. Please set LDAP as authentication service in ##xwiki.cfg##
 ldap.ldapGroupTip=Grupo LDAP...
-ldap.ldapUserField=Campo LDAP...
 ldap.xwikiGroupTip=Grupo XWiki...
+ldap.ldapUserField=Campo LDAP...
+### Missing: ldap.xwikiUserField=XWiki user property...
+ldap.adminHeadingConfiguration=Configuración
+### Missing: ldap.adminHeadingMiscellaneous=Miscellaneous
+### Missing: ldap.resetGroupCacheSuccess=Groups cache has been reset
+### Missing: ldap.resetGroupCacheButton=Reset group cache
 </content>
 </xwikidoc>
