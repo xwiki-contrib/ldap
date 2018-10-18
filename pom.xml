@@ -29,7 +29,7 @@
   </parent>
   <groupId>org.xwiki.contrib.ldap</groupId>
   <artifactId>ldap</artifactId>
-  <version>9.2.6</version>
+  <version>9.2.7-SNAPSHOT</version>
   <name>LDAP - Parent POM</name>
   <description>Various tools to manipulate LDAP servers in XWiki</description>
   <packaging>pom</packaging>
@@ -128,6 +128,6 @@
     <connection>scm:git:git://github.com/xwiki-contrib/ldap.git</connection>
     <developerConnection>scm:git:git@github.com:xwiki-contrib/ldap.git</developerConnection>
     <url>https://github.com/xwiki-contrib/ldap/tree/master</url>
-    <tag>ldap-9.2.6</tag>
+    <tag>HEAD</tag>
   </scm>
 </project>
