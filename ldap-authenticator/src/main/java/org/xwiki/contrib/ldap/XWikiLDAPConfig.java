@@ -369,7 +369,7 @@ public class XWikiLDAPConfig
      */
     public String getLDAPParam(String name, String def)
     {
-        return getLDAPParam(name, name.replace(PREF_LDAP_SUFFIX, CFG_LDAP_SUFFIX), def);
+        return getLDAPParam(name, name.replaceFirst(PREF_LDAP_SUFFIX, CFG_LDAP_SUFFIX), def);
     }
 
     /**

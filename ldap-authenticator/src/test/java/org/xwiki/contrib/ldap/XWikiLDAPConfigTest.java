@@ -36,8 +36,10 @@ import org.xwiki.test.mockito.MockitoComponentManagerRule;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.web.Utils;
 
-import static org.mockito.Mockito.*;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.when;
 
 /**
  * Test {@link XWikiLDAPConfig}.
@@ -97,25 +99,21 @@ public class XWikiLDAPConfigTest
 
         // No param set and default used
         assertEquals("1", this.config.getLDAPParam("wikiKey", "cfgKey", "1"));
-        assertEquals("1",
-            this.config.getLDAPParam("wikiKey", "cfgKey", "1", (XWikiContext) null));
+        assertEquals("1", this.config.getLDAPParam("wikiKey", "cfgKey", "1", (XWikiContext) null));
 
         // Param set in xwiki.cfg only
         setCfgPreference("cfgKey", "1");
         assertEquals("1", this.config.getLDAPParam("wikiKey", "cfgKey", (String) null));
 
         // Param set in xwiki.cfg and with default used
-        assertEquals("1",
-            this.config.getLDAPParam("wikiKey", "cfgKey", "0"));
+        assertEquals("1", this.config.getLDAPParam("wikiKey", "cfgKey", "0"));
 
         // Param override in XWikiPreferences
         setWikiPreference("wikiKey", "0");
-        assertEquals("0",
-            this.config.getLDAPParam("wikiKey", "cfgKey", (String) null));
+        assertEquals("0", this.config.getLDAPParam("wikiKey", "cfgKey", (String) null));
 
         // Param override in XWikiPreferences and with default used
-        assertEquals("0",
-            this.config.getLDAPParam("wikiKey", "cfgKey", "1"));
+        assertEquals("0", this.config.getLDAPParam("wikiKey", "cfgKey", "1"));
     }
 
     @Test
@@ -163,12 +161,10 @@ public class XWikiLDAPConfigTest
 
         // Param set in xwiki.cfg only
         setCfgPreference("xwiki.authentication.ldap.group_mapping",
-            XADMINGROUP_FULLNAME + "=" + LDAPTOTOGRP2_DN + "|" +
-            XADMINGROUP_FULLNAME + "=" + LDAPTITIGRP2_DN + "|" +
-            XADMINGROUP_FULLNAME + "=" + FILTER.replace("|", "\\|") + "|" +
-            XADMINGROUP2_FULLNAME + "=" + LDAPTOTOGRP2_DN + "|" +
-            XADMINGROUP2_FULLNAME + "=" + LDAPTITIGRP2_DN + "|" +
-            XADMINGROUP2_FULLNAME + "=" + FILTER.replace("|", "\\|"));
+            XADMINGROUP_FULLNAME + "=" + LDAPTOTOGRP2_DN + "|" + XADMINGROUP_FULLNAME + "=" + LDAPTITIGRP2_DN + "|"
+                + XADMINGROUP_FULLNAME + "=" + FILTER.replace("|", "\\|") + "|" + XADMINGROUP2_FULLNAME + "="
+                + LDAPTOTOGRP2_DN + "|" + XADMINGROUP2_FULLNAME + "=" + LDAPTITIGRP2_DN + "|" + XADMINGROUP2_FULLNAME
+                + "=" + FILTER.replace("|", "\\|"));
 
         Map<String, Set<String>> expectedCfgLDAPGroups = new HashMap<>();
         Set<String> cfgLDAPGroups = new HashSet<String>();
@@ -183,12 +179,10 @@ public class XWikiLDAPConfigTest
 
         // Param override in XWikiPreferences
         setWikiPreference("ldap_group_mapping",
-            XADMINGROUP_FULLNAME + "=" + LDAPTOTOGRP_DN + "|" +
-            XADMINGROUP_FULLNAME + "=" + LDAPTITIGRP_DN + "|" +
-            XADMINGROUP_FULLNAME + "=" + FILTER.replace("|", "\\|") + "|" +
-            XADMINGROUP2_FULLNAME + "=" + LDAPTOTOGRP_DN + "|" +
-            XADMINGROUP2_FULLNAME + "=" + LDAPTITIGRP_DN + "|" +
-            XADMINGROUP2_FULLNAME + "=" + FILTER.replace("|", "\\|"));
+            XADMINGROUP_FULLNAME + "=" + LDAPTOTOGRP_DN + "|" + XADMINGROUP_FULLNAME + "=" + LDAPTITIGRP_DN + "|"
+                + XADMINGROUP_FULLNAME + "=" + FILTER.replace("|", "\\|") + "|" + XADMINGROUP2_FULLNAME + "="
+                + LDAPTOTOGRP_DN + "|" + XADMINGROUP2_FULLNAME + "=" + LDAPTITIGRP_DN + "|" + XADMINGROUP2_FULLNAME
+                + "=" + FILTER.replace("|", "\\|"));
 
         Map<String, Set<String>> expectedWikiLDAPGroups = new HashMap<>();
         Set<String> wikiLDAPGroups = new HashSet<>();
@@ -367,18 +361,20 @@ public class XWikiLDAPConfigTest
     @Test
     public void parseRemoteUserWithGroupsPatternandConversions() throws Exception
     {
-        setWikiPreference("ldap_remoteUserParser", "(.+)@(.+)");
-        setWikiPreference("ldap_remoteUserMapping.1", "uid");
-        setWikiPreference("ldap_remoteUserMapping.2",
+        setCfgPreference("xwiki.authentication.ldap.remoteUserParser", "(.+)@(.+)");
+        setCfgPreference("xwiki.authentication.ldap.remoteUserMapping.1", "uid");
+        setCfgPreference("xwiki.authentication.ldap.remoteUserMapping.2",
             "ldap_server,ldap_port,ldap_base_DN,ldap_bind_DN,ldap_bind_pass,ldap_group_mapping");
-        setWikiPreference("ldap_remoteUserMapping.ldap_server", "doMain=my.domain.com|domain2=my.domain2.com");
-        setWikiPreference("ldap_remoteUserMapping.ldap_port", "doMain=388|domain2=387");
-        setWikiPreference("ldap_remoteUserMapping.ldap_base_DN",
+        setCfgPreference("xwiki.authentication.ldap.remoteUserMapping.ldap_server",
+            "doMain=my.domain.com|domain2=my.domain2.com");
+        setCfgPreference("xwiki.authentication.ldap.remoteUserMapping.ldap_port", "doMain=388|domain2=387");
+        setCfgPreference("xwiki.authentication.ldap.remoteUserMapping.ldap_base_DN",
             "dOmain=dc=my,dc=domain,dc=com|domain2=dc=my,dc=domain2,dc=com");
-        setWikiPreference("ldap_remoteUserMapping.ldap_bind_DN",
+        setCfgPreference("xwiki.authentication.ldap.remoteUserMapping.ldap_bind_DN",
             "doMain=cn=bind,dc=my,dc=domain,dc=com|domain2=cn=bind,dc=my,dc=domain2,dc=com");
-        setWikiPreference("ldap_remoteUserMapping.ldap_bind_pass", "doMain=password|domain2=password2");
-        setWikiPreference("ldap_remoteUserMapping.ldap_group_mapping",
+        setCfgPreference("xwiki.authentication.ldap.remoteUserMapping.ldap_bind_pass",
+            "doMain=password|domain2=password2");
+        setCfgPreference("xwiki.authentication.ldap.remoteUserMapping.ldap_group_mapping",
             "doMain=xgroup11=lgroup11\\|xgroup12=lgroup12|domain2=xgroup21=lgroup21\\|xgroup22=lgroup22");
 
         XWikiLDAPConfig config = new XWikiLDAPConfig("user@domain");
@@ -389,8 +385,7 @@ public class XWikiLDAPConfigTest
         assertEquals("dc=my,dc=domain,dc=com", config.getMemoryConfiguration().get("ldap_base_DN"));
         assertEquals("cn=bind,dc=my,dc=domain,dc=com", config.getMemoryConfiguration().get("ldap_bind_DN"));
         assertEquals("password", config.getMemoryConfiguration().get("ldap_bind_pass"));
-        assertEquals("xgroup11=lgroup11|xgroup12=lgroup12",
-            config.getMemoryConfiguration().get("ldap_group_mapping"));
+        assertEquals("xgroup11=lgroup11|xgroup12=lgroup12", config.getMemoryConfiguration().get("ldap_group_mapping"));
 
         config = new XWikiLDAPConfig("user@domain2");
 
@@ -400,7 +395,6 @@ public class XWikiLDAPConfigTest
         assertEquals("dc=my,dc=domain2,dc=com", config.getMemoryConfiguration().get("ldap_base_DN"));
         assertEquals("cn=bind,dc=my,dc=domain2,dc=com", config.getMemoryConfiguration().get("ldap_bind_DN"));
         assertEquals("password2", config.getMemoryConfiguration().get("ldap_bind_pass"));
-        assertEquals("xgroup21=lgroup21|xgroup22=lgroup22",
-            config.getMemoryConfiguration().get("ldap_group_mapping"));
+        assertEquals("xgroup21=lgroup21|xgroup22=lgroup22", config.getMemoryConfiguration().get("ldap_group_mapping"));
     }
 }
