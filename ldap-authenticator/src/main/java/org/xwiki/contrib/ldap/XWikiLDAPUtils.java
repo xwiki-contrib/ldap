@@ -635,7 +635,7 @@ public class XWikiLDAPUtils
 
                 // Not a valid filter, try as uid
                 List<XWikiLDAPSearchAttribute> searchAttributeList =
-                    searchUserAttributesByUid(userOrGroup, new String[] {LDAP_FIELD_DN});
+                    searchUserAttributesByUid(userOrGroup, new String[] { LDAP_FIELD_DN });
 
                 if (searchAttributeList != null && !searchAttributeList.isEmpty()) {
                     String dn = searchAttributeList.get(0).value;
@@ -1026,12 +1026,12 @@ public class XWikiLDAPUtils
     {
         // search for the user in LDAP
         String filter = MessageFormat.format(this.userSearchFormatString,
-            new Object[] {XWikiLDAPConnection.escapeLDAPSearchFilter(this.uidAttributeName),
-                XWikiLDAPConnection.escapeLDAPSearchFilter(uid)});
+            new Object[] { XWikiLDAPConnection.escapeLDAPSearchFilter(this.uidAttributeName),
+                XWikiLDAPConnection.escapeLDAPSearchFilter(uid) });
 
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Searching for the user in LDAP: user [{}] base [{}] query [{}] uid [{}]",
-                new Object[] {uid, this.baseDN, filter, this.uidAttributeName});
+                new Object[] { uid, this.baseDN, filter, this.uidAttributeName });
         }
 
         return getConnection().searchLDAP(this.baseDN, filter, attributeNameTable, LDAPConnection.SCOPE_SUB);
@@ -1046,7 +1046,8 @@ public class XWikiLDAPUtils
     {
         String userDN = null;
 
-        List<XWikiLDAPSearchAttribute> searchAttributes = searchUserAttributesByUid(uid, new String[] {LDAP_FIELD_DN});
+        List<XWikiLDAPSearchAttribute> searchAttributes =
+            searchUserAttributesByUid(uid, new String[] { LDAP_FIELD_DN });
 
         if (searchAttributes != null && !searchAttributes.isEmpty()) {
             userDN = searchAttributes.get(0).value;
@@ -1178,12 +1179,19 @@ public class XWikiLDAPUtils
     {
         String[] attributeNameTable = null;
 
-        List<String> attributeNameList = new ArrayList<String>();
-        this.configuration.getUserMappings(attributeNameList, context);
+        List<String> attributeNameList = new ArrayList<>();
+        this.configuration.getUserMappings(attributeNameList);
 
         int lsize = attributeNameList.size();
         if (lsize > 0) {
             attributeNameTable = attributeNameList.toArray(new String[lsize]);
+        }
+
+        // Add avatar field
+        if (this.configuration.getLDAPParam(XWikiLDAPConfig.PREF_LDAP_UPDATE_PHOTO, "0").equals("1")) {
+            String ldapPhotoAttribute = this.configuration.getLDAPParam(XWikiLDAPConfig.PREF_LDAP_PHOTO_ATTRIBUTE,
+                XWikiLDAPConfig.DEFAULT_PHOTO_ATTRIBUTE);
+            attributeNameList.add(ldapPhotoAttribute);
         }
 
         return attributeNameTable;
@@ -1233,7 +1241,7 @@ public class XWikiLDAPUtils
     {
         BaseClass userClass = xcontext.getWiki().getUserClass(xcontext);
 
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         if (searchAttributes != null) {
             for (XWikiLDAPSearchAttribute lattr : searchAttributes) {
                 String lval = lattr.value;
@@ -1292,10 +1300,8 @@ public class XWikiLDAPUtils
         XWikiDocument createdUserProfile = context.getWiki().getDocument(userProfile.getDocumentReference(), context);
         LDAPProfileXClass ldapXClass = new LDAPProfileXClass(context);
 
-        if (this.configuration.getLDAPParam(XWikiLDAPConfig.PREF_LDAP_UPDATE_PHOTO, "0", context).equals("1")) {
-            // Add user photo from LDAP
-            updatePhotoFromLdap(ldapUid, createdUserProfile, context);
-        }
+        // Add user photo from LDAP
+        updateAvatarFromLdap(attributes, createdUserProfile, context);
 
         if (ldapXClass.updateLDAPObject(createdUserProfile, ldapDN, ldapUid)) {
             context.getWiki().saveDocument(createdUserProfile, "Created user profile from LDAP server", context);
@@ -1315,7 +1321,7 @@ public class XWikiLDAPUtils
     protected void updateUserFromLDAP(XWikiDocument userProfile, List<XWikiLDAPSearchAttribute> attributes,
         String ldapDN, String ldapUid, XWikiContext context) throws XWikiException
     {
-        Map<String, String> userMappings = this.configuration.getUserMappings(null, context);
+        Map<String, String> userMappings = this.configuration.getUserMappings(null);
 
         BaseClass userClass = context.getWiki().getUserClass(context);
 
@@ -1333,10 +1339,8 @@ public class XWikiLDAPUtils
         // Let BaseObject#apply tell us if something changed or not
         boolean needsUpdate = userObj.apply(clonedUser, false);
 
-        if (this.configuration.getLDAPParam(XWikiLDAPConfig.PREF_LDAP_UPDATE_PHOTO, "0", context).equals("1")) {
-            // Sync user photo with LDAP
-            needsUpdate = updatePhotoFromLdap(ldapUid, userProfile, context) || needsUpdate;
-        }
+        // Sync user photo with LDAP
+        needsUpdate |= updateAvatarFromLdap(attributes, userProfile, context);
 
         // Update ldap profile object
         LDAPProfileXClass ldaXClass = new LDAPProfileXClass(context);
@@ -1356,9 +1360,14 @@ public class XWikiLDAPUtils
      * @return true if avatar was updated, false otherwise.
      * @throws XWikiException
      */
-    protected boolean updatePhotoFromLdap(String ldapUid, XWikiDocument userProfile, XWikiContext context)
-        throws XWikiException
+    private boolean updateAvatarFromLdap(List<XWikiLDAPSearchAttribute> ldapAttributes, XWikiDocument userProfile,
+        XWikiContext context) throws XWikiException
     {
+        // Check if avatar update is enabled
+        if (!this.configuration.getLDAPParam(XWikiLDAPConfig.PREF_LDAP_UPDATE_PHOTO, "0").equals("1")) {
+            return false;
+        }
+
         BaseClass userClass = context.getWiki().getUserClass(context);
         BaseObject userObj = userProfile.getXObject(userClass.getDocumentReference());
 
@@ -1371,9 +1380,7 @@ public class XWikiLDAPUtils
 
         // Get properties
         String photoAttachmentName =
-            this.configuration.getLDAPParam(XWikiLDAPConfig.PREF_LDAP_PHOTO_ATTACHMENT_NAME, "ldapPhoto", context);
-        String ldapPhotoAttribute = this.configuration.getLDAPParam(XWikiLDAPConfig.PREF_LDAP_PHOTO_ATTRIBUTE,
-            XWikiLDAPConfig.DEFAULT_PHOTO_ATTRIBUTE, context);
+            this.configuration.getLDAPParam(XWikiLDAPConfig.PREF_LDAP_PHOTO_ATTACHMENT_NAME, "ldapPhoto");
 
         // Proceed only if any of conditions are true:
         // 1. User do not have avatar currently
@@ -1382,8 +1389,8 @@ public class XWikiLDAPUtils
             || currentPhoto == null) {
             // Obtain photo from LDAP
             byte[] ldapPhoto = null;
-            List<XWikiLDAPSearchAttribute> ldapAttributes =
-                searchUserAttributesByUid(ldapUid, new String[] {ldapPhotoAttribute});
+            String ldapPhotoAttribute = this.configuration.getLDAPParam(XWikiLDAPConfig.PREF_LDAP_PHOTO_ATTRIBUTE,
+                XWikiLDAPConfig.DEFAULT_PHOTO_ATTRIBUTE);
             if (ldapAttributes != null) {
                 // searchUserAttributesByUid method may return «dn» as 1st element
                 // Let's iterate over array and search ldapPhotoAttribute
@@ -1411,16 +1418,17 @@ public class XWikiLDAPUtils
                                 ldapPhotoInputStream.reset();
 
                                 // Store photo
-                                return addPhotoToProfile(userProfile, context, ldapPhotoInputStream, ldapPhoto.length,
+                                return addAvatarToProfile(userProfile, context, ldapPhotoInputStream,
                                     photoAttachmentFullName);
                             }
                         } catch (IOException ex) {
                             LOGGER.error(ex.getMessage());
                         }
-                    } else if (addPhotoToProfile(userProfile, context, ldapPhotoInputStream, ldapPhoto.length,
+                    } else if (addAvatarToProfile(userProfile, context, ldapPhotoInputStream,
                         photoAttachmentFullName)) {
                         PropertyClass avatarProperty = (PropertyClass) userClass.getField("avatar");
                         userObj.safeput("avatar", avatarProperty.fromString(photoAttachmentFullName));
+
                         return true;
                     }
                 } else {
@@ -1430,6 +1438,7 @@ public class XWikiLDAPUtils
                 // Remove current avatar
                 PropertyClass avatarProperty = (PropertyClass) userClass.getField("avatar");
                 userObj.safeput("avatar", avatarProperty.fromString(""));
+
                 return true;
             }
         }
@@ -1443,12 +1452,11 @@ public class XWikiLDAPUtils
      * @param userProfile the XWiki user profile document.
      * @param context the XWiki context.
      * @param photoInputStream InputStream containing photo.
-     * @param streamLength size of provided InputStream.
      * @param attachmentName attachment name for provided photo.
      * @return true if photo was saved to user profile, false otherwise.
      */
-    protected boolean addPhotoToProfile(XWikiDocument userProfile, XWikiContext context, InputStream photoInputStream,
-        int streamLength, String attachmentName)
+    private boolean addAvatarToProfile(XWikiDocument userProfile, XWikiContext context, InputStream photoInputStream,
+        String attachmentName)
     {
         XWikiAttachment attachment;
         try {
@@ -1469,7 +1477,7 @@ public class XWikiLDAPUtils
      * @param imageInputStream InputStream containing image.
      * @return type of image as String.
      */
-    protected String guessImageType(InputStream imageInputStream)
+    private String guessImageType(InputStream imageInputStream)
     {
         ImageInputStream imageStream;
         try {
@@ -1551,7 +1559,7 @@ public class XWikiLDAPUtils
 
             LOGGER.debug("Finished adding user [{}] to xwiki group [{}]", xwikiUserName, groupName);
         } catch (Exception e) {
-            LOGGER.error("Failed to add a user [{}] to a group [{}]", new Object[] {xwikiUserName, groupName, e});
+            LOGGER.error("Failed to add a user [{}] to a group [{}]", new Object[] { xwikiUserName, groupName, e });
         }
     }
 
