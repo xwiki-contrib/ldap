@@ -155,7 +155,7 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
         }
 
         if (remoteUser != null) {
-            LOGGER.debug("RemoteUser: {}", remoteUser);
+            LOGGER.debug("REMOTE_USER: {}", remoteUser);
             user = checkAuthSSO(remoteUser, context);
         }
 
