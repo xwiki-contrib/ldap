@@ -1177,22 +1177,33 @@ public class XWikiLDAPUtils
      */
     public String[] getAttributeNameTable(XWikiContext context)
     {
+        LOGGER.debug("Getting the list of user fields to synchronize");
+
         String[] attributeNameTable = null;
 
         List<String> attributeNameList = new ArrayList<>();
         this.configuration.getUserMappings(attributeNameList);
+
+        // Add avatar field
+        if (this.configuration.getLDAPParam(XWikiLDAPConfig.PREF_LDAP_UPDATE_PHOTO, "0").equals("1")) {
+            LOGGER.debug("LDAP avatar photo synchronisation is enabled");
+
+            String ldapPhotoAttribute = this.configuration.getLDAPParam(XWikiLDAPConfig.PREF_LDAP_PHOTO_ATTRIBUTE,
+                XWikiLDAPConfig.DEFAULT_PHOTO_ATTRIBUTE);
+
+            LOGGER.debug("LDAP avatar photo field name: {}", ldapPhotoAttribute);
+
+            attributeNameList.add(ldapPhotoAttribute);
+        } else {
+            LOGGER.debug("LDAP avatar photo synchronisation is disabled");
+        }
 
         int lsize = attributeNameList.size();
         if (lsize > 0) {
             attributeNameTable = attributeNameList.toArray(new String[lsize]);
         }
 
-        // Add avatar field
-        if (this.configuration.getLDAPParam(XWikiLDAPConfig.PREF_LDAP_UPDATE_PHOTO, "0").equals("1")) {
-            String ldapPhotoAttribute = this.configuration.getLDAPParam(XWikiLDAPConfig.PREF_LDAP_PHOTO_ATTRIBUTE,
-                XWikiLDAPConfig.DEFAULT_PHOTO_ATTRIBUTE);
-            attributeNameList.add(ldapPhotoAttribute);
-        }
+        LOGGER.debug("LDAP user fields to synchronize: {}", attributeNameList);
 
         return attributeNameTable;
     }
@@ -1389,9 +1400,10 @@ public class XWikiLDAPUtils
             || currentPhoto == null) {
             // Obtain photo from LDAP
             byte[] ldapPhoto = null;
-            String ldapPhotoAttribute = this.configuration.getLDAPParam(XWikiLDAPConfig.PREF_LDAP_PHOTO_ATTRIBUTE,
-                XWikiLDAPConfig.DEFAULT_PHOTO_ATTRIBUTE);
             if (ldapAttributes != null) {
+                String ldapPhotoAttribute = this.configuration.getLDAPParam(XWikiLDAPConfig.PREF_LDAP_PHOTO_ATTRIBUTE,
+                    XWikiLDAPConfig.DEFAULT_PHOTO_ATTRIBUTE);
+
                 // searchUserAttributesByUid method may return «dn» as 1st element
                 // Let's iterate over array and search ldapPhotoAttribute
                 for (XWikiLDAPSearchAttribute attribute : ldapAttributes) {
