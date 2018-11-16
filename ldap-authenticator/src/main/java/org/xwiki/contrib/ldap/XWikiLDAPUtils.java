@@ -1595,7 +1595,9 @@ public class XWikiLDAPUtils
                 // Get and remove the specific group membership object for the user
                 BaseObject groupObj =
                     groupDoc.getXObject(groupClass.getDocumentReference(), XWIKI_GROUP_MEMBERFIELD, xwikiUserName);
-                groupDoc.removeXObject(groupObj);
+                if (groupObj != null) {
+                    groupDoc.removeXObject(groupObj);
+                }
 
                 // Save modifications
                 context.getWiki().saveDocument(groupDoc, context);
