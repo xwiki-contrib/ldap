@@ -1351,10 +1351,28 @@ public class XWikiLDAPUtils
         // Mark user active
         map.put("active", "1");
 
-        context.getWiki().createUser(userProfile.getDocumentReference().getName(), map, context);
+        XWikiException createUserError = null;
+        try {
+            context.getWiki().createUser(userProfile.getDocumentReference().getName(), map, context);
+        } catch (XWikiException e) {
+            createUserError = e;
+        }
+
+        XWikiDocument createdUserProfile = context.getWiki().getDocument(userProfile.getDocumentReference(), context);
+        if (createdUserProfile.isNew()) {
+            if (createUserError != null) {
+                throw createUserError;
+            } else {
+                throw new XWikiLDAPException(
+                    "User [" + userProfile.getDocumentReference() + "] hasn't been created for unknown reason");
+            }
+        } else if (createUserError != null) {
+            // Whatever crashed the createUser API it was after the actual user creation so let's log an error and
+            // continue
+            LOGGER.error("Unexpected error when creating a new wiki", createUserError);
+        }
 
         // Update ldap profile object
-        XWikiDocument createdUserProfile = context.getWiki().getDocument(userProfile.getDocumentReference(), context);
         LDAPProfileXClass ldapXClass = new LDAPProfileXClass(context);
 
         // Add user photo from LDAP
