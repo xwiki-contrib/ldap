@@ -372,9 +372,9 @@ public class XWikiLDAPUtils
      * 
      * @param groupDN the group to retrieve the members of and scan for subgroups.
      * @return the LDAP search result.
-     * @throws LDAPException failed to execute LDAP query
+     * @throws XWikiLDAPException failed to execute LDAP query
      */
-    private LDAPSearchResults searchGroupsMembersByDN(String groupDN) throws LDAPException
+    private PagedLDAPSearchResults searchGroupsMembersByDN(String groupDN) throws LDAPException
     {
         String[] attrs = new String[2 + getGroupMemberFields().size()];
 
@@ -385,9 +385,9 @@ public class XWikiLDAPUtils
         }
 
         // in case it's a organization unit get the users ids
-        attrs[i++] = getUidAttributeName();
+        attrs[i] = getUidAttributeName();
 
-        return getConnection().search(groupDN, null, attrs, LDAPConnection.SCOPE_SUB);
+        return getConnection().searchPaginated(groupDN, LDAPConnection.SCOPE_SUB, null, attrs, false);
     }
 
     /**
@@ -395,9 +395,9 @@ public class XWikiLDAPUtils
      * 
      * @param filter the LDAP filter to search with.
      * @return the LDAP search result.
-     * @throws LDAPException failed to execute LDAP query
+     * @throws XWikiLDAPException failed to execute LDAP query
      */
-    private LDAPSearchResults searchGroupsMembersByFilter(String filter) throws LDAPException
+    private PagedLDAPSearchResults searchGroupsMembersByFilter(String filter) throws LDAPException
     {
         String[] attrs = new String[2 + getGroupMemberFields().size()];
 
@@ -408,9 +408,9 @@ public class XWikiLDAPUtils
         }
 
         // in case it's a organization unit get the users ids
-        attrs[i++] = getUidAttributeName();
+        attrs[i] = getUidAttributeName();
 
-        return getConnection().search(getBaseDN(), filter, attrs, LDAPConnection.SCOPE_SUB);
+        return getConnection().searchPaginated(getBaseDN(), LDAPConnection.SCOPE_SUB, filter, attrs, false);
     }
 
     /**
@@ -447,6 +447,7 @@ public class XWikiLDAPUtils
      * @param memberMap the result: maps DN to member id.
      * @param subgroups return all the subgroups identified.
      * @param context the XWiki context.
+     * @since 9.3
      */
     private void getGroupMembersFromLDAPEntry(LDAPEntry ldapEntry, Map<String, String> memberMap,
         List<String> subgroups, XWikiContext context)
@@ -686,7 +687,7 @@ public class XWikiLDAPUtils
             return true;
         }
 
-        LDAPSearchResults result;
+        PagedLDAPSearchResults result;
         try {
             result = searchGroupsMembersByDN(userOrGroupDN);
         } catch (LDAPException e) {
@@ -700,7 +701,7 @@ public class XWikiLDAPUtils
         } finally {
             if (result.hasMore()) {
                 try {
-                    getConnection().getConnection().abandon(result);
+                    result.close();
                 } catch (LDAPException e) {
                     LOGGER.debug("LDAP Search clean up failed", e);
                 }
@@ -725,7 +726,7 @@ public class XWikiLDAPUtils
     {
         boolean isGroup = false;
 
-        LDAPSearchResults result;
+        PagedLDAPSearchResults result;
         try {
             result = searchGroupsMembersByFilter(filter);
         } catch (LDAPException e) {
@@ -739,7 +740,7 @@ public class XWikiLDAPUtils
         } finally {
             if (result.hasMore()) {
                 try {
-                    getConnection().getConnection().abandon(result);
+                    result.close();
                 } catch (LDAPException e) {
                     LOGGER.debug("LDAP Search clean up failed", e);
                 }
@@ -758,8 +759,53 @@ public class XWikiLDAPUtils
      * @param subgroups all the subgroups identified.
      * @param context the XWiki context.
      * @return whether the provided DN is actually a group or not.
+     * @deprecated since 9.3, use {@link #getGroupMembersSearchResult(XWikiLDAPSearchResults, Map, List, XWikiContext)}
+     *             instead
      */
+    @Deprecated
     public boolean getGroupMembersSearchResult(LDAPSearchResults result, Map<String, String> memberMap,
+        List<String> subgroups, XWikiContext context)
+    {
+        boolean isGroup = false;
+
+        LDAPEntry resultEntry = null;
+        // For some weird reason result.hasMore() is always true before the first call to next() even if nothing is
+        // found
+        if (result.hasMore()) {
+            try {
+                resultEntry = result.next();
+            } catch (LDAPException e) {
+                LOGGER.debug("Failed to get group members", e);
+            }
+        }
+
+        if (resultEntry != null) {
+            do {
+                try {
+                    isGroup |= getGroupMembers(memberMap, subgroups, resultEntry, context);
+
+                    resultEntry = result.hasMore() ? result.next() : null;
+                } catch (LDAPException e) {
+                    LOGGER.debug("Failed to get group members", e);
+                }
+            } while (resultEntry != null);
+        }
+
+        return isGroup;
+    }
+
+    /**
+     * Get all members of a given group based on the the result of a LDAP search. If the group contains subgroups get
+     * these members as well. Retrieve an identifier for each member.
+     * 
+     * @param result the result of a LDAP search.
+     * @param memberMap the result: maps DN to member id.
+     * @param subgroups all the subgroups identified.
+     * @param context the XWiki context.
+     * @return whether the provided DN is actually a group or not.
+     * @since 9.3
+     */
+    public boolean getGroupMembersSearchResult(PagedLDAPSearchResults result, Map<String, String> memberMap,
         List<String> subgroups, XWikiContext context)
     {
         boolean isGroup = false;

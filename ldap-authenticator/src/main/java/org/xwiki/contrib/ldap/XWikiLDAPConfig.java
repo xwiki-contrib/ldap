@@ -195,7 +195,7 @@ public class XWikiLDAPConfig
     /**
      * @param userId the complete user id given
      * @param configurationSource the Configuration source to use to find LDAP parameters first (if not found in this
-     *        source then the parameter will be searched for in xwiki.cfg).
+     *            source then the parameter will be searched for in xwiki.cfg).
      * @since 9.1.1
      */
     public XWikiLDAPConfig(String userId, ConfigurationSource configurationSource)
@@ -260,8 +260,7 @@ public class XWikiLDAPConfig
                         List<String> remoteUserMapping = getRemoteUserMapping(g);
 
                         for (String configName : remoteUserMapping) {
-                            this.memoryConfiguration.put(configName,
-                                convertRemoteUserMapping(configName, groupValue));
+                            this.memoryConfiguration.put(configName, convertRemoteUserMapping(configName, groupValue));
                         }
                     }
                 }
@@ -606,7 +605,7 @@ public class XWikiLDAPConfig
      *
      * @return the mapping between XWiki users and LDAP users. The key is the XWiki group, and the value is the list of
      *         mapped LDAP groups.
-     *         @since 9.1.1
+     * @since 9.1.1
      */
     public Map<String, Set<String>> getGroupMappings()
     {
@@ -717,8 +716,7 @@ public class XWikiLDAPConfig
                         attrListToFill.add(ldapattr);
                     }
                 } else {
-                    LOGGER.error("Error parsing LDAP fields mapping attribute from configuration, got [{}]",
-                        fields[j]);
+                    LOGGER.error("Error parsing LDAP fields mapping attribute from configuration, got [{}]", fields[j]);
                 }
             }
         }
@@ -729,7 +727,7 @@ public class XWikiLDAPConfig
     /**
      * @param context the XWiki context.
      * @return the time in seconds until a entry in the cache is to expire.
-     * @deprecated  since 9.1.1, use {@link #getCacheExpiration()} instead
+     * @deprecated since 9.1.1, use {@link #getCacheExpiration()} instead
      */
     @Deprecated
     public int getCacheExpiration(XWikiContext context)
@@ -1224,5 +1222,14 @@ public class XWikiLDAPConfig
     public void setFinalProperty(String key, String value)
     {
         this.finalMemoryConfiguration.put(key, value);
+    }
+
+    /**
+     * @return the maximum number of elements to return in each search page
+     * @since 9.3
+     */
+    public int getSearchPageSize()
+    {
+        return (int) getLDAPParamAsLong("ldap_searchPageSize", 500);
     }
 }

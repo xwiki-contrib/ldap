@@ -331,12 +331,8 @@ public class XWikiLDAPConnection
     {
         List<XWikiLDAPSearchAttribute> searchAttributeList = null;
 
-        LDAPSearchResults searchResults = null;
-
-        try {
-            // filter return all attributes return attrs and values time out value
-            searchResults = search(baseDN, filter, attr, ldapScope);
-
+        // filter return all attributes return attrs and values time out value
+        try (PagedLDAPSearchResults searchResults = searchPaginated(baseDN, ldapScope, filter, attr, false)) {
             if (!searchResults.hasMore()) {
                 return null;
             }
@@ -344,7 +340,7 @@ public class XWikiLDAPConnection
             LDAPEntry nextEntry = searchResults.next();
             String foundDN = nextEntry.getDN();
 
-            searchAttributeList = new ArrayList<XWikiLDAPSearchAttribute>();
+            searchAttributeList = new ArrayList<>();
 
             searchAttributeList.add(new XWikiLDAPSearchAttribute("dn", foundDN));
 
@@ -353,14 +349,6 @@ public class XWikiLDAPConnection
             ldapToXWikiAttribute(searchAttributeList, attributeSet);
         } catch (LDAPException e) {
             LOGGER.debug("LDAP Search failed", e);
-        } finally {
-            if (searchResults != null) {
-                try {
-                    this.connection.abandon(searchResults);
-                } catch (LDAPException e) {
-                    LOGGER.debug("LDAP Search clean up failed", e);
-                }
-            }
         }
 
         LOGGER.debug("LDAP search found attributes [{}]", searchAttributeList);
@@ -385,11 +373,40 @@ public class XWikiLDAPConnection
     public LDAPSearchResults search(String baseDN, String filter, String[] attr, int ldapScope) throws LDAPException
     {
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("LDAP search: baseDN=[{}] query=[{}] attr=[{}] ldapScope=[{}]",
-                new Object[] {baseDN, filter, attr != null ? Arrays.asList(attr) : null, ldapScope});
+            LOGGER.debug("LDAP search: baseDN=[{}] query=[{}] attr=[{}] ldapScope=[{}]", baseDN, filter,
+                attr != null ? Arrays.asList(attr) : null, ldapScope);
         }
 
         return this.connection.search(baseDN, ldapScope, filter, attr, false);
+    }
+
+    /**
+     * @param base the root DN from where to search.
+     * @param scope the scope of the entries to search. The following are the valid options:
+     *            <ul>
+     *            <li>SCOPE_BASE - searches only the base DN
+     *            <li>SCOPE_ONE - searches only entries under the base DN
+     *            <li>SCOPE_SUB - searches the base DN and all entries within its subtree
+     *            </ul>
+     * @param filter filter the LDAP filter
+     * @param attrs the attributes names of values to return
+     * @param typesOnly if true, returns the names but not the values of the attributes found. If false, returns the
+     *            names and values for attributes found.
+     * @return a result stream. LDAPConnection#abandon should be called when it's not needed anymore.
+     * @throws LDAPException error when searching
+     * @since 9.3
+     */
+    public PagedLDAPSearchResults searchPaginated(String base, int scope, String filter, String[] attrs,
+        boolean typesOnly) throws LDAPException
+    {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("LDAP search: base=[{}] query=[{}] attrs=[{}] scope=[{}] typesOnly=[{}]", base, filter,
+                attrs != null ? Arrays.asList(attrs) : null, scope, typesOnly);
+        }
+
+        int pageSize = this.configuration.getSearchPageSize();
+
+        return new PagedLDAPSearchResults(this, base, scope, filter, attrs, typesOnly, pageSize);
     }
 
     /**
