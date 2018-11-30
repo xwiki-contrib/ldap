@@ -1369,7 +1369,8 @@ public class XWikiLDAPUtils
         } else if (createUserError != null) {
             // Whatever crashed the createUser API it was after the actual user creation so let's log an error and
             // continue
-            LOGGER.error("Unexpected error when creating a new wiki", createUserError);
+            LOGGER.error("Unexpected error when creating user [" + userProfile.getDocumentReference() + "]",
+                createUserError);
         }
 
         // Update ldap profile object
