@@ -399,11 +399,6 @@ public class XWikiLDAPConnection
     public PagedLDAPSearchResults searchPaginated(String base, int scope, String filter, String[] attrs,
         boolean typesOnly) throws LDAPException
     {
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("LDAP search: base=[{}] query=[{}] attrs=[{}] scope=[{}] typesOnly=[{}]", base, filter,
-                attrs != null ? Arrays.asList(attrs) : null, scope, typesOnly);
-        }
-
         int pageSize = this.configuration.getSearchPageSize();
 
         return new PagedLDAPSearchResults(this, base, scope, filter, attrs, typesOnly, pageSize);

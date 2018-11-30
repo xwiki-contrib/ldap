@@ -19,6 +19,11 @@
  */
 package org.xwiki.contrib.ldap;
 
+import java.util.Arrays;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.novell.ldap.LDAPControl;
 import com.novell.ldap.LDAPEntry;
 import com.novell.ldap.LDAPException;
@@ -36,6 +41,8 @@ import com.novell.ldap.controls.LDAPPagedResultsResponse;
  */
 public class PagedLDAPSearchResults implements AutoCloseable
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(PagedLDAPSearchResults.class);
+
     private final XWikiLDAPConnection connection;
 
     private final String base;
@@ -92,6 +99,14 @@ public class PagedLDAPSearchResults implements AutoCloseable
         LDAPPagedResultsControl control = new LDAPPagedResultsControl(this.pageSize, cookie, false);
         LDAPSearchConstraints constraints = new LDAPSearchConstraints();
         constraints.setControls(control);
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug(
+                "LDAP pagined search: base=[{}] query=[{}] attrs=[{}] scope=[{}] typesOnly=[{}]"
+                    + " pageSize=[{}], cookie=[{}]",
+                this.base, this.filter, this.attrs != null ? Arrays.asList(this.attrs) : null, this.scope,
+                this.typesOnly, this.pageSize, cookie != null ? Arrays.asList(cookie) : null);
+        }
 
         this.currentSearchResults = this.connection.getConnection().search(this.base, this.scope, this.filter,
             this.attrs, this.typesOnly, constraints);
