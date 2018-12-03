@@ -139,7 +139,12 @@ public class PagedLDAPSearchResults implements AutoCloseable
 
     private void nextLDAPSearchResults(byte[] cookie) throws LDAPException
     {
-        search(cookie);
+        if (cookie != null) {
+            search(cookie);
+        } else {
+            // Mark that we reached the last page
+            this.lastResult = true;
+        }
     }
 
     /**
