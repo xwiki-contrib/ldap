@@ -1720,17 +1720,16 @@ public class XWikiLDAPUtils
 
         // Check if the default profile document is available
         for (int i = 0; true; ++i) {
-            if (i > 0) {
-                userReference =
-                    new DocumentReference(context.getWikiId(), XWIKI_USER_SPACE, validXWikiUserName + "_" + i);
-            }
-
             XWikiDocument doc = context.getWiki().getDocument(userReference, context);
 
             // Don't use non user existing document
             if (doc.isNew()) {
                 return doc;
             }
+
+            // Increment user name
+            userReference =
+                new DocumentReference(context.getWikiId(), XWIKI_USER_SPACE, validXWikiUserName + "_" + i);
         }
     }
 
