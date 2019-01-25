@@ -63,11 +63,9 @@ import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.doc.XWikiAttachment;
 import com.xpn.xwiki.doc.XWikiDocument;
 import com.xpn.xwiki.objects.BaseObject;
-import com.xpn.xwiki.objects.BaseProperty;
 import com.xpn.xwiki.objects.classes.BaseClass;
 import com.xpn.xwiki.objects.classes.ListClass;
 import com.xpn.xwiki.objects.classes.PropertyClass;
-import com.xpn.xwiki.objects.classes.StringClass;
 import com.xpn.xwiki.web.Utils;
 
 /**
@@ -121,8 +119,7 @@ public class XWikiLDAPUtils
     /**
      * Contains caches for each LDAP host:port.
      */
-    private static Map<String, Map<String, Cache<Map<String, String>>>> cachePool =
-        new HashMap<String, Map<String, Cache<Map<String, String>>>>();
+    private static Map<String, Map<String, Cache<Map<String, String>>>> cachePool = new HashMap<>();
 
     /**
      * The LDAP connection.
@@ -318,7 +315,7 @@ public class XWikiLDAPUtils
             if (cachePool.containsKey(cacheKey)) {
                 cacheMap = cachePool.get(cacheKey);
             } else {
-                cacheMap = new HashMap<String, Cache<Map<String, String>>>();
+                cacheMap = new HashMap<>();
                 cachePool.put(cacheKey, cacheMap);
             }
 
@@ -856,7 +853,7 @@ public class XWikiLDAPUtils
                 groupMembers = cache.get(groupDN);
 
                 if (groupMembers == null) {
-                    Map<String, String> members = new HashMap<String, String>();
+                    Map<String, String> members = new HashMap<>();
 
                     LOGGER.debug("Retrieving Members of the group [{}]", groupDN);
 
@@ -1072,12 +1069,12 @@ public class XWikiLDAPUtils
     {
         // search for the user in LDAP
         String filter = MessageFormat.format(this.userSearchFormatString,
-            new Object[] { XWikiLDAPConnection.escapeLDAPSearchFilter(this.uidAttributeName),
-                XWikiLDAPConnection.escapeLDAPSearchFilter(uid) });
+            XWikiLDAPConnection.escapeLDAPSearchFilter(this.uidAttributeName),
+            XWikiLDAPConnection.escapeLDAPSearchFilter(uid));
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Searching for the user in LDAP: user [{}] base [{}] query [{}] uid [{}]",
-                new Object[] { uid, this.baseDN, filter, this.uidAttributeName });
+            LOGGER.debug("Searching for the user in LDAP: user [{}] base [{}] query [{}] uid [{}]", uid, this.baseDN,
+                filter, this.uidAttributeName);
         }
 
         return getConnection().searchLDAP(this.baseDN, filter, attributeNameTable, LDAPConnection.SCOPE_SUB);
@@ -1266,33 +1263,6 @@ public class XWikiLDAPUtils
         }
     }
 
-    private void setProperty(BaseObject userObject, String key, Object value, XWikiContext xcontext)
-    {
-        BaseClass bclass = userObject.getXClass(xcontext);
-        PropertyClass pclass = (PropertyClass) bclass.get(key);
-
-        BaseProperty prop = null;
-        if (pclass != null) {
-            if (value instanceof String) {
-                // In case the LDAP side in a String go trough property class fromString to be safe
-                prop = pclass.fromString((String) value);
-            } else if (value instanceof Collection && pclass instanceof StringClass) {
-                // In case the LDAP side is a list and XWiki size is a String, assume we want the first element
-                prop = pclass.fromValue(((Collection) value).iterator().next());
-            } else {
-                // Default behavior: try to put whatever we get as it is
-                prop = pclass.fromValue(value);
-            }
-        }
-
-        // TODO: else generate new property based on the type of the value instead of relying on what is already
-        // there
-
-        if (prop != null) {
-            userObject.safeput(key, prop);
-        }
-    }
-
     private Map<String, Object> toMap(List<XWikiLDAPSearchAttribute> searchAttributes, Map<String, String> userMappings,
         XWikiContext xcontext) throws XWikiException
     {
@@ -1369,7 +1339,7 @@ public class XWikiLDAPUtils
         } else if (createUserError != null) {
             // Whatever crashed the createUser API it was after the actual user creation so let's log an error and
             // continue
-            LOGGER.error("Unexpected error when creating user [" + userProfile.getDocumentReference() + "]",
+            LOGGER.error("Unexpected error when creating user [{}]", userProfile.getDocumentReference(),
                 createUserError);
         }
 
@@ -1620,7 +1590,7 @@ public class XWikiLDAPUtils
 
                 // Add a member object to document
                 BaseObject memberObj = groupDoc.newXObject(groupClass.getDocumentReference(), context);
-                Map<String, String> map = new HashMap<String, String>();
+                Map<String, String> map = new HashMap<>();
                 map.put(XWIKI_GROUP_MEMBERFIELD, xwikiUserName);
                 groupClass.fromMap(map, memberObj);
 
@@ -1636,7 +1606,7 @@ public class XWikiLDAPUtils
 
             LOGGER.debug("Finished adding user [{}] to xwiki group [{}]", xwikiUserName, groupName);
         } catch (Exception e) {
-            LOGGER.error("Failed to add a user [{}] to a group [{}]", new Object[] { xwikiUserName, groupName, e });
+            LOGGER.error("Failed to add a user [{}] to a group [{}]", xwikiUserName, groupName, e);
         }
     }
 
@@ -1668,7 +1638,7 @@ public class XWikiLDAPUtils
                 context.getWiki().saveDocument(groupDoc, context);
             }
         } catch (Exception e) {
-            LOGGER.error("Failed to remove a user from a group " + xwikiUserName + " group: " + groupName, e);
+            LOGGER.error("Failed to remove a user from a group [{}] group: [{}]", xwikiUserName, groupName, e);
         }
     }
 
@@ -1728,8 +1698,7 @@ public class XWikiLDAPUtils
             }
 
             // Increment user name
-            userReference =
-                new DocumentReference(context.getWikiId(), XWIKI_USER_SPACE, validXWikiUserName + "_" + i);
+            userReference = new DocumentReference(context.getWikiId(), XWIKI_USER_SPACE, validXWikiUserName + "_" + i);
         }
     }
 
