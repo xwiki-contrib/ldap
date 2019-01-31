@@ -48,6 +48,5 @@ ldap.xwikiUserField=XWiki lietotāja īpašība...
 ldap.adminHeadingConfiguration=Iestatījumi
 ldap.adminHeadingMiscellaneous=Dažādi
 ldap.resetGroupCacheSuccess=Grupu kešs ir atstatīts
-ldap.resetGroupCacheButton=Atstatīt grupas kešu
-</content>
+ldap.resetGroupCacheButton=Atstatīt grupas kešu</content>
 </xwikidoc>

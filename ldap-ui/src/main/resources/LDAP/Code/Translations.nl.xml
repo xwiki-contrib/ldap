@@ -48,6 +48,5 @@ ldap.xwikiUserField=XWiki property van gebruiker...
 ldap.adminHeadingConfiguration=Configuratie
 ### Missing: ldap.adminHeadingMiscellaneous=Miscellaneous
 ldap.resetGroupCacheSuccess=Cache van groepen is gereset
-ldap.resetGroupCacheButton=Cache van groepen resetten
-</content>
+ldap.resetGroupCacheButton=Cache van groepen resetten</content>
 </xwikidoc>

@@ -48,6 +48,5 @@ ldap.xwikiUserField=propriété de l'utilisateur XWiki.
 ldap.adminHeadingConfiguration=Configuration
 ldap.adminHeadingMiscellaneous=Divers
 ldap.resetGroupCacheSuccess=Le cache des groupes a été vidé
-ldap.resetGroupCacheButton=Vider le cache du groupe
-</content>
+ldap.resetGroupCacheButton=Vider le cache du groupe</content>
 </xwikidoc>

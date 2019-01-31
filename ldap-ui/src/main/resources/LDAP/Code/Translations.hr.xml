@@ -48,6 +48,5 @@ ldap.xwikiUserField=XWiki korisničko svojstvo...
 ldap.adminHeadingConfiguration=Konfiguracija
 ldap.adminHeadingMiscellaneous=Razno
 ldap.resetGroupCacheSuccess=Međuspremnik grupa je ponovo postavljen
-ldap.resetGroupCacheButton=Ponovo postavi međuspremnik grupa
-</content>
+ldap.resetGroupCacheButton=Ponovo postavi međuspremnik grupa</content>
 </xwikidoc>

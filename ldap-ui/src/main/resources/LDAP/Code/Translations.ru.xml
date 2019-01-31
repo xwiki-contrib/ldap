@@ -48,6 +48,5 @@ ldap.xwikiGroupTip=Группа XWiki...
 ldap.adminHeadingConfiguration=Настройки
 ### Missing: ldap.adminHeadingMiscellaneous=Miscellaneous
 ### Missing: ldap.resetGroupCacheSuccess=Groups cache has been reset
-### Missing: ldap.resetGroupCacheButton=Reset group cache 
-</content>
+### Missing: ldap.resetGroupCacheButton=Reset group cache</content>
 </xwikidoc>

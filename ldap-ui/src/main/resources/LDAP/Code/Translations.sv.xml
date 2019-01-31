@@ -48,6 +48,5 @@ ldap.xwikiUserField=XWiki-användarfält...
 ldap.adminHeadingConfiguration=Konfiguration
 ### Missing: ldap.adminHeadingMiscellaneous=Miscellaneous
 ldap.resetGroupCacheSuccess=Gruppcache\:n har tömts.
-ldap.resetGroupCacheButton=Töm gruppcache.
-</content>
+ldap.resetGroupCacheButton=Töm gruppcache.</content>
 </xwikidoc>

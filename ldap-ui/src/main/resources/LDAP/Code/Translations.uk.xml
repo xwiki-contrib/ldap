@@ -39,8 +39,7 @@
   <minorEdit>false</minorEdit>
   <syntaxId>plain/1.0</syntaxId>
   <hidden>true</hidden>
-  <content>
-ldap.missingLdapService=Служба LDAP недоступна. Будь ласка, перевірте встановлення.
+  <content>ldap.missingLdapService=Служба LDAP недоступна. Будь ласка, перевірте встановлення.
 ldap.ldapAuthenticationIsNotEnabledWarning=Аутентифікація LDAP вимкнена. Будь ласка, встановіть LDAP як службу автентифікації у ##xwiki.cfg##
 ldap.ldapGroupTip=LDAP група...
 ldap.xwikiGroupTip=XWiki група...
@@ -49,6 +48,5 @@ ldap.xwikiUserField=Властивість користувача XWiki...
 ldap.adminHeadingConfiguration=Конфігурація
 ldap.adminHeadingMiscellaneous=Різне
 ldap.resetGroupCacheSuccess=Кеш груп скинуто
-ldap.resetGroupCacheButton=Скинути кеш груп
-</content>
+ldap.resetGroupCacheButton=Скинути кеш груп</content>
 </xwikidoc>

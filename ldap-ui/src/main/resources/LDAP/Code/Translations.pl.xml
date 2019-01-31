@@ -48,6 +48,5 @@ ldap.xwikiUserField=Właściwości użytkownika XWiki ...
 ldap.adminHeadingConfiguration=Konfiguracja
 ldap.adminHeadingMiscellaneous=Różnorodne
 ldap.resetGroupCacheSuccess=Pamięć podręczna grup została zresetowana
-ldap.resetGroupCacheButton=Zresetuj pamięć podręczną grupy
-</content>
+ldap.resetGroupCacheButton=Zresetuj pamięć podręczną grupy</content>
 </xwikidoc>
