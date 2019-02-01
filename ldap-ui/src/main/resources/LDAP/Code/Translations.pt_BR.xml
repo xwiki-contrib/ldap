@@ -48,6 +48,5 @@ ldap.xwikiUserField=Propriedade de usuário XWiki...
 ldap.adminHeadingConfiguration=Configuração
 ### Missing: ldap.adminHeadingMiscellaneous=Miscellaneous
 ldap.resetGroupCacheSuccess=Cache de grupos foi reiniciado
-ldap.resetGroupCacheButton=Reiniciar cache de grupo
-</content>
+ldap.resetGroupCacheButton=Reiniciar cache de grupo</content>
 </xwikidoc>

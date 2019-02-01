@@ -20,15 +20,15 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 -->
 
-<xwikidoc version="1.3" reference="LDAP.Code.Translations" locale="ru">
+<xwikidoc version="1.2" reference="LDAP.Code.Translations" locale="uk">
   <web>LDAP.Code</web>
   <name>Translations</name>
-  <language>ru</language>
+  <language>uk</language>
   <defaultLanguage>en</defaultLanguage>
   <translation>1</translation>
+  <parent>Main.WebHome</parent>
   <creator>xwiki:XWiki.Admin</creator>
   <creationDate>1470233221000</creationDate>
-  <parent>Main.WebHome</parent>
   <author>xwiki:XWiki.Admin</author>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <date>1470233243000</date>
@@ -39,14 +39,14 @@
   <minorEdit>false</minorEdit>
   <syntaxId>plain/1.0</syntaxId>
   <hidden>true</hidden>
-  <content>### Missing: ldap.missingLdapService=LDAP service is not available. Please verify your installation.
-### Missing: ldap.ldapAuthenticationIsNotEnabledWarning=LDAP authentication is not enabled. Please set LDAP as authentication service in ##xwiki.cfg##
-### Missing: ldap.ldapGroupTip=LDAP group...
-ldap.xwikiGroupTip=Группа XWiki...
-### Missing: ldap.ldapUserField=LDAP field...
-### Missing: ldap.xwikiUserField=XWiki user property...
-ldap.adminHeadingConfiguration=Настройки
-### Missing: ldap.adminHeadingMiscellaneous=Miscellaneous
-### Missing: ldap.resetGroupCacheSuccess=Groups cache has been reset
-### Missing: ldap.resetGroupCacheButton=Reset group cache</content>
+  <content>ldap.missingLdapService=Служба LDAP недоступна. Будь ласка, перевірте встановлення.
+ldap.ldapAuthenticationIsNotEnabledWarning=Аутентифікація LDAP вимкнена. Будь ласка, встановіть LDAP як службу автентифікації у ##xwiki.cfg##
+ldap.ldapGroupTip=LDAP група...
+ldap.xwikiGroupTip=XWiki група...
+ldap.ldapUserField=LDAP поле...
+ldap.xwikiUserField=Властивість користувача XWiki...
+ldap.adminHeadingConfiguration=Конфігурація
+ldap.adminHeadingMiscellaneous=Різне
+ldap.resetGroupCacheSuccess=Кеш груп скинуто
+ldap.resetGroupCacheButton=Скинути кеш груп</content>
 </xwikidoc>

@@ -48,6 +48,5 @@ ldap.xwikiUserField=XWiki kullanıcı özelliği ...
 ldap.adminHeadingConfiguration=Yapılandırma
 ### Missing: ldap.adminHeadingMiscellaneous=Miscellaneous
 ldap.resetGroupCacheSuccess=Gruplar önbellek reseted olmuştur
-ldap.resetGroupCacheButton=Reset grup önbellek
-</content>
+ldap.resetGroupCacheButton=Reset grup önbellek</content>
 </xwikidoc>

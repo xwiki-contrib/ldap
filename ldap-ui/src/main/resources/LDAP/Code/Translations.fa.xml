@@ -48,6 +48,5 @@
 ### Missing: ldap.adminHeadingConfiguration=Configuration
 ldap.adminHeadingMiscellaneous=متفرقه
 ### Missing: ldap.resetGroupCacheSuccess=Groups cache has been reset
-### Missing: ldap.resetGroupCacheButton=Reset group cache
-</content>
+### Missing: ldap.resetGroupCacheButton=Reset group cache</content>
 </xwikidoc>

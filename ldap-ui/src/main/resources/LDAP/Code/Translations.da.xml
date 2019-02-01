@@ -48,6 +48,5 @@ ldap.xwikiUserField=XWiki-brugeregenskab...
 ldap.adminHeadingConfiguration=Konfiguration
 ### Missing: ldap.adminHeadingMiscellaneous=Miscellaneous
 ldap.resetGroupCacheSuccess=Mellemlager for gruppe er nulstil
-ldap.resetGroupCacheButton=Nulstil gruppe-mellemlager
-</content>
+ldap.resetGroupCacheButton=Nulstil gruppe-mellemlager</content>
 </xwikidoc>
