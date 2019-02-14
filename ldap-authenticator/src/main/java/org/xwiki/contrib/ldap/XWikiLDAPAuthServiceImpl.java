@@ -24,6 +24,8 @@ import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import org.securityfilter.filter.SecurityRequestWrapper;
 import org.securityfilter.realm.SimplePrincipal;
@@ -64,6 +66,8 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
     private static final Logger LOGGER = LoggerFactory.getLogger(XWikiLDAPAuthServiceImpl.class);
 
     private static final String CONTEXT_CONFIGURATION = "ldap.configuration";
+
+    private final ConcurrentMap<String, Object> lockMap = new ConcurrentHashMap<>();
 
     private Execution execution;
 
@@ -168,28 +172,36 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
         return user;
     }
 
-    private XWikiUser checkAuthSSO(String remoteUser, XWikiContext context)
+    private Principal checkSessionPrincipal(String remoteUser, XWikiRequest request)
     {
-        // Remember various stuff in the session so that callback can access it
-        XWikiRequest request = context.getRequest();
-
-        // Check if the user is already authenticated
+        // Get the current user
         Principal principal =
             (Principal) request.getSession().getAttribute(SecurityRequestWrapper.PRINCIPAL_SESSION_KEY);
+
         if (principal != null) {
             String storedRemoteUser = (String) request.getSession().getAttribute("ldap.remoteuser");
-            if (!remoteUser.equals(storedRemoteUser)) {
-                // If the remote user changed authenticate again
-                principal = null;
+
+            // If the remote user changed authenticate again
+            if (remoteUser.equals(storedRemoteUser)) {
+                return principal;
             }
         }
 
+        return null;
+    }
+
+    private XWikiUser checkAuthSSO(String remoteUser, XWikiContext context)
+    {
+        XWikiRequest request = context.getRequest();
+
+        // Check if the user is already authenticated
+        Principal principal = checkSessionPrincipal(remoteUser, request);
+
         XWikiUser user;
 
-        // Authenticate
         if (principal == null) {
-            // Force always getting full reference (including the wiki)
-            principal = ldapAuthenticate(remoteUser, null, true, false, context);
+            // Authenticate
+            principal = checkAuthSSOSync(remoteUser, request, context);
             if (principal == null) {
                 return null;
             }
@@ -204,11 +216,26 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
                 ? principal.getName().substring(context.getWikiId().length() + 1) : principal.getName());
         }
 
-        LOGGER.debug("XWikiUser=" + user);
+        LOGGER.debug("XWikiUser = [{}]", user);
 
         removeConfiguration();
 
         return user;
+    }
+
+    private Principal checkAuthSSOSync(String remoteUser, XWikiRequest request, XWikiContext context)
+    {
+        synchronized (this.lockMap.putIfAbsent(remoteUser, remoteUser)) {
+            // Check if the user was authenticated by another thread in the meantime
+            Principal principal = checkSessionPrincipal(remoteUser, request);
+
+            if (principal == null) {
+                // Authenticate
+                principal = ldapAuthenticate(remoteUser, null, true, false, context);
+            }
+
+            return principal;
+        }
     }
 
     // LOGIN/PASS
@@ -561,7 +588,7 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
 
             if (ldapDn == null) {
                 throw new XWikiException(XWikiException.MODULE_XWIKI_USER, XWikiException.ERROR_XWIKI_USER_INIT,
-                    "LDAP user {0} does not belong to LDAP group {1}.", null, new Object[] {uid, filterGroupDN});
+                    "LDAP user {0} does not belong to LDAP group {1}.", null, new Object[] { uid, filterGroupDN });
             }
         }
 
@@ -578,7 +605,7 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
 
             if (ldapUtils.isInGroup(uid, ldapDn, excludeGroupDN, context) != null) {
                 throw new XWikiException(XWikiException.MODULE_XWIKI_USER, XWikiException.ERROR_XWIKI_USER_INIT,
-                    "LDAP user {0} should not belong to LDAP group {1}.", null, new Object[] {uid, filterGroupDN});
+                    "LDAP user {0} should not belong to LDAP group {1}.", null, new Object[] { uid, filterGroupDN });
             }
         }
 

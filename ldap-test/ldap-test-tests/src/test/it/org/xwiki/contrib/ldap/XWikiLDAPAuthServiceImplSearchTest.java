@@ -33,6 +33,7 @@ import org.xwiki.test.annotation.AllComponents;
 public class XWikiLDAPAuthServiceImplSearchTest extends XWikiLDAPAuthServiceImplTest
 {
     @Before
+    @Override
     public void before() throws Exception
     {
         super.before();
