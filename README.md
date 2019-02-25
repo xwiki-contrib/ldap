@@ -9,7 +9,7 @@ Various tools to manipulate LDAP servers in XWiki.
 * [Development Practices](http://dev.xwiki.org)
 * Minimal XWiki version supported: XWiki 7.4
 * License: LGPL 2.1
-* Translations: http://l10n.xwiki.org/xwiki/bin/view/Contrib/LDAPApplication
+* Translations: https://l10n.xwiki.org/projects/xwiki-contrib/ldap-application/
 * Sonar Dashboard: N/A
 * Continuous Integration Status: [![Build Status](http://ci.xwiki.org/job/XWiki%20Contrib/job/ldap/job/master/badge/icon)](http://ci.xwiki.org/job/XWiki%20Contrib/job/ldap/job/master/)
 
