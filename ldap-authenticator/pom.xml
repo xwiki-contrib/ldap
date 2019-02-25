@@ -25,7 +25,7 @@
   <parent>
     <groupId>org.xwiki.contrib.ldap</groupId>
     <artifactId>ldap</artifactId>
-    <version>9.3.4-SNAPSHOT</version>
+    <version>9.3.4</version>
   </parent>
   <artifactId>ldap-authenticator</artifactId>
   <name>LDAP - Authenticator</name>
