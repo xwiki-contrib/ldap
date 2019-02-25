@@ -67,7 +67,7 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
 
     private static final String CONTEXT_CONFIGURATION = "ldap.configuration";
 
-    private final ConcurrentMap<String, Object> lockMap = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, String> lockMap = new ConcurrentHashMap<>();
 
     private Execution execution;
 
@@ -225,7 +225,12 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
 
     private Principal checkAuthSSOSync(String remoteUser, XWikiRequest request, XWikiContext context)
     {
-        synchronized (this.lockMap.putIfAbsent(remoteUser, remoteUser)) {
+        // TODO: replace with computeIfAbsent when moving to Java 8
+        String lock = this.lockMap.putIfAbsent(remoteUser, remoteUser);
+        if (lock == null) {
+            lock = this.lockMap.get(remoteUser);
+        }
+        synchronized (lock) {
             // Check if the user was authenticated by another thread in the meantime
             Principal principal = checkSessionPrincipal(remoteUser, request);
 

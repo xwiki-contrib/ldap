@@ -20,8 +20,12 @@
 package org.xwiki.contrib.ldap;
 
 import org.junit.Before;
+import org.junit.Test;
 import org.xwiki.contrib.ldap.framework.LDAPTestSetup;
 import org.xwiki.test.annotation.AllComponents;
+
+import com.xpn.xwiki.XWikiException;
+import com.xpn.xwiki.doc.XWikiDocument;
 
 /**
  * Unit tests using embedded LDAP server (Apache DS). Theses test can be launched directly from JUnit plugin of EDI.
@@ -40,5 +44,33 @@ public class XWikiLDAPAuthServiceImplSearchTest extends XWikiLDAPAuthServiceImpl
 
         this.mocker.getMockXWikiCfg().setProperty("xwiki.authentication.ldap.bind_DN",
             LDAPTestSetup.HORATIOHORNBLOWER_DN);
+        this.mocker.getMockXWikiCfg().setProperty("xwiki.authentication.ldap.bind_pass",
+            LDAPTestSetup.HORATIOHORNBLOWER_PWD);
+    }
+
+    private XWikiDocument assertAuthenticateSSO(String remoteuser, String storedDn) throws XWikiException
+    {
+        return assertAuthenticateSSO(remoteuser, "xwiki:" + userProfileName(remoteuser), storedDn);
+    }
+
+    private XWikiDocument assertAuthenticateSSO(String remoteuser, String xwikiUserName, String storedDn)
+        throws XWikiException
+    {
+        return assertAuthenticateSSO(remoteuser, xwikiUserName, storedDn, remoteuser);
+    }
+
+    private XWikiDocument assertAuthenticateSSO(String remoteuser, String xwikiUserName, String storedDn,
+        String storedUid) throws XWikiException
+    {
+        return assertAuthenticate(remoteuser, null, xwikiUserName, storedDn, storedUid, true);
+    }
+
+    /**
+     * Validate SSO LDAP authentication.
+     */
+    @Test
+    public void testAuthenticateSSO() throws XWikiException
+    {
+        assertAuthenticateSSO(LDAPTestSetup.HORATIOHORNBLOWER_CN, LDAPTestSetup.HORATIOHORNBLOWER_DN);
     }
 }

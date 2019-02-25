@@ -24,8 +24,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import javax.servlet.http.HttpSession;
+
 import org.junit.Before;
 import org.junit.Test;
+import org.securityfilter.realm.SimplePrincipal;
 import org.xwiki.configuration.ConfigurationSource;
 import org.xwiki.contrib.ldap.framework.AbstractLDAPTestCase;
 import org.xwiki.contrib.ldap.framework.LDAPTestSetup;
@@ -38,6 +41,8 @@ import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.doc.XWikiDocument;
 import com.xpn.xwiki.objects.BaseObject;
 import com.xpn.xwiki.objects.classes.BaseClass;
+import com.xpn.xwiki.user.api.XWikiUser;
+import com.xpn.xwiki.web.XWikiRequest;
 
 import static com.xpn.xwiki.test.mockito.OldcoreMatchers.anyXWikiContext;
 import static org.junit.Assert.assertEquals;
@@ -50,6 +55,7 @@ import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
@@ -70,6 +76,8 @@ public class XWikiLDAPAuthServiceImplTest extends AbstractLDAPTestCase
         new LocalDocumentReference("XWiki", "XWikiGroups");
 
     private XWikiLDAPAuthServiceImpl ldapAuth;
+
+    private HttpSession session;
 
     @AfterComponent
     public void afterComponent()
@@ -112,38 +120,56 @@ public class XWikiLDAPAuthServiceImplTest extends AbstractLDAPTestCase
         this.mocker.getSpyXWiki().saveDocument(userDocument, this.mocker.getXWikiContext());
 
         this.ldapAuth = new XWikiLDAPAuthServiceImpl();
+
+        this.session = mock(HttpSession.class);
+        this.mocker.getXWikiContext().setRequest(mock(XWikiRequest.class));
+        when(this.mocker.getXWikiContext().getRequest().getSession()).thenReturn(this.session);
     }
 
-    private String userProfileName(String uid)
+    protected String userProfileName(String uid)
     {
         return "XWiki." + XWikiLDAPUtils.cleanXWikiUserPageName(uid);
     }
 
-    private XWikiDocument getDocument(String name) throws XWikiException
+    protected XWikiDocument getDocument(String name) throws XWikiException
     {
         return this.mocker.getSpyXWiki().getDocument(name, this.mocker.getXWikiContext());
     }
 
-    private void saveDocument(XWikiDocument document) throws XWikiException
+    protected void saveDocument(XWikiDocument document) throws XWikiException
     {
         this.mocker.getSpyXWiki().saveDocument(document, this.mocker.getXWikiContext());
     }
 
-    private XWikiDocument assertAuthenticate(String login, String password, String storedDn) throws XWikiException
+    protected XWikiDocument assertAuthenticate(String login, String password, String storedDn) throws XWikiException
     {
         return assertAuthenticate(login, password, userProfileName(login), storedDn);
     }
 
-    private XWikiDocument assertAuthenticate(String login, String password, String xwikiUserName, String storedDn)
+    protected XWikiDocument assertAuthenticate(String login, String password, String xwikiUserName, String storedDn)
         throws XWikiException
     {
         return assertAuthenticate(login, password, xwikiUserName, storedDn, login);
     }
 
-    private XWikiDocument assertAuthenticate(String login, String password, String xwikiUserName, String storedDn,
+    protected XWikiDocument assertAuthenticate(String login, String password, String xwikiUserName, String storedDn,
         String storedUid) throws XWikiException
     {
-        Principal principal = this.ldapAuth.authenticate(login, password, this.mocker.getXWikiContext());
+        return assertAuthenticate(login, password, xwikiUserName, storedDn, storedUid, false);
+    }
+
+    protected XWikiDocument assertAuthenticate(String login, String password, String xwikiUserName, String storedDn,
+        String storedUid, boolean sso) throws XWikiException
+    {
+        Principal principal;
+
+        if (sso) {
+            when(this.mocker.getXWikiContext().getRequest().getRemoteUser()).thenReturn(login);
+            XWikiUser user = this.ldapAuth.checkAuth(this.mocker.getXWikiContext());
+            principal = user != null ? new SimplePrincipal(user.getUser()) : null;
+        } else {
+            principal = this.ldapAuth.authenticate(login, password, this.mocker.getXWikiContext());
+        }
 
         // Check that authentication return a valid Principal
         assertNotNull("Authentication failed", principal);
@@ -170,12 +196,11 @@ public class XWikiLDAPAuthServiceImplTest extends AbstractLDAPTestCase
             ldapProfileObj.getStringValue(LDAPProfileXClass.LDAP_XFIELD_UID).toLowerCase());
 
         // Register user profile document so that it's found by following searches
-        when(
-            this.mocker.getMockStore().searchDocuments(
-                ", BaseObject as obj, StringProperty as prop where doc.fullName=obj.name and obj.className=? and obj.id=prop.id.id and prop.name=? and lower(prop.value)=?",
-                false, false, false, 0, 0, Arrays.asList(LDAPProfileXClass.LDAP_XCLASS,
-                    LDAPProfileXClass.LDAP_XFIELD_UID, storedUid.toLowerCase()),
-                this.mocker.getXWikiContext())).thenReturn(Arrays.asList(userProfile));
+        when(this.mocker.getMockStore().searchDocuments(
+            ", BaseObject as obj, StringProperty as prop where doc.fullName=obj.name and obj.className=? and obj.id=prop.id.id and prop.name=? and lower(prop.value)=?",
+            false, false, false, 0, 0,
+            Arrays.asList(LDAPProfileXClass.LDAP_XCLASS, LDAPProfileXClass.LDAP_XFIELD_UID, storedUid.toLowerCase()),
+            this.mocker.getXWikiContext())).thenReturn(Arrays.asList(userProfile));
 
         return userProfile;
     }
@@ -323,7 +348,7 @@ public class XWikiLDAPAuthServiceImplTest extends AbstractLDAPTestCase
 
         assertAuthenticate(LDAPTestSetup.HORATIOHORNBLOWER_CN.toUpperCase(), LDAPTestSetup.HORATIOHORNBLOWER_PWD,
             userProfileName(LDAPTestSetup.HORATIOHORNBLOWER_CN), LDAPTestSetup.HORATIOHORNBLOWER_DN,
-            LDAPTestSetup.HORATIOHORNBLOWER_CN);
+            LDAPTestSetup.HORATIOHORNBLOWER_CN, false);
     }
 
     /**
@@ -341,7 +366,7 @@ public class XWikiLDAPAuthServiceImplTest extends AbstractLDAPTestCase
 
         assertAuthenticate(" " + LDAPTestSetup.HORATIOHORNBLOWER_CN + " ", LDAPTestSetup.HORATIOHORNBLOWER_PWD,
             userProfileName(LDAPTestSetup.HORATIOHORNBLOWER_CN), LDAPTestSetup.HORATIOHORNBLOWER_DN,
-            LDAPTestSetup.HORATIOHORNBLOWER_CN);
+            LDAPTestSetup.HORATIOHORNBLOWER_CN, false);
     }
 
     /**
