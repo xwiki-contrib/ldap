@@ -552,145 +552,150 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
                 "Bind to LDAP server failed.");
         }
 
-        // ////////////////////////////////////////////////////////////////////
-        // 3. find XWiki user profile page
-        // ////////////////////////////////////////////////////////////////////
+        try {
+            // ////////////////////////////////////////////////////////////////////
+            // 3. find XWiki user profile page
+            // ////////////////////////////////////////////////////////////////////
 
-        XWikiDocument userProfile = ldapUtils.getUserProfileByUid(validXWikiUserName, trimedAuthInput, context);
-        if (userProfile == null) {
-            // Try to search just the UID (in case this user was created before a move to multidomain)
-            if (!trimedAuthInput.equals(uid) && getConfiguration().getTestLoginFor().contains(trimedAuthInput)) {
-                userProfile = ldapUtils.getUserProfileByUid(validXWikiUserName, uid, context);
-            }
-        }
-
-        // ////////////////////////////////////////////////////////////////////
-        // 4. check if bind DN is user DN
-        // ////////////////////////////////////////////////////////////////////
-
-        String ldapDn = null;
-
-        String bindDNFormat = configuration.getLDAPBindDN();
-        String bindDN = configuration.getLDAPBindDN(trimedAuthInput, password);
-
-        // Active directory support a special non DN form for bind but does not accept it at search level
-        if (!bindDNFormat.equals(bindDN) && LDAPDN.isValid(bindDN)) {
-            ldapDn = bindDN;
-        }
-
-        // ////////////////////////////////////////////////////////////////////
-        // 5. if group param, verify group membership (& get DN)
-        // ////////////////////////////////////////////////////////////////////
-
-        String filterGroupDN = configuration.getLDAPParam("ldap_user_group", "");
-
-        if (filterGroupDN.length() > 0) {
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Checking if the user belongs to the user group: {}", filterGroupDN);
+            XWikiDocument userProfile = ldapUtils.getUserProfileByUid(validXWikiUserName, trimedAuthInput, context);
+            if (userProfile == null) {
+                // Try to search just the UID (in case this user was created before a move to multidomain)
+                if (!trimedAuthInput.equals(uid) && getConfiguration().getTestLoginFor().contains(trimedAuthInput)) {
+                    userProfile = ldapUtils.getUserProfileByUid(validXWikiUserName, uid, context);
+                }
             }
 
-            ldapDn = ldapUtils.isInGroup(uid, ldapDn, filterGroupDN, context);
+            // ////////////////////////////////////////////////////////////////////
+            // 4. check if bind DN is user DN
+            // ////////////////////////////////////////////////////////////////////
 
+            String ldapDn = null;
+
+            String bindDNFormat = configuration.getLDAPBindDN();
+            String bindDN = configuration.getLDAPBindDN(trimedAuthInput, password);
+
+            // Active directory support a special non DN form for bind but does not accept it at search level
+            if (!bindDNFormat.equals(bindDN) && LDAPDN.isValid(bindDN)) {
+                ldapDn = bindDN;
+            }
+
+            // ////////////////////////////////////////////////////////////////////
+            // 5. if group param, verify group membership (& get DN)
+            // ////////////////////////////////////////////////////////////////////
+
+            String filterGroupDN = configuration.getLDAPParam("ldap_user_group", "");
+
+            if (filterGroupDN.length() > 0) {
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("Checking if the user belongs to the user group: {}", filterGroupDN);
+                }
+
+                ldapDn = ldapUtils.isInGroup(uid, ldapDn, filterGroupDN, context);
+
+                if (ldapDn == null) {
+                    throw new XWikiException(XWikiException.MODULE_XWIKI_USER, XWikiException.ERROR_XWIKI_USER_INIT,
+                        "LDAP user {0} does not belong to LDAP group {1}.", null, new Object[] { uid, filterGroupDN });
+                }
+            }
+
+            // ////////////////////////////////////////////////////////////////////
+            // 6. if exclude group param, verify group membership
+            // ////////////////////////////////////////////////////////////////////
+
+            String excludeGroupDN = configuration.getLDAPParam("ldap_exclude_group", "", context);
+
+            if (excludeGroupDN.length() > 0) {
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("Checking if the user does not belongs to the exclude group: {}", excludeGroupDN);
+                }
+
+                if (ldapUtils.isInGroup(uid, ldapDn, excludeGroupDN, context) != null) {
+                    throw new XWikiException(XWikiException.MODULE_XWIKI_USER, XWikiException.ERROR_XWIKI_USER_INIT,
+                        "LDAP user {0} should not belong to LDAP group {1}.", null,
+                        new Object[] { uid, filterGroupDN });
+                }
+            }
+
+            // ////////////////////////////////////////////////////////////////////
+            // 7. if no dn search for user
+            // ////////////////////////////////////////////////////////////////////
+
+            List<XWikiLDAPSearchAttribute> searchAttributes = null;
+
+            // if we still don't have a dn, search for it. Also get the attributes, we might need
+            // them
             if (ldapDn == null) {
-                throw new XWikiException(XWikiException.MODULE_XWIKI_USER, XWikiException.ERROR_XWIKI_USER_INIT,
-                    "LDAP user {0} does not belong to LDAP group {1}.", null, new Object[] { uid, filterGroupDN });
-            }
-        }
+                searchAttributes = ldapUtils.searchUserAttributesByUid(uid, ldapUtils.getAttributeNameTable(context));
 
-        // ////////////////////////////////////////////////////////////////////
-        // 6. if exclude group param, verify group membership
-        // ////////////////////////////////////////////////////////////////////
+                if (searchAttributes != null) {
+                    for (XWikiLDAPSearchAttribute searchAttribute : searchAttributes) {
+                        if ("dn".equals(searchAttribute.name)) {
+                            ldapDn = searchAttribute.value;
 
-        String excludeGroupDN = configuration.getLDAPParam("ldap_exclude_group", "", context);
-
-        if (excludeGroupDN.length() > 0) {
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Checking if the user does not belongs to the exclude group: {}", excludeGroupDN);
-            }
-
-            if (ldapUtils.isInGroup(uid, ldapDn, excludeGroupDN, context) != null) {
-                throw new XWikiException(XWikiException.MODULE_XWIKI_USER, XWikiException.ERROR_XWIKI_USER_INIT,
-                    "LDAP user {0} should not belong to LDAP group {1}.", null, new Object[] { uid, filterGroupDN });
-            }
-        }
-
-        // ////////////////////////////////////////////////////////////////////
-        // 7. if no dn search for user
-        // ////////////////////////////////////////////////////////////////////
-
-        List<XWikiLDAPSearchAttribute> searchAttributes = null;
-
-        // if we still don't have a dn, search for it. Also get the attributes, we might need
-        // them
-        if (ldapDn == null) {
-            searchAttributes = ldapUtils.searchUserAttributesByUid(uid, ldapUtils.getAttributeNameTable(context));
-
-            if (searchAttributes != null) {
-                for (XWikiLDAPSearchAttribute searchAttribute : searchAttributes) {
-                    if ("dn".equals(searchAttribute.name)) {
-                        ldapDn = searchAttribute.value;
-
-                        break;
+                            break;
+                        }
                     }
                 }
             }
-        }
 
-        if (ldapDn == null) {
-            throw new XWikiException(XWikiException.MODULE_XWIKI_USER, XWikiException.ERROR_XWIKI_USER_INIT,
-                "Can't find LDAP user DN for input [" + trimedAuthInput + "]");
-        }
-
-        // ////////////////////////////////////////////////////////////////////
-        // 8. apply validate_password property or if user used for LDAP connection is not the one
-        // authenticated try to bind
-        // ////////////////////////////////////////////////////////////////////
-
-        if (!trusted) {
-            if ("1".equals(configuration.getLDAPParam("ldap_validate_password", "0"))) {
-                String passwordField = configuration.getLDAPParam("ldap_password_field", "userPassword");
-                if (!connector.checkPassword(ldapDn, password, passwordField)) {
-                    LOGGER.debug("Password comparison failed, are you really sure you need validate_password ?"
-                        + " If you don't enable it, it does not mean user credentials are not validated."
-                        + " The goal of this property is to bypass standard LDAP bind"
-                        + " which is usually bad unless you really know what you do.");
-
-                    throw new XWikiException(XWikiException.MODULE_XWIKI_USER, XWikiException.ERROR_XWIKI_USER_INIT,
-                        "LDAP authentication failed:" + " could not validate the password: wrong password for "
-                            + ldapDn);
-                }
-            } else if (!ldapDn.equals(bindDN)) {
-                // Validate user credentials
-                connector.bind(ldapDn, password);
-
-                // Rebind admin user
-                connector.bind(bindDN, configuration.getLDAPBindPassword(trimedAuthInput, password));
+            if (ldapDn == null) {
+                throw new XWikiException(XWikiException.MODULE_XWIKI_USER, XWikiException.ERROR_XWIKI_USER_INIT,
+                    "Can't find LDAP user DN for input [" + trimedAuthInput + "]");
             }
-        }
 
-        // ////////////////////////////////////////////////////////////////////
-        // 9. sync user
-        // ////////////////////////////////////////////////////////////////////
+            // ////////////////////////////////////////////////////////////////////
+            // 8. apply validate_password property or if user used for LDAP connection is not the one
+            // authenticated try to bind
+            // ////////////////////////////////////////////////////////////////////
 
-        boolean isNewUser = userProfile == null || userProfile.isNew();
+            if (!trusted) {
+                if ("1".equals(configuration.getLDAPParam("ldap_validate_password", "0"))) {
+                    String passwordField = configuration.getLDAPParam("ldap_password_field", "userPassword");
+                    if (!connector.checkPassword(ldapDn, password, passwordField)) {
+                        LOGGER.debug("Password comparison failed, are you really sure you need validate_password ?"
+                            + " If you don't enable it, it does not mean user credentials are not validated."
+                            + " The goal of this property is to bypass standard LDAP bind"
+                            + " which is usually bad unless you really know what you do.");
 
-        userProfile = syncUser(userProfile, searchAttributes, ldapDn, trimedAuthInput, ldapUtils, context);
+                        throw new XWikiException(XWikiException.MODULE_XWIKI_USER, XWikiException.ERROR_XWIKI_USER_INIT,
+                            "LDAP authentication failed:" + " could not validate the password: wrong password for "
+                                + ldapDn);
+                    }
+                } else if (!ldapDn.equals(bindDN)) {
+                    // Validate user credentials
+                    connector.bind(ldapDn, password);
 
-        // from now on we can enter the application
-        if (local) {
-            principal = new SimplePrincipal(userProfile.getFullName());
-        } else {
-            principal = new SimplePrincipal(userProfile.getPrefixedFullName());
-        }
+                    // Rebind admin user
+                    connector.bind(bindDN, configuration.getLDAPBindPassword(trimedAuthInput, password));
+                }
+            }
 
-        // ////////////////////////////////////////////////////////////////////
-        // 10. sync groups membership
-        // ////////////////////////////////////////////////////////////////////
+            // ////////////////////////////////////////////////////////////////////
+            // 9. sync user
+            // ////////////////////////////////////////////////////////////////////
 
-        try {
-            syncGroupsMembership(userProfile.getFullName(), ldapDn, isNewUser, ldapUtils, context);
-        } catch (XWikiException e) {
-            LOGGER.error("Failed to synchronise user's groups membership", e);
+            boolean isNewUser = userProfile == null || userProfile.isNew();
+
+            userProfile = syncUser(userProfile, searchAttributes, ldapDn, trimedAuthInput, ldapUtils, context);
+
+            // from now on we can enter the application
+            if (local) {
+                principal = new SimplePrincipal(userProfile.getFullName());
+            } else {
+                principal = new SimplePrincipal(userProfile.getPrefixedFullName());
+            }
+
+            // ////////////////////////////////////////////////////////////////////
+            // 10. sync groups membership
+            // ////////////////////////////////////////////////////////////////////
+
+            try {
+                syncGroupsMembership(userProfile.getFullName(), ldapDn, isNewUser, ldapUtils, context);
+            } catch (XWikiException e) {
+                LOGGER.error("Failed to synchronise user's groups membership", e);
+            }
+        } finally {
+            connector.close();
         }
 
         return principal;
