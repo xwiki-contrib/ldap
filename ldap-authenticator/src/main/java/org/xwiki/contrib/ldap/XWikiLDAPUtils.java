@@ -847,7 +847,7 @@ public class XWikiLDAPUtils
 
         Cache<Map<String, String>> cache;
         try {
-            cache = getGroupCache(getGroupCacheConfiguration(context), context);
+            cache = getGroupCache(getGroupCacheConfiguration(), context);
 
             synchronized (cache) {
                 groupMembers = cache.get(groupDN);
@@ -921,6 +921,28 @@ public class XWikiLDAPUtils
         return false;
     }
 
+    private static LRUCacheConfiguration createCacheConfiguration(int lifespan)
+    {
+        LRUCacheConfiguration cacheConfiguration = new LRUCacheConfiguration(CACHE_NAME_GROUPS);
+        cacheConfiguration.getLRUEvictionConfiguration().setLifespan(lifespan);
+
+        return cacheConfiguration;
+    }
+
+    /**
+     * @return the configuration for the LDAP groups cache.
+     */
+    public CacheConfiguration getGroupCacheConfiguration()
+    {
+        if (cacheConfigurationGroups == null) {
+            XWikiLDAPConfig config = getConfiguration();
+
+            cacheConfigurationGroups = createCacheConfiguration(config.getCacheExpiration());
+        }
+
+        return cacheConfigurationGroups;
+    }
+
     /**
      * @param context the XWiki context used to get cache configuration.
      * @return the configuration for the LDAP groups cache.
@@ -930,8 +952,7 @@ public class XWikiLDAPUtils
         if (cacheConfigurationGroups == null) {
             XWikiLDAPConfig config = XWikiLDAPConfig.getInstance();
 
-            cacheConfigurationGroups = new LRUCacheConfiguration(CACHE_NAME_GROUPS);
-            cacheConfigurationGroups.getLRUEvictionConfiguration().setLifespan(config.getCacheExpiration());
+            return createCacheConfiguration(config.getCacheExpiration());
         }
 
         return cacheConfigurationGroups;
