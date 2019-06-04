@@ -931,6 +931,7 @@ public class XWikiLDAPUtils
 
     /**
      * @return the configuration for the LDAP groups cache.
+     * @since 9.3.7
      */
     public CacheConfiguration getGroupCacheConfiguration()
     {
