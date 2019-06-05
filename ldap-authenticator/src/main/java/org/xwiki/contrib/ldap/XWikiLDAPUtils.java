@@ -346,6 +346,7 @@ public class XWikiLDAPUtils
         }
 
         cachePool.clear();
+        cacheConfigurationGroups = null;
     }
 
     /**
