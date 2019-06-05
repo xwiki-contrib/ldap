@@ -28,18 +28,15 @@ import javax.inject.Singleton;
 
 import org.xwiki.component.annotation.Component;
 import org.xwiki.model.EntityType;
-import org.xwiki.model.reference.LocalDocumentReference;
 import org.xwiki.model.reference.PartialEntityReference;
 import org.xwiki.model.reference.RegexEntityReference;
-import org.xwiki.observation.EventListener;
+import org.xwiki.observation.AbstractEventListener;
 import org.xwiki.observation.event.Event;
 import org.xwiki.stability.Unstable;
 
-import com.xpn.xwiki.doc.XWikiDocument;
 import com.xpn.xwiki.internal.event.XObjectPropertyAddedEvent;
 import com.xpn.xwiki.internal.event.XObjectPropertyDeletedEvent;
 import com.xpn.xwiki.internal.event.XObjectPropertyUpdatedEvent;
-import com.xpn.xwiki.objects.BaseObject;
 
 /**
  * Event listener to reset group cache when the ldap_groupcache_expiration property is updated.
@@ -51,12 +48,12 @@ import com.xpn.xwiki.objects.BaseObject;
 @Singleton
 @Unstable
 @Named("GroupCacheExpirationEventListener")
-public class GroupCacheExpirationEventListener implements EventListener
+public class GroupCacheExpirationEventListener extends AbstractEventListener
 {
-    private static final String LDAP_GROUP_CACHE_EXPIRATION = "ldap_groupcache_expiration";
-
-    private static final LocalDocumentReference LOCAL_CLASS_REFERENCE =
-        new LocalDocumentReference("XWiki", "XWikiPreferences");
+    /**
+     * The name of the listener.
+     */
+    private static final String NAME = "GroupCacheExpirationEventListener";
 
     /**
      * A regular expression to match only the XWiki.XWikiPreferences objects.
@@ -69,38 +66,25 @@ public class GroupCacheExpirationEventListener implements EventListener
      * XWiki.XWikiPreferences object.
      */
     private static final PartialEntityReference PROPERTY_MATCHER =
-        new PartialEntityReference(LDAP_GROUP_CACHE_EXPIRATION, EntityType.OBJECT_PROPERTY, OBJECT_MATCHER);
+        new PartialEntityReference("ldap_groupcache_expiration", EntityType.OBJECT_PROPERTY, OBJECT_MATCHER);
 
+    /**
+     * The events to listen to in order to trigger the group cache reset.
+     */
     private static final List<Event> EVENTS = Arrays.<Event>asList(new XObjectPropertyAddedEvent(PROPERTY_MATCHER),
         new XObjectPropertyDeletedEvent(PROPERTY_MATCHER), new XObjectPropertyUpdatedEvent(PROPERTY_MATCHER));
+
+    /**
+     * The default constructor.
+     */
+    public GroupCacheExpirationEventListener()
+    {
+        super(NAME, EVENTS);
+    }
 
     @Override
     public void onEvent(Event event, Object source, Object data)
     {
-        XWikiDocument doc = (XWikiDocument) source;
-        XWikiDocument originalDoc = doc.getOriginalDocument();
-
-        BaseObject newPreferencesObj = doc.getXObject(LOCAL_CLASS_REFERENCE);
-        BaseObject originalPreferencesObj = originalDoc.getXObject(LOCAL_CLASS_REFERENCE);
-
-        if (newPreferencesObj != null && originalPreferencesObj != null
-            && newPreferencesObj.getStringValue(LDAP_GROUP_CACHE_EXPIRATION)
-                .equals(originalPreferencesObj.getStringValue(LDAP_GROUP_CACHE_EXPIRATION))) {
-            return;
-        }
-
         XWikiLDAPUtils.resetGroupCache();
-    }
-
-    @Override
-    public String getName()
-    {
-        return "GroupCacheExpirationEventListener";
-    }
-
-    @Override
-    public List<Event> getEvents()
-    {
-        return EVENTS;
     }
 }
