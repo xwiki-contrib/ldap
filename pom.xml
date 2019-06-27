@@ -108,22 +108,9 @@
           -->
           <ignored>
             <difference>
-              <differenceType>7002</differenceType>
-              <className>org/xwiki/contrib/ldap/XWikiLDAPUtils</className>
-              <method>boolean addPhotoToProfile(com.xpn.xwiki.doc.XWikiDocument, com.xpn.xwiki.XWikiContext, java.io.InputStream, int, java.lang.String)</method>
-              <justification>Should have never been protected in the first place.</justification>
-            </difference>
-            <difference>
-              <differenceType>7002</differenceType>
-              <className>org/xwiki/contrib/ldap/XWikiLDAPUtils</className>
-              <method>boolean updatePhotoFromLdap(java.lang.String, com.xpn.xwiki.doc.XWikiDocument, com.xpn.xwiki.XWikiContext)</method>
-              <justification>Should have never been protected in the first place.</justification>
-            </difference>
-            <difference>
-              <differenceType>7009</differenceType>
-              <className>org/xwiki/contrib/ldap/XWikiLDAPUtils</className>
-              <method>java.lang.String guessImageType(java.io.InputStream)</method>
-              <justification>Should have never been protected in the first place.</justification>
+              <differenceType>8001</differenceType>
+              <className>org/xwiki/contrib/ldap/GroupCacheExpirationEventListener</className>
+              <justification>Should have never been public in the first place.</justification>
             </difference>
           </ignored>
           <excludes>
