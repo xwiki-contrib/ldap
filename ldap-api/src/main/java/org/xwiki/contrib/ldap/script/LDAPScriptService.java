@@ -28,7 +28,7 @@ import org.xwiki.context.Execution;
 import org.xwiki.contrib.ldap.XWikiLDAPConfig;
 import org.xwiki.contrib.ldap.XWikiLDAPConnection;
 import org.xwiki.contrib.ldap.XWikiLDAPException;
-import org.xwiki.contrib.ldap.XWikiLDAPUtils;
+import org.xwiki.contrib.ldap.internal.LDAPGroupsCache;
 import org.xwiki.script.service.ScriptService;
 import org.xwiki.stability.Unstable;
 
@@ -54,6 +54,9 @@ public class LDAPScriptService implements ScriptService
      */
     @Inject
     private Execution execution;
+
+    @Inject
+    private LDAPGroupsCache caches;
 
     /**
      * @return the XWiki context associated with this execution.
@@ -101,8 +104,8 @@ public class LDAPScriptService implements ScriptService
      */
     public boolean isXWikiLDAPAuthenticator()
     {
-        return org.xwiki.contrib.ldap.XWikiLDAPAuthServiceImpl.class.isAssignableFrom(getXWikiContext().getWiki()
-            .getAuthService().getClass());
+        return org.xwiki.contrib.ldap.XWikiLDAPAuthServiceImpl.class
+            .isAssignableFrom(getXWikiContext().getWiki().getAuthService().getClass());
     }
 
     /**
@@ -112,7 +115,7 @@ public class LDAPScriptService implements ScriptService
      */
     public void resetGroupCache()
     {
-        XWikiLDAPUtils.resetGroupCache();
+        this.caches.reset();
     }
 
     /**

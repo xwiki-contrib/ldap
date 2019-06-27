@@ -17,12 +17,13 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.xwiki.contrib.ldap;
+package org.xwiki.contrib.ldap.internal;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
@@ -74,6 +75,9 @@ public class GroupCacheExpirationEventListener extends AbstractEventListener
     private static final List<Event> EVENTS = Arrays.<Event>asList(new XObjectPropertyAddedEvent(PROPERTY_MATCHER),
         new XObjectPropertyDeletedEvent(PROPERTY_MATCHER), new XObjectPropertyUpdatedEvent(PROPERTY_MATCHER));
 
+    @Inject
+    private LDAPGroupsCache caches;
+
     /**
      * The default constructor.
      */
@@ -85,6 +89,6 @@ public class GroupCacheExpirationEventListener extends AbstractEventListener
     @Override
     public void onEvent(Event event, Object source, Object data)
     {
-        XWikiLDAPUtils.resetGroupCache();
+        this.caches.reset();
     }
 }
