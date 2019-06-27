@@ -1,1 +1,3 @@
 org.xwiki.contrib.ldap.GroupCacheExpirationEventListener
+org.xwiki.contrib.ldap.internal.LDAPGroupsCache
+

@@ -45,9 +45,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xwiki.cache.Cache;
 import org.xwiki.cache.CacheException;
-import org.xwiki.cache.CacheManager;
 import org.xwiki.cache.config.CacheConfiguration;
-import org.xwiki.cache.config.LRUCacheConfiguration;
+import org.xwiki.contrib.ldap.internal.LDAPGroupsCache;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.rendering.syntax.Syntax;
 
@@ -87,11 +86,6 @@ public class XWikiLDAPUtils
     private static final String LDAP_OBJECTCLASS = "objectClass";
 
     /**
-     * The name of the LDAP groups cache.
-     */
-    private static final String CACHE_NAME_GROUPS = "ldap.groups";
-
-    /**
      * The name of the XWiki group member field.
      */
     private static final String XWIKI_GROUP_MEMBERFIELD = "member";
@@ -100,11 +94,6 @@ public class XWikiLDAPUtils
      * The XWiki space where users are stored.
      */
     private static final String XWIKI_USER_SPACE = "XWiki";
-
-    /**
-     * The configuration of the LDAP group cache.
-     */
-    private static LRUCacheConfiguration cacheConfigurationGroups;
 
     /**
      * Default unique user field name.
@@ -117,16 +106,13 @@ public class XWikiLDAPUtils
     private static final String LDAP_FIELD_DN = "dn";
 
     /**
-     * Contains caches for each LDAP host:port.
-     */
-    private static Map<String, Map<String, Cache<Map<String, String>>>> cachePool = new HashMap<>();
-
-    /**
      * The LDAP connection.
      */
     private final XWikiLDAPConnection connection;
 
     private final XWikiLDAPConfig configuration;
+
+    private LDAPGroupsCache caches;
 
     /**
      * The LDAP attribute containing the identifier for a user.
@@ -178,6 +164,15 @@ public class XWikiLDAPUtils
     {
         this.connection = connection;
         this.configuration = configuration;
+    }
+
+    private LDAPGroupsCache getCaches()
+    {
+        if (this.caches == null) {
+            this.caches = Utils.getComponent(LDAPGroupsCache.class);
+        }
+
+        return this.caches;
     }
 
     /**
@@ -304,30 +299,7 @@ public class XWikiLDAPUtils
     public Cache<Map<String, String>> getGroupCache(CacheConfiguration configuration, XWikiContext context)
         throws CacheException
     {
-        Cache<Map<String, String>> cache;
-
-        String cacheKey = getUidAttributeName() + "." + getConnection().getConnection().getHost() + ":"
-            + getConnection().getConnection().getPort();
-
-        synchronized (cachePool) {
-            Map<String, Cache<Map<String, String>>> cacheMap;
-
-            if (cachePool.containsKey(cacheKey)) {
-                cacheMap = cachePool.get(cacheKey);
-            } else {
-                cacheMap = new HashMap<>();
-                cachePool.put(cacheKey, cacheMap);
-            }
-
-            cache = cacheMap.get(configuration.getConfigurationId());
-
-            if (cache == null) {
-                cache = Utils.getComponent(CacheManager.class).createNewCache(configuration);
-                cacheMap.put(configuration.getConfigurationId(), cache);
-            }
-        }
-
-        return cache;
+        return getCaches().getGroupCache(this);
     }
 
     /**
@@ -337,16 +309,7 @@ public class XWikiLDAPUtils
      */
     public static void resetGroupCache()
     {
-        synchronized (cachePool) {
-            for (Map<String, Cache<Map<String, String>>> caches : cachePool.values()) {
-                for (Cache<Map<String, String>> cache : caches.values()) {
-                    cache.dispose();
-                }
-            }
-        }
-
-        cachePool.clear();
-        cacheConfigurationGroups = null;
+        Utils.getComponent(LDAPGroupsCache.class).reset();
     }
 
     /**
@@ -848,7 +811,7 @@ public class XWikiLDAPUtils
 
         Cache<Map<String, String>> cache;
         try {
-            cache = getGroupCache(getGroupCacheConfiguration(), context);
+            cache = getCaches().getGroupCache(this);
 
             synchronized (cache) {
                 groupMembers = cache.get(groupDN);
@@ -922,42 +885,26 @@ public class XWikiLDAPUtils
         return false;
     }
 
-    private static LRUCacheConfiguration createCacheConfiguration(int lifespan)
-    {
-        LRUCacheConfiguration cacheConfiguration = new LRUCacheConfiguration(CACHE_NAME_GROUPS);
-        cacheConfiguration.getLRUEvictionConfiguration().setLifespan(lifespan);
-
-        return cacheConfiguration;
-    }
-
     /**
      * @return the configuration for the LDAP groups cache.
      * @since 9.3.7
+     * @deprecated since 9.4
      */
+    @Deprecated
     public CacheConfiguration getGroupCacheConfiguration()
     {
-        if (cacheConfigurationGroups == null) {
-            XWikiLDAPConfig config = getConfiguration();
-
-            cacheConfigurationGroups = createCacheConfiguration(config.getCacheExpiration());
-        }
-
-        return cacheConfigurationGroups;
+        return getCaches().createCacheConfiguration(getConfiguration());
     }
 
     /**
      * @param context the XWiki context used to get cache configuration.
      * @return the configuration for the LDAP groups cache.
+     * @deprecated
      */
+    @Deprecated
     public static CacheConfiguration getGroupCacheConfiguration(XWikiContext context)
     {
-        if (cacheConfigurationGroups == null) {
-            XWikiLDAPConfig config = XWikiLDAPConfig.getInstance();
-
-            return createCacheConfiguration(config.getCacheExpiration());
-        }
-
-        return cacheConfigurationGroups;
+        return Utils.getComponent(LDAPGroupsCache.class).createCacheConfiguration(XWikiLDAPConfig.getInstance());
     }
 
     /**
