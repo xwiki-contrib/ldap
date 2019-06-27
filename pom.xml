@@ -59,6 +59,10 @@
       <timezone>+1</timezone>
     </developer>
     <developer>
+      <id>acotiuga</id>
+      <name>Alex Cotiuga</name>
+    </developer>
+    <developer>
       <id>xwikidev</id>
       <name>XWiki Development Team</name>
     </developer>
