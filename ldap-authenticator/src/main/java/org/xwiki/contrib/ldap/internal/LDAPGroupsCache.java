@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import org.xwiki.cache.Cache;
 import org.xwiki.cache.CacheException;
@@ -41,6 +42,7 @@ import org.xwiki.contrib.ldap.XWikiLDAPUtils;
  * @since 9.4
  */
 @Component(roles = LDAPGroupsCache.class)
+@Singleton
 public class LDAPGroupsCache implements Disposable
 {
     /**
