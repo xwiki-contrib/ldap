@@ -309,6 +309,7 @@ public class XWikiLDAPUtils
      */
     public static void resetGroupCache()
     {
+        LOGGER.debug("reset group cache");
         Utils.getComponent(LDAPGroupsCache.class).reset();
     }
 

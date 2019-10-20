@@ -20,6 +20,8 @@
 package org.xwiki.contrib.ldap;
 
 import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.Security;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -42,6 +44,7 @@ import com.novell.ldap.LDAPJSSESecureSocketFactory;
 import com.novell.ldap.LDAPSearchConstraints;
 import com.novell.ldap.LDAPSearchResults;
 import com.novell.ldap.LDAPSocketFactory;
+import com.novell.ldap.util.Base64;
 import com.xpn.xwiki.XWikiContext;
 
 /**
@@ -257,8 +260,17 @@ public class XWikiLDAPConnection
     {
         LOGGER.debug("Binding to LDAP server with credentials login=[{}]", loginDN);
 
+        final byte[] pwAsBytes = password.getBytes("UTF8");
+        // debug log sha256 sum of passwd just when sending it to the server
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            String result = Base64.encode(digest.digest(pwAsBytes));
+            LOGGER.debug("Binding to LDAP server with credentials passwdHash=[{}]", result);
+        } catch (NoSuchAlgorithmException e) {
+            LOGGER.debug("no sha-256 found", e);
+        }
         // authenticate to the server
-        this.connection.bind(LDAPConnection.LDAP_V3, loginDN, password.getBytes("UTF8"));
+        this.connection.bind(LDAPConnection.LDAP_V3, loginDN, pwAsBytes);
     }
 
     /**
