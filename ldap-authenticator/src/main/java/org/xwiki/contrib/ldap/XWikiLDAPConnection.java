@@ -19,29 +19,42 @@
  */
 package org.xwiki.contrib.ldap;
 
-import java.io.UnsupportedEncodingException;
+import java.io.IOException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.security.Security;
+import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Enumeration;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.net.ssl.TrustManagerFactory;
+
 import org.apache.commons.lang3.StringUtils;
+import org.apache.directory.api.ldap.codec.api.BinaryAttributeDetector;
+import org.apache.directory.api.ldap.model.cursor.EntryCursor;
+import org.apache.directory.api.ldap.model.cursor.SearchCursor;
+import org.apache.directory.api.ldap.model.entry.Attribute;
+import org.apache.directory.api.ldap.model.entry.Entry;
+import org.apache.directory.api.ldap.model.entry.Value;
+import org.apache.directory.api.ldap.model.exception.LdapException;
+import org.apache.directory.api.ldap.model.message.AliasDerefMode;
+import org.apache.directory.api.ldap.model.message.ResultCodeEnum;
+import org.apache.directory.api.ldap.model.message.SearchRequest;
+import org.apache.directory.api.ldap.model.message.SearchRequestImpl;
+import org.apache.directory.api.ldap.model.message.SearchScope;
+import org.apache.directory.api.ldap.model.name.Dn;
+import org.apache.directory.ldap.client.api.EntryCursorImpl;
+import org.apache.directory.ldap.client.api.LdapConnection;
+import org.apache.directory.ldap.client.api.LdapConnectionConfig;
+import org.apache.directory.ldap.client.api.LdapNetworkConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.novell.ldap.LDAPAttribute;
-import com.novell.ldap.LDAPAttributeSet;
-import com.novell.ldap.LDAPConnection;
-import com.novell.ldap.LDAPDN;
-import com.novell.ldap.LDAPEntry;
-import com.novell.ldap.LDAPException;
-import com.novell.ldap.LDAPJSSESecureSocketFactory;
-import com.novell.ldap.LDAPSearchConstraints;
-import com.novell.ldap.LDAPSearchResults;
-import com.novell.ldap.LDAPSocketFactory;
 import com.xpn.xwiki.XWikiContext;
 
 /**
@@ -60,7 +73,7 @@ public class XWikiLDAPConnection
     /**
      * The LDAP connection.
      */
-    private LDAPConnection connection;
+    private LdapConnection connection;
 
     /**
      * LDAP attributes that should be treated as binary data.
@@ -92,37 +105,50 @@ public class XWikiLDAPConnection
      */
     public XWikiLDAPConnection(org.xwiki.contrib.ldap.XWikiLDAPConnection connection)
     {
-        this();
-
         this.connection = connection.connection;
         this.binaryAttributes = connection.binaryAttributes;
+        this.configuration = connection.configuration;
     }
 
     /**
-     * @param context the XWiki context.
      * @return the maximum number of milliseconds the client waits for any operation under these constraints to
      *         complete.
      */
-    private int getTimeout(XWikiContext context)
+    private int getTimeout()
     {
         return this.configuration.getLDAPTimeout();
     }
 
     /**
-     * @param context the XWiki context.
      * @return the maximum number of search results to be returned from a search operation.
      */
-    private int getMaxResults(XWikiContext context)
+    int getMaxResults()
     {
         return this.configuration.getLDAPMaxResults();
     }
 
     /**
-     * @return the {@link LDAPConnection}.
+     * @return the {@link LdapConnection}.
      */
-    public LDAPConnection getConnection()
+    public LdapConnection getConnection()
     {
         return this.connection;
+    }
+
+    /**
+     * @return the host to connect to
+     */
+    public String getLDAPHost()
+    {
+        return this.configuration.getLDAPParam("ldap_server", "localhost");
+    }
+
+    /**
+     * @return the port to connect to
+     */
+    public int getLDAPPort()
+    {
+        return this.configuration.getLDAPPort();
     }
 
     /**
@@ -138,7 +164,7 @@ public class XWikiLDAPConnection
     {
         // open LDAP
         int ldapPort = this.configuration.getLDAPPort();
-        String ldapHost = this.configuration.getLDAPParam("ldap_server", "localhost");
+        String ldapHost = this.getLDAPHost();
 
         // allow to use the given user and password also as the LDAP bind user and password
         String bindDN = this.configuration.getLDAPBindDN(ldapUserName, password);
@@ -171,17 +197,20 @@ public class XWikiLDAPConnection
      * @return true if the connection succeed, false otherwise.
      * @throws XWikiLDAPException error when trying to open connection.
      */
-    public boolean open(String ldapHost, int ldapPort, String loginDN, String password, String pathToKeys, boolean ssl,
-        XWikiContext context) throws XWikiLDAPException
+    public boolean open(String ldapHost, int ldapPort, String loginDN, String password, String pathToKeys,
+        boolean ssl, XWikiContext context) throws XWikiLDAPException
     {
         int port = ldapPort;
 
         if (port <= 0) {
-            port = ssl ? LDAPConnection.DEFAULT_SSL_PORT : LDAPConnection.DEFAULT_PORT;
+            port = ssl ? LdapConnectionConfig.DEFAULT_LDAPS_PORT : LdapConnectionConfig.DEFAULT_LDAP_PORT;
         }
 
         setBinaryAttributes(this.configuration.getBinaryAttributes());
 
+        LdapConnectionConfig config = new LdapConnectionConfig();
+
+        KeyStore ourKeyStore = null;
         try {
             if (ssl) {
                 // Dynamically set JSSE as a security provider
@@ -194,55 +223,52 @@ public class XWikiLDAPConnection
                     System.setProperty("javax.net.ssl.trustStore", pathToKeys);
                     // obviously unnecessary: sun default pwd = "changeit"
                     // System.setProperty("javax.net.ssl.trustStorePassword", sslpwd);
+
+                    ourKeyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+                    try (java.io.FileInputStream fis = new java.io.FileInputStream(pathToKeys)) {
+                        ourKeyStore.load(fis, null);
+                    }
                 }
 
-                LDAPSocketFactory ssf = new LDAPJSSESecureSocketFactory();
-
-                // Set the socket factory as the default for all future connections
-                // LDAPConnection.setSocketFactory(ssf);
-
-                // Note: the socket factory can also be passed in as a parameter
-                // to the constructor to set it for this connection only.
-                this.connection = new LDAPConnection(ssf);
-            } else {
-                this.connection = new LDAPConnection();
+                // FIXME: here use trust manager instead of secure provider ? which one?
+                TrustManagerFactory tm = TrustManagerFactory.getInstance(
+                    TrustManagerFactory.getDefaultAlgorithm(), this.configuration.getSecureProvider());
+                tm.init(ourKeyStore);
+                config.setTrustManagers(tm.getTrustManagers());
             }
 
-            // connect
-            connect(ldapHost, port);
+ 
+            config.setUseSsl(ssl);
+            // config.setUseTls(useTls); // where this? new config variable?
+            config.setLdapHost(ldapHost);
+            config.setLdapPort(port);
+            config.setTimeout(getTimeout());
 
-            // set referral following
-            LDAPSearchConstraints constraints = new LDAPSearchConstraints(this.connection.getConstraints());
-            constraints.setTimeLimit(getTimeout(context));
-            constraints.setMaxResults(getMaxResults(context));
-            constraints.setReferralFollowing(true);
-            constraints.setReferralHandler(new LDAPPluginReferralHandler(loginDN, password, context));
-            this.connection.setConstraints(constraints);
+            // TODO: needed?
+            config.setBinaryAttributeDetector(new BinaryAttributeDetector()
+            {
+                @Override
+                public boolean isBinary(String attributeId)
+                {
+                    return isBinaryAttribute(attributeId);
+                }
+            });
+
+            // FIXME: where do we set this ? "MaxResults" is set in the SearchRequest, but the "referral handler"?
+           // config.setReferralFollowing(true);
+            // config.setReferralHandler(new LDAPPluginReferralHandler(loginDN, password, context));
+
+            this.connection = new LdapNetworkConnection(config);
 
             // bind
             bind(loginDN, password);
-        } catch (UnsupportedEncodingException e) {
-            throw new XWikiLDAPException("LDAP bind failed with UnsupportedEncodingException.", e);
-        } catch (LDAPException e) {
+        } catch (LdapException e) {
             throw new XWikiLDAPException("LDAP bind failed with LDAPException.", e);
+        } catch (NoSuchAlgorithmException | KeyStoreException | CertificateException | IOException e) {
+            throw new XWikiLDAPException("LDAP bind failed while loading SSL keystore.", e);
         }
 
         return true;
-    }
-
-    /**
-     * Connect to server.
-     * 
-     * @param ldapHost the host of the server to connect to.
-     * @param port the port of the server to connect to.
-     * @throws LDAPException error when trying to connect.
-     */
-    private void connect(String ldapHost, int port) throws LDAPException
-    {
-        LOGGER.debug("Connection to LDAP server [{}:{}]", ldapHost, port);
-
-        // connect to the server
-        this.connection.connect(ldapHost, port);
     }
 
     /**
@@ -250,15 +276,14 @@ public class XWikiLDAPConnection
      * 
      * @param loginDN the user DN to connect to LDAP server.
      * @param password the password to connect to LDAP server.
-     * @throws UnsupportedEncodingException error when converting provided password to UTF-8 table.
      * @throws LDAPException error when trying to bind.
      */
-    public void bind(String loginDN, String password) throws UnsupportedEncodingException, LDAPException
+    public void bind(String loginDN, String password) throws LdapException
     {
         LOGGER.debug("Binding to LDAP server with credentials login=[{}]", loginDN);
 
         // authenticate to the server
-        this.connection.bind(LDAPConnection.LDAP_V3, loginDN, password.getBytes("UTF8"));
+        this.connection.bind(loginDN, password);
     }
 
     /**
@@ -268,9 +293,9 @@ public class XWikiLDAPConnection
     {
         try {
             if (this.connection != null) {
-                this.connection.disconnect();
+                this.connection.close();
             }
-        } catch (LDAPException e) {
+        } catch (IOException e) {
             LOGGER.debug("LDAP close failed.", e);
         }
     }
@@ -298,13 +323,12 @@ public class XWikiLDAPConnection
     public boolean checkPassword(String userDN, String password, String passwordField)
     {
         try {
-            LDAPAttribute attribute = new LDAPAttribute(passwordField, password);
-            return this.connection.compare(userDN, attribute);
-        } catch (LDAPException e) {
-            if (e.getResultCode() == LDAPException.NO_SUCH_OBJECT) {
-                LOGGER.debug("Unable to locate user_dn [{}]", userDN, e);
-            } else if (e.getResultCode() == LDAPException.NO_SUCH_ATTRIBUTE) {
-                LOGGER.debug("Unable to verify password because userPassword attribute not found.", e);
+            return this.connection.compare(userDN, passwordField, password);
+        } catch (LdapException e) {
+            ResultCodeEnum errorCode = ResultCodeEnum.getResultCode(e);
+            if (errorCode != null) {
+                LOGGER.debug("Unable to verify password [{}]: message [{}]", errorCode.getResultCode(),
+                    errorCode.getMessage());
             } else {
                 LOGGER.debug("Unable to verify password", e);
             }
@@ -337,17 +361,17 @@ public class XWikiLDAPConnection
                 return null;
             }
 
-            LDAPEntry nextEntry = searchResults.next();
-            String foundDN = nextEntry.getDN();
+            Entry nextEntry = searchResults.next();
+            String foundDN = nextEntry.getDn().getName();
 
             searchAttributeList = new ArrayList<>();
 
             searchAttributeList.add(new XWikiLDAPSearchAttribute("dn", foundDN));
 
-            LDAPAttributeSet attributeSet = nextEntry.getAttributeSet();
+            Collection<Attribute> attributeSet = nextEntry.getAttributes();
 
             ldapToXWikiAttribute(searchAttributeList, attributeSet);
-        } catch (LDAPException e) {
+        } catch (LdapException e) {
             LOGGER.debug("LDAP Search failed", e);
         }
 
@@ -367,17 +391,30 @@ public class XWikiLDAPConnection
      *            <li>SCOPE_SUB - searches the base DN and all entries within its subtree
      *            </ul>
      * @return a result stream. LDAPConnection#abandon should be called when it's not needed anymore.
-     * @throws LDAPException error when searching
+     * @throws LdapException error when searching
      * @since 3.3M1
      */
-    public LDAPSearchResults search(String baseDN, String filter, String[] attr, int ldapScope) throws LDAPException
+    public EntryCursor search(String baseDN, String filter, String[] attr, int ldapScope) throws LdapException
     {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("LDAP search: baseDN=[{}] query=[{}] attr=[{}] ldapScope=[{}]", baseDN, filter,
                 attr != null ? Arrays.asList(attr) : null, ldapScope);
         }
 
-        return this.connection.search(baseDN, ldapScope, filter, attr, false);
+        // XXX: is copy & paste from PagedLDAPSearchResults#search
+        SearchRequest searchRequest = new SearchRequestImpl();
+        searchRequest.setBase(new Dn(baseDN));
+        searchRequest.setFilter(filter);
+        searchRequest.setScope(SearchScope.getSearchScope(ldapScope));
+        searchRequest.addAttributes(attr);
+        searchRequest.setDerefAliases(AliasDerefMode.DEREF_ALWAYS);
+        searchRequest.setTypesOnly(false);
+        searchRequest.setSizeLimit(getMaxResults());
+
+        SearchCursor searchResponse = this.connection.search(searchRequest);
+
+        // TODO: should we return the plain SearchResponse here instead?
+        return new EntryCursorImpl(searchResponse);
     }
 
     /**
@@ -392,12 +429,12 @@ public class XWikiLDAPConnection
      * @param attrs the attributes names of values to return
      * @param typesOnly if true, returns the names but not the values of the attributes found. If false, returns the
      *            names and values for attributes found.
-     * @return a result stream. LDAPConnection#abandon should be called when it's not needed anymore.
-     * @throws LDAPException error when searching
+     * @return a result stream. PagedLDAPSearchResults#close should be called when it's not needed anymore.
+     * @throws LdapException error when searching
      * @since 9.3
      */
     public PagedLDAPSearchResults searchPaginated(String base, int scope, String filter, String[] attrs,
-        boolean typesOnly) throws LDAPException
+        boolean typesOnly) throws LdapException
     {
         int pageSize = this.configuration.getSearchPageSize();
 
@@ -411,35 +448,33 @@ public class XWikiLDAPConnection
      * @param attributeSet the LDAP attributes.
      */
     protected void ldapToXWikiAttribute(List<XWikiLDAPSearchAttribute> searchAttributeList,
-        LDAPAttributeSet attributeSet)
+        Collection<Attribute> attributeSet)
     {
-        for (LDAPAttribute attribute : (Set<LDAPAttribute>) attributeSet) {
-            String attributeName = attribute.getName();
+        for (Attribute attribute : attributeSet) {
+            String attributeName = attribute.getId();
 
             if (!isBinaryAttribute(attributeName)) {
                 LOGGER.debug("  - values for attribute [{}]", attributeName);
 
-                Enumeration<String> allValues = attribute.getStringValues();
+                for (Value value : attribute) {
+                    String strValue = value.getString();
 
-                if (allValues != null) {
-                    while (allValues.hasMoreElements()) {
-                        String value = allValues.nextElement();
+                    LOGGER.debug("    |- [{}]", strValue);
 
-                        LOGGER.debug("    |- [{}]", value);
-
-                        searchAttributeList.add(new XWikiLDAPSearchAttribute(attributeName, value));
-                    }
+                    searchAttributeList.add(new XWikiLDAPSearchAttribute(attributeName, strValue));
                 }
+
             } else {
                 LOGGER.debug("  - attribute [{}] is binary", attributeName);
 
-                Enumeration<byte[]> allValues = attribute.getByteValues();
+                for (Value value : attribute) {
+                    byte[] byteValue = value.getBytes();
 
-                if (allValues != null) {
-                    while (allValues.hasMoreElements()) {
-                        byte[] value = allValues.nextElement();
-
-                        searchAttributeList.add(new XWikiLDAPSearchAttribute(attributeName, value));
+                    if (byteValue == null) {
+                        LOGGER.warn("ignore value for [{}] as it turns out not to be binary (or empty)",
+                            attributeName);
+                    } else {
+                        searchAttributeList.add(new XWikiLDAPSearchAttribute(attributeName, byteValue));
                     }
                 }
             }
@@ -457,7 +492,7 @@ public class XWikiLDAPConnection
      */
     public static String escapeLDAPDNValue(String value)
     {
-        return StringUtils.isBlank(value) ? value : LDAPDN.escapeRDN("key=" + value).substring(4);
+        return StringUtils.isBlank(value) ? value : new Value(value).getEscaped();
     }
 
     /**
@@ -473,7 +508,7 @@ public class XWikiLDAPConnection
         }
 
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < value.length(); i++) {
+        for (int i = 0, n = value.length(); i < n; i++) {
             char curChar = value.charAt(i);
             switch (curChar) {
                 case '\\':

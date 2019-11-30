@@ -69,8 +69,8 @@ public class LDAPGroupsCache implements Disposable
     {
         Cache<Map<String, String>> cache;
 
-        String cacheKey = utils.getUidAttributeName() + "." + utils.getConnection().getConnection().getHost() + ":"
-            + utils.getConnection().getConnection().getPort();
+        String cacheKey = utils.getUidAttributeName() + "." + utils.getConnection().getLDAPHost() + ":"
+            + utils.getConnection().getLDAPPort();
 
         synchronized (cachePool) {
             Map<String, Cache<Map<String, String>>> cacheMap;

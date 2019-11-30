@@ -51,9 +51,9 @@
     </dependency>
 
     <dependency>
-      <groupId>com.novell.ldap</groupId>
-      <artifactId>jldap</artifactId>
-      <version>2009-10-07</version>
+      <groupId>org.apache.directory.api</groupId>
+      <artifactId>api-all</artifactId>
+      <version>2.0.0</version>
     </dependency>
 
     <!-- Testing dependencies -->
