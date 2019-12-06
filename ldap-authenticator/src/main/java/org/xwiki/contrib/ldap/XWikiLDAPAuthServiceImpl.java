@@ -27,7 +27,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import org.apache.directory.api.ldap.model.exception.LdapException;
 import org.securityfilter.filter.SecurityRequestWrapper;
 import org.securityfilter.realm.SimplePrincipal;
 import org.slf4j.Logger;
@@ -36,6 +35,8 @@ import org.xwiki.context.Execution;
 import org.xwiki.context.ExecutionContext;
 import org.xwiki.text.StringUtils;
 
+import com.novell.ldap.LDAPDN;
+import com.novell.ldap.LDAPException;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.doc.XWikiDocument;
@@ -429,10 +430,10 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
      * @return the {@link Principal}.
      * @throws XWikiException error when login.
      * @throws UnsupportedEncodingException error when login.
-     * @throws LdapException error when login.
+     * @throws LDAPException error when login.
      */
     protected Principal ldapAuthenticateInContext(String userId, String validXWikiUserName, String password,
-        XWikiContext context) throws XWikiException, UnsupportedEncodingException, LdapException
+        XWikiContext context) throws XWikiException, UnsupportedEncodingException, LDAPException
     {
         return ldapAuthenticateInContext(userId, validXWikiUserName, password, context, false);
     }
@@ -446,10 +447,10 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
      * @return the {@link Principal}.
      * @throws XWikiException error when login.
      * @throws UnsupportedEncodingException error when login.
-     * @throws LdapException error when login.
+     * @throws LDAPException error when login.
      */
     protected Principal ldapAuthenticateInContext(String userId, String password, XWikiContext context)
-        throws XWikiException, UnsupportedEncodingException, LdapException
+        throws XWikiException, UnsupportedEncodingException, LDAPException
     {
         return ldapAuthenticateInContext(userId, password, context, false);
     }
@@ -465,10 +466,10 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
      * @return the {@link Principal}.
      * @throws XWikiException error when login.
      * @throws UnsupportedEncodingException error when login.
-     * @throws LdapException error when login.
+     * @throws LDAPException error when login.
      */
     protected Principal ldapAuthenticateInContext(String userId, String password, XWikiContext context, boolean local)
-        throws XWikiException, UnsupportedEncodingException, LdapException
+        throws XWikiException, UnsupportedEncodingException, LDAPException
     {
         return ldapAuthenticateInContext(userId, null, password, context, local);
     }
@@ -485,10 +486,10 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
      * @return the {@link Principal}.
      * @throws XWikiException error when login.
      * @throws UnsupportedEncodingException error when login.
-     * @throws LdapException error when login.
+     * @throws LDAPException error when login.
      */
     protected Principal ldapAuthenticateInContext(String userId, String validXWikiUserName, String password,
-        XWikiContext context, boolean local) throws XWikiException, UnsupportedEncodingException, LdapException
+        XWikiContext context, boolean local) throws XWikiException, UnsupportedEncodingException, LDAPException
     {
         return ldapAuthenticateInContext(userId, validXWikiUserName, password, false, context, local);
     }
@@ -506,12 +507,12 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
      * @return the {@link Principal}.
      * @throws XWikiException error when login.
      * @throws UnsupportedEncodingException error when login.
-     * @throws LdapException error when login.
+     * @throws LDAPException error when login.
      * @since 9.0
      */
     protected Principal ldapAuthenticateInContext(String authInput, String validXWikiUserName, String password,
         boolean trusted, XWikiContext context, boolean local)
-        throws XWikiException, UnsupportedEncodingException, LdapException
+        throws XWikiException, UnsupportedEncodingException, LDAPException
     {
         Principal principal = null;
 
@@ -574,7 +575,7 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
             String bindDN = configuration.getLDAPBindDN(trimedAuthInput, password);
 
             // Active directory support a special non DN form for bind but does not accept it at search level
-            if (!bindDNFormat.equals(bindDN) && XWikiLDAPUtils.isValidDN(bindDN)) {
+            if (!bindDNFormat.equals(bindDN) && LDAPDN.isValid(bindDN)) {
                 ldapDn = bindDN;
             }
 
