@@ -55,6 +55,12 @@
       <artifactId>jldap</artifactId>
       <version>2009-10-07</version>
     </dependency>
+    <dependency>
+      <groupId>org.apache.directory.api</groupId>
+      <artifactId>api-all</artifactId>
+      <version>2.0.0</version>
+    </dependency>
+
 
     <!-- Testing dependencies -->
     <dependency>
@@ -88,6 +94,7 @@
              org/xwiki/contrib/ldap/LDAPPluginReferralHandler.java,
              org/xwiki/contrib/ldap/LDAPProfileXClass.java,
              org/xwiki/contrib/ldap/XWikiLDAPAuthServiceImpl.java,
+             org/xwiki/contrib/ldap/XWiki10LDAPAuthServiceImpl.java,
              org/xwiki/contrib/ldap/XWikiLDAPConfig.java,
              org/xwiki/contrib/ldap/XWikiLDAPConnection.java,
              org/xwiki/contrib/ldap/XWikiLDAPException.java,

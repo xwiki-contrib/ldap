@@ -28,6 +28,7 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 
 import org.xwiki.component.annotation.Component;
+import org.xwiki.contrib.ldap.apachedsapi.internal.LdapGroupsCache;
 import org.xwiki.model.EntityType;
 import org.xwiki.model.reference.PartialEntityReference;
 import org.xwiki.model.reference.RegexEntityReference;
@@ -78,6 +79,9 @@ public class GroupCacheExpirationEventListener extends AbstractEventListener
     @Inject
     private LDAPGroupsCache caches;
 
+    @Inject
+    private LdapGroupsCache apacheDSAPICaches;
+
     /**
      * The default constructor.
      */
@@ -90,5 +94,6 @@ public class GroupCacheExpirationEventListener extends AbstractEventListener
     public void onEvent(Event event, Object source, Object data)
     {
         this.caches.reset();
+        this.apacheDSAPICaches.reset();
     }
 }
