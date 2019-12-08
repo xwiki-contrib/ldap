@@ -28,7 +28,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.xwiki.contrib.ldap.XWikiLDAPException;
-import org.xwiki.contrib.ldap.apachedsapi.internal.DefaultXWikiLDAPConfigImpl;
+import org.xwiki.contrib.ldap.apachedsapi.internal.DefaultXWikiLdapConfigImpl;
 import org.xwiki.stability.Unstable;
 
 /**
@@ -47,7 +47,7 @@ public interface XWikiLdapConfig
     /**
      * Try to find the configuration in the following order:
      * <ul>
-     * <li>Local configuration stored in this {@link DefaultXWikiLDAPConfigImpl} instance (ldap_*name*)</li>
+     * <li>Local configuration stored in this {@link DefaultXWikiLdapConfigImpl} instance (ldap_*name*)</li>
      * <li>XWiki Preferences page (ldap_*name*)</li>
      * <li>xwiki.cfg configuration file (ldap.*name*)</li>
      * <li>A final configuration that could be overriden by extended authenticators</li>

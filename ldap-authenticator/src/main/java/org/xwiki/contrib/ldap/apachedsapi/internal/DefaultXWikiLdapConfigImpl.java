@@ -45,7 +45,7 @@ import org.xwiki.configuration.ConfigurationSource;
 import org.xwiki.context.Execution;
 import org.xwiki.context.ExecutionContext;
 import org.xwiki.contrib.ldap.XWikiLDAPException;
-import org.xwiki.contrib.ldap.apachedsapi.XWikiLDAPConnection;
+import org.xwiki.contrib.ldap.apachedsapi.XWikiLdapConnection;
 import org.xwiki.contrib.ldap.apachedsapi.XWikiLdapConfig;
 import org.xwiki.stability.Unstable;
 
@@ -56,7 +56,7 @@ import org.xwiki.stability.Unstable;
  * @since 10.0
  */
 @Component(roles = XWikiLdapConfig.class)
-public class DefaultXWikiLDAPConfigImpl implements XWikiLdapConfig
+public class DefaultXWikiLdapConfigImpl implements XWikiLdapConfig
 {
     /**
      * Mapping fields separator.
@@ -136,7 +136,7 @@ public class DefaultXWikiLDAPConfigImpl implements XWikiLdapConfig
     /**
      * Logging tool.
      */
-    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultXWikiLDAPConfigImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultXWikiLdapConfigImpl.class);
 
     /**
      * The default secure provider to use for SSL.
@@ -146,7 +146,7 @@ public class DefaultXWikiLDAPConfigImpl implements XWikiLdapConfig
     /**
      * the key to store the thread dependent "in memory" configuration in the execution context.
      */
-    private static final String LDAP_IN_MEMORY_CONFIG_KEY = DefaultXWikiLDAPConfigImpl.class.getName() + "::memory";
+    private static final String LDAP_IN_MEMORY_CONFIG_KEY = DefaultXWikiLdapConfigImpl.class.getName() + "::memory";
 
     static {
         DEFAULT_GROUP_CLASSES.add("group".toLowerCase());
@@ -179,7 +179,7 @@ public class DefaultXWikiLDAPConfigImpl implements XWikiLdapConfig
     /**
      * component constructor.
      */
-    public DefaultXWikiLDAPConfigImpl()
+    public DefaultXWikiLdapConfigImpl()
     {
         this.finalMemoryConfiguration = new HashMap<>();
     }
@@ -255,7 +255,7 @@ public class DefaultXWikiLDAPConfigImpl implements XWikiLdapConfig
     /**
      * Try to find the configuration in the following order:
      * <ul>
-     * <li>Local configuration stored in this {@link DefaultXWikiLDAPConfigImpl} instance (ldap_*name*)</li>
+     * <li>Local configuration stored in this {@link DefaultXWikiLdapConfigImpl} instance (ldap_*name*)</li>
      * <li>XWiki Preferences page (ldap_*name*)</li>
      * <li>xwiki.cfg configuration file (ldap.*name*)</li>
      * <li>A final configuration that could be overriden by extended authenticators</li>
@@ -790,8 +790,8 @@ public class DefaultXWikiLDAPConfigImpl implements XWikiLdapConfig
     @Override
     public String getLDAPBindDN(String input, String password)
     {
-        return MessageFormat.format(getLDAPBindDN(), XWikiLDAPConnection.escapeLDAPDNValue(input),
-            XWikiLDAPConnection.escapeLDAPDNValue(password));
+        return MessageFormat.format(getLDAPBindDN(), XWikiLdapConnection.escapeLDAPDNValue(input),
+            XWikiLdapConnection.escapeLDAPDNValue(password));
     }
 
     /**
@@ -857,7 +857,7 @@ public class DefaultXWikiLDAPConfigImpl implements XWikiLdapConfig
      */
     public String getUidAttributeName()
     {
-        return getLDAPParam(DefaultXWikiLDAPConfigImpl.PREF_LDAP_UID, LDAP_DEFAULT_UID);
+        return getLDAPParam(DefaultXWikiLdapConfigImpl.PREF_LDAP_UID, LDAP_DEFAULT_UID);
     }
 
     /**
@@ -868,7 +868,7 @@ public class DefaultXWikiLDAPConfigImpl implements XWikiLdapConfig
     {
         Set<String> binaryAttributes = new HashSet<>();
 
-        binaryAttributes.add(getLDAPParam(DefaultXWikiLDAPConfigImpl.PREF_LDAP_PHOTO_ATTRIBUTE, DEFAULT_PHOTO_ATTRIBUTE));
+        binaryAttributes.add(getLDAPParam(DefaultXWikiLdapConfigImpl.PREF_LDAP_PHOTO_ATTRIBUTE, DEFAULT_PHOTO_ATTRIBUTE));
 
         return binaryAttributes;
     }

@@ -66,12 +66,12 @@ import com.xpn.xwiki.XWikiContext;
  * @version $Id$
  * @since 10.0
  */
-public class XWikiLDAPConnection
+public class XWikiLdapConnection
 {
     /**
      * Logging tool.
      */
-    private static final Logger LOGGER = LoggerFactory.getLogger(XWikiLDAPConnection.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(XWikiLdapConnection.class);
 
     /**
      * The LDAP connection.
@@ -88,7 +88,7 @@ public class XWikiLDAPConnection
     /**
      * @param configuration the configuration to use
      */
-    public XWikiLDAPConnection(XWikiLdapConfig configuration)
+    public XWikiLdapConnection(XWikiLdapConfig configuration)
     {
         this.configuration = configuration;
     }
@@ -96,7 +96,7 @@ public class XWikiLDAPConnection
     /**
      * @param connection the connection to copy
      */
-    public XWikiLDAPConnection(XWikiLDAPConnection connection)
+    public XWikiLdapConnection(XWikiLdapConnection connection)
     {
         this.connection = connection.connection;
         this.binaryAttributes = connection.binaryAttributes;
@@ -351,7 +351,7 @@ public class XWikiLDAPConnection
         List<XWikiLDAPSearchAttribute> searchAttributeList = null;
 
         // filter return all attributes return attrs and values time out value
-        try (PagedLDAPSearchResults searchResults = searchPaginated(baseDN, ldapScope, filter, attr, false)) {
+        try (PagedLdapSearchResults searchResults = searchPaginated(baseDN, ldapScope, filter, attr, false)) {
             if (!searchResults.hasMore()) {
                 return null;
             }
@@ -396,7 +396,7 @@ public class XWikiLDAPConnection
                 attr != null ? Arrays.asList(attr) : null, ldapScope);
         }
 
-        // XXX: is copy & paste from PagedLDAPSearchResults#search
+        // XXX: is copy & paste from PagedLdapSearchResults#search
         SearchRequest searchRequest = new SearchRequestImpl();
         searchRequest.setBase(new Dn(baseDN));
         searchRequest.setFilter(filter);
@@ -424,16 +424,16 @@ public class XWikiLDAPConnection
      * @param attrs the attributes names of values to return
      * @param typesOnly if true, returns the names but not the values of the attributes found. If false, returns the
      *            names and values for attributes found.
-     * @return a result stream. PagedLDAPSearchResults#close should be called when it's not needed anymore.
+     * @return a result stream. PagedLdapSearchResults#close should be called when it's not needed anymore.
      * @throws LdapException error when searching
      * @since 9.3
      */
-    public PagedLDAPSearchResults searchPaginated(String base, int scope, String filter, String[] attrs,
+    public PagedLdapSearchResults searchPaginated(String base, int scope, String filter, String[] attrs,
         boolean typesOnly) throws LdapException
     {
         int pageSize = this.configuration.getSearchPageSize();
 
-        return new PagedLDAPSearchResults(this, base, scope, filter, attrs, typesOnly, pageSize);
+        return new PagedLdapSearchResults(this, base, scope, filter, attrs, typesOnly, pageSize);
     }
 
     /**

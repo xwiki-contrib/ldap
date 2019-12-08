@@ -35,8 +35,8 @@ import org.slf4j.LoggerFactory;
 import org.xwiki.context.Execution;
 import org.xwiki.context.ExecutionContext;
 import org.xwiki.text.StringUtils;
-import org.xwiki.contrib.ldap.apachedsapi.XWikiLDAPConnection;
-import org.xwiki.contrib.ldap.apachedsapi.XWikiLDAPUtils;
+import org.xwiki.contrib.ldap.apachedsapi.XWikiLdapConnection;
+import org.xwiki.contrib.ldap.apachedsapi.XWikiLdapUtils;
 import org.xwiki.contrib.ldap.apachedsapi.XWikiLdapConfig;
 
 import com.xpn.xwiki.XWikiContext;
@@ -68,7 +68,7 @@ public class XWiki10LDAPAuthServiceImpl extends XWikiAuthServiceImpl
 
     private XWikiLdapConfig ldapConfig;
 
-    private XWikiLDAPUtils ldapUtils;
+    private XWikiLdapUtils ldapUtils;
     
     protected ExecutionContext getExecutionContext()
     {
@@ -89,10 +89,10 @@ public class XWiki10LDAPAuthServiceImpl extends XWikiAuthServiceImpl
         return ldapConfig;
     }
 
-    protected XWikiLDAPUtils getUtils()
+    protected XWikiLdapUtils getUtils()
     {
         if (this.ldapUtils == null) {
-            this.ldapUtils = Utils.getComponent(XWikiLDAPUtils.class);
+            this.ldapUtils = Utils.getComponent(XWikiLdapUtils.class);
         }
 
         return ldapUtils;
@@ -460,8 +460,8 @@ public class XWiki10LDAPAuthServiceImpl extends XWikiAuthServiceImpl
         configuration.parseRemoteUser(authInput);
         String uid = configuration.getMemoryConfiguration().get("uid");
 
-        XWikiLDAPUtils ldapUtils = getUtils();
-        XWikiLDAPConnection connector = new XWikiLDAPConnection(configuration);
+        XWikiLdapUtils ldapUtils = getUtils();
+        XWikiLdapConnection connector = new XWikiLdapConnection(configuration);
 
         // ////////////////////////////////////////////////////////////////////
         // 1. check if ldap authentication is off => authenticate against db
@@ -507,7 +507,7 @@ public class XWiki10LDAPAuthServiceImpl extends XWikiAuthServiceImpl
             String bindDN = configuration.getLDAPBindDN(trimedAuthInput, password);
 
             // Active directory support a special non DN form for bind but does not accept it at search level
-            if (!bindDNFormat.equals(bindDN) && XWikiLDAPUtils.isValidDN(bindDN)) {
+            if (!bindDNFormat.equals(bindDN) && XWikiLdapUtils.isValidDN(bindDN)) {
                 ldapDn = bindDN;
             }
 
@@ -646,7 +646,7 @@ public class XWiki10LDAPAuthServiceImpl extends XWikiAuthServiceImpl
      * @throws XWikiException error when updating or creating XWiki user.
      */
     protected XWikiDocument syncUser(XWikiDocument userProfile, List<XWikiLDAPSearchAttribute> searchAttributeListIn,
-        String ldapDn, String authInput, XWikiLDAPUtils ldapUtils, XWikiLDAPConnection connection, XWikiContext context) throws XWikiException
+        String ldapDn, String authInput, XWikiLdapUtils ldapUtils, XWikiLdapConnection connection, XWikiContext context) throws XWikiException
     {
         return ldapUtils.syncUser(connection, userProfile, searchAttributeListIn, ldapDn, authInput, context);
     }
@@ -662,7 +662,7 @@ public class XWiki10LDAPAuthServiceImpl extends XWikiAuthServiceImpl
      * @throws XWikiException error when synchronizing user membership.
      */
     protected void syncGroupsMembership(String xwikiUserName, String ldapDn, boolean createuser,
-        XWikiLDAPUtils ldapUtils, XWikiLDAPConnection connection, XWikiContext context) throws XWikiException
+        XWikiLdapUtils ldapUtils, XWikiLdapConnection connection, XWikiContext context) throws XWikiException
     {
         XWikiLdapConfig configuration = getConfiguration();
 
@@ -692,7 +692,7 @@ public class XWiki10LDAPAuthServiceImpl extends XWikiAuthServiceImpl
      * @throws XWikiException error when synchronizing user membership.
      */
     protected void syncGroupsMembership(String xwikiUserName, String userDN, Map<String, Set<String>> groupMappings,
-        XWikiLDAPUtils ldapUtils, XWikiLDAPConnection connection, XWikiContext context) throws XWikiException
+        XWikiLdapUtils ldapUtils, XWikiLdapConnection connection, XWikiContext context) throws XWikiException
     {
         ldapUtils.syncGroupsMembership(connection, xwikiUserName, userDN, groupMappings, context);
     }

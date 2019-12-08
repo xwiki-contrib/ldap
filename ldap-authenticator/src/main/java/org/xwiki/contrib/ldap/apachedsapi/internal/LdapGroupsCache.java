@@ -32,7 +32,7 @@ import org.xwiki.cache.config.LRUCacheConfiguration;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.manager.ComponentLifecycleException;
 import org.xwiki.component.phase.Disposable;
-import org.xwiki.contrib.ldap.apachedsapi.XWikiLDAPUtils;
+import org.xwiki.contrib.ldap.apachedsapi.XWikiLdapUtils;
 import org.xwiki.contrib.ldap.apachedsapi.XWikiLdapConfig;
 
 /**

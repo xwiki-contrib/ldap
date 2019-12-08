@@ -46,11 +46,11 @@ import org.slf4j.LoggerFactory;
  * @version $Id$
  * @since 9.3
  */
-public class PagedLDAPSearchResults implements AutoCloseable
+public class PagedLdapSearchResults implements AutoCloseable
 {
-    private static final Logger LOGGER = LoggerFactory.getLogger(PagedLDAPSearchResults.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PagedLdapSearchResults.class);
 
-    private final XWikiLDAPConnection connection;
+    private final XWikiLdapConnection connection;
 
     private final String base;
 
@@ -84,7 +84,7 @@ public class PagedLDAPSearchResults implements AutoCloseable
      * @param pageSize the maximum number of results to get in one page
      * @throws LdapException A general exception which includes an error message and an LDAP error code.
      */
-    public PagedLDAPSearchResults(XWikiLDAPConnection connection, String base, int scope, String filter, String[] attrs,
+    public PagedLdapSearchResults(XWikiLdapConnection connection, String base, int scope, String filter, String[] attrs,
         boolean typesOnly, int pageSize) throws LdapException
     {
         this.connection = connection;
@@ -108,7 +108,7 @@ public class PagedLDAPSearchResults implements AutoCloseable
         pageControl.setSize(pageSize);
         pageControl.setCookie(cookie);
 
-        // XXX: has copy & paste in XWikiLDAPConnection#search
+        // XXX: has copy & paste in XWikiLdapConnection#search
         SearchRequest searchRequest = new SearchRequestImpl();
         searchRequest.setBase(new Dn(this.base));
         searchRequest.setFilter(this.filter);
@@ -209,9 +209,9 @@ public class PagedLDAPSearchResults implements AutoCloseable
 
     /**
      * the connection used by this result
-     * @return a {@link XWikiLDAPConnection}
+     * @return a {@link XWikiLdapConnection}
      */
-    public XWikiLDAPConnection getConnection()
+    public XWikiLdapConnection getConnection()
     {
         return connection;
     }
