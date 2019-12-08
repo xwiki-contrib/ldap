@@ -208,7 +208,7 @@ public class PagedLdapSearchResults implements AutoCloseable
     }
 
     /**
-     * the connection used by this result
+     * The connection used by this result.
      * @return a {@link XWikiLdapConnection}
      */
     public XWikiLdapConnection getConnection()

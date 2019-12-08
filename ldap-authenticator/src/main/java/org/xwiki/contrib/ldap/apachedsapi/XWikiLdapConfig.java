@@ -50,7 +50,7 @@ public interface XWikiLdapConfig
      * <li>Local configuration stored in this {@link DefaultXWikiLdapConfigImpl} instance (ldap_*name*)</li>
      * <li>XWiki Preferences page (ldap_*name*)</li>
      * <li>xwiki.cfg configuration file (ldap.*name*)</li>
-     * <li>A final configuration that could be overriden by extended authenticators</li>
+     * <li>A final configuration that could be overriden by extended authenticators.</li>
      * </ul>
      *
      * @param name the name of the property in XWikiPreferences.
@@ -109,7 +109,7 @@ public interface XWikiLdapConfig
     /**
      * @param name the name of the property in XWikiPreferences.
      * @param def the default value
-     * @param forceLowerCaseKey
+     * @param forceLowerCaseKey to force the result keys in lower case
      * @return the configuration value as {@link Map}
      */
     Map<String, String> getLDAPMapParam(String name, Map<String, String> def, boolean forceLowerCaseKey);
@@ -118,7 +118,7 @@ public interface XWikiLdapConfig
      * @param name the name of the property in XWikiPreferences.
      * @param separator the separator used to cut each element of the list
      * @param def the default value
-     * @param forceLowerCaseKey
+     * @param forceLowerCaseKey to force the result keys in lower case
      * @return the configuration value as {@link Map}
      */
     Map<String, String> getLDAPMapParam(String name, char separator, Map<String, String> def,
@@ -130,6 +130,7 @@ public interface XWikiLdapConfig
      * and will be used by all threads until the server is restarted (or the authenticator extension reloaded)
      * @param key the name of the configuration variable
      * @param value the configuration value as a string
+     * @since 10.0
      */
     @Unstable
     void setFinalProperty(String key, String value);
@@ -215,6 +216,11 @@ public interface XWikiLdapConfig
     Map<String, Set<String>> getGroupMappings();
 
     /**
+     * @return true if sub groups should be resolved. too.
+     */
+    boolean isResolveSubgroups();
+
+    /**
      * Get mapping between XWiki users attributes and LDAP users attributes. The key in the Map is lower cased to easily
      * support any case.
      *
@@ -274,7 +280,12 @@ public interface XWikiLdapConfig
     int getLDAPMaxResults();
 
     /**
-     * @return the maximum number of elements to return in each search page
+     * @return the user search format string.
+     */
+    String getUserSearchFormatString();
+
+    /**
+     * @return the maximum number of elements to return in each search page.
      */
     int getSearchPageSize();
 

@@ -98,8 +98,7 @@ public class LdapGroupsCache implements Disposable
     }
 
     /**
-     * @param config the current LDAP configuration
-     * @return the cache configuration
+     * @return a newly created cache configuration
      */
     public LRUCacheConfiguration createCacheConfiguration()
     {

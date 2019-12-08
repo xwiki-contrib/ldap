@@ -99,7 +99,9 @@
              org/xwiki/contrib/ldap/XWikiLDAPConnection.java,
              org/xwiki/contrib/ldap/XWikiLDAPException.java,
              org/xwiki/contrib/ldap/XWikiLDAPSearchAttribute.java,
-             org/xwiki/contrib/ldap/XWikiLDAPUtils.java
+             org/xwiki/contrib/ldap/XWikiLDAPUtils.java,
+             org/xwiki/contrib/ldap/apachedsapi/XWikiLdapConnection.java,
+             org/xwiki/contrib/ldap/apachedsapi/XWikiLdapUtils.java
           </excludes>
         </configuration>
       </plugin>

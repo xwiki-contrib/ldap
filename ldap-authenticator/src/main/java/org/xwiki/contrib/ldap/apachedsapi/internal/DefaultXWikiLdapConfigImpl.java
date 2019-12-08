@@ -89,9 +89,9 @@ public class DefaultXWikiLdapConfigImpl implements XWikiLdapConfig
     public static final String PREF_LDAP_UID = "ldap_UID_attr";
 
     /**
-     * Default unique user field name.
+     * Key to store the unique user field in the memory configuration.
      */
-    private static final String LDAP_DEFAULT_UID = "cn";
+    public static final String CONF_LDAP_UID = "uid";
 
     /**
      * Enable photo update property name in XWikiPreferences.
@@ -142,6 +142,16 @@ public class DefaultXWikiLdapConfigImpl implements XWikiLdapConfig
      * The default secure provider to use for SSL.
      */
     private static final String DEFAULT_SECUREPROVIDER = "com.sun.net.ssl.internal.ssl.Provider";
+
+    /**
+     * prefix for remote user mapping entries in the configuration.
+     */
+    private static final String REMOTE_USER_MAPPING_CONFIG_PREFIX = "ldap_remoteUserMapping.";
+
+    /**
+     * Default unique user field name.
+     */
+    private static final String PREF_LDAP_DEFAULT_UID = "cn";
 
     /**
      * the key to store the thread dependent "in memory" configuration in the execution context.
@@ -195,7 +205,6 @@ public class DefaultXWikiLdapConfigImpl implements XWikiLdapConfig
         Map<String, String> memoryConfig = (Map<String, String>) exec.getProperty(LDAP_IN_MEMORY_CONFIG_KEY);
         if (memoryConfig == null) {
             memoryConfig = new HashMap<String, String>();
-            // exec.setProperty(LDAP_IN_MEMORY_CONFIG_KEY, memoryConfig);
             exec.newProperty(LDAP_IN_MEMORY_CONFIG_KEY).initial(memoryConfig).nonNull().declare();
         }
         return memoryConfig;
@@ -212,7 +221,7 @@ public class DefaultXWikiLdapConfigImpl implements XWikiLdapConfig
     public void parseRemoteUser(String ssoRemoteUser)
     {
         this.getMemoryConfiguration().put("auth.input", ssoRemoteUser);
-        this.getMemoryConfiguration().put("uid", ssoRemoteUser.trim());
+        this.getMemoryConfiguration().put(CONF_LDAP_UID, ssoRemoteUser.trim());
 
         Pattern remoteUserParser = getRemoteUserPattern();
 
@@ -224,7 +233,7 @@ public class DefaultXWikiLdapConfigImpl implements XWikiLdapConfig
             if (marcher.find()) {
                 int groupCount = marcher.groupCount();
                 if (groupCount == 0) {
-                    this.getMemoryConfiguration().put("uid", marcher.group().trim());
+                    this.getMemoryConfiguration().put(CONF_LDAP_UID, marcher.group().trim());
                 } else {
                     for (int g = 1; g <= groupCount; ++g) {
                         String groupValue = marcher.group(g);
@@ -232,7 +241,8 @@ public class DefaultXWikiLdapConfigImpl implements XWikiLdapConfig
                         List<String> remoteUserMapping = getRemoteUserMapping(g);
 
                         for (String configName : remoteUserMapping) {
-                            this.getMemoryConfiguration().put(configName, convertRemoteUserMapping(configName, groupValue));
+                            this.getMemoryConfiguration().put(configName,
+                                convertRemoteUserMapping(configName, groupValue));
                         }
                     }
                 }
@@ -258,7 +268,7 @@ public class DefaultXWikiLdapConfigImpl implements XWikiLdapConfig
      * <li>Local configuration stored in this {@link DefaultXWikiLdapConfigImpl} instance (ldap_*name*)</li>
      * <li>XWiki Preferences page (ldap_*name*)</li>
      * <li>xwiki.cfg configuration file (ldap.*name*)</li>
-     * <li>A final configuration that could be overriden by extended authenticators</li>
+     * <li>A final configuration that could be overriden by extended authenticators.</li>
      * </ul>
      *
      * @param name the name of the property in XWikiPreferences.
@@ -356,66 +366,6 @@ public class DefaultXWikiLdapConfigImpl implements XWikiLdapConfig
     public List<String> getLDAPListParam(String name, List<String> def)
     {
         return getLDAPListParam(name, ',', def);
-    }
-
-    /**
-     * @return a Java regexp used to parse the remote user provided by JAAS.
-     */
-    @Override
-    public Pattern getRemoteUserPattern()
-    {
-        String param = getLDAPParam("ldap_remoteUserParser", null);
-
-        return param != null ? Pattern.compile(param) : null;
-    }
-
-    /**
-     * @param groupId the identifier of the group matched by the REMOTE_USER regexp
-     * @return the properties associated to the passed group
-     */
-    @Override
-    public List<String> getRemoteUserMapping(int groupId)
-    {
-        return getLDAPListParam("ldap_remoteUserMapping." + groupId, ',', Collections.<String>emptyList());
-    }
-
-    /**
-     * @param propertyName the name of the property
-     * @param forceLowerCaseKey if true the keys will be stored lowered cased in the {@link Map}
-     * @return the mapping (the value for each domain) associated to the passed property
-     */
-    @Override
-    public Map<String, String> getRemoteUserMapping(String propertyName, boolean forceLowerCaseKey)
-    {
-        return getLDAPMapParam("ldap_remoteUserMapping." + propertyName, '|', Collections.<String, String>emptyMap(),
-            forceLowerCaseKey);
-    }
-
-    /**
-     * @return try to find existing XWiki user with both complete user id and user login
-     */
-    @Override
-    public Set<String> getTestLoginFor()
-    {
-        List<String> list = getLDAPListParam("ldap_testLoginFor", ',', Collections.<String>emptyList());
-
-        Set<String> set = new HashSet<>(list.size());
-        for (String uid : list) {
-            set.add(StrSubstitutor.replace(uid, this.getMemoryConfiguration()));
-        }
-
-        LOGGER.debug("TestLoginFor: {}", set);
-
-        return set;
-    }
-
-    /**
-     * @return an HTTP header that could be used to retrieve the authenticated user (only in xwiki.cfg).
-     */
-    @Override
-    public String getHttpHeader()
-    {
-        return this.cfgConfigurationSource.getProperty("xwiki.authentication.ldap.httpHeader");
     }
 
     /**
@@ -522,13 +472,13 @@ public class DefaultXWikiLdapConfigImpl implements XWikiLdapConfig
         return tokens;
     }
 
-
     /**
      * Add a configuration value to the "in memory" config.
      * These values will be effective if there is no value in the other configuration sources,
      * and will be used by all threads until the server is restarted (or the authenticator extension reloaded)
      * @param key the name of the configuration variable
      * @param value the configuration value as a string
+     * @since 10.0
      */
     @Override
     @Unstable
@@ -536,7 +486,67 @@ public class DefaultXWikiLdapConfigImpl implements XWikiLdapConfig
     {
         this.finalMemoryConfiguration.put(key, value);
     }
-    
+
+    /**
+     * @return try to find existing XWiki user with both complete user id and user login
+     */
+    @Override
+    public Set<String> getTestLoginFor()
+    {
+        List<String> list = getLDAPListParam("ldap_testLoginFor", ',', Collections.<String>emptyList());
+
+        Set<String> set = new HashSet<>(list.size());
+        for (String uid : list) {
+            set.add(StrSubstitutor.replace(uid, this.getMemoryConfiguration()));
+        }
+
+        LOGGER.debug("TestLoginFor: {}", set);
+
+        return set;
+    }
+
+    /**
+     * @return a Java regexp used to parse the remote user provided by JAAS.
+     */
+    @Override
+    public Pattern getRemoteUserPattern()
+    {
+        String param = getLDAPParam("ldap_remoteUserParser", null);
+
+        return param != null ? Pattern.compile(param) : null;
+    }
+
+    /**
+     * @param groupId the identifier of the group matched by the REMOTE_USER regexp
+     * @return the properties associated to the passed group
+     */
+    @Override
+    public List<String> getRemoteUserMapping(int groupId)
+    {
+        return getLDAPListParam(REMOTE_USER_MAPPING_CONFIG_PREFIX + groupId, Collections.<String>emptyList());
+    }
+
+    /**
+     * @param propertyName the name of the property
+     * @param forceLowerCaseKey if true the keys will be stored lowered cased in the {@link Map}
+     * @return the mapping (the value for each domain) associated to the passed property
+     */
+    @Override
+    public Map<String, String> getRemoteUserMapping(String propertyName, boolean forceLowerCaseKey)
+    {
+        return getLDAPMapParam(REMOTE_USER_MAPPING_CONFIG_PREFIX + propertyName, '|',
+            Collections.<String, String>emptyMap(), forceLowerCaseKey);
+    }
+
+    /**
+     * @return an HTTP header that could be used to retrieve the authenticated user (only in xwiki.cfg).
+     */
+    @Override
+    public String getHttpHeader()
+    {
+        return this.cfgConfigurationSource.getProperty("xwiki.authentication.ldap.httpHeader");
+    }
+
     /**
      * @return the collection of the LDAP groups classes.
      */
@@ -615,7 +625,6 @@ public class DefaultXWikiLdapConfigImpl implements XWikiLdapConfig
 
         return provider;
     }
-
 
     /**
      * @return true if LDAP is enabled.
@@ -722,6 +731,15 @@ public class DefaultXWikiLdapConfigImpl implements XWikiLdapConfig
                 LOGGER.debug("Groupmapping found [{}] [{}]", xwikigroup, ldapGroups);
             }
         }
+    }
+
+    /**
+     * @return true if sub groups should be resolved. too.
+     */
+    @Override
+    public boolean isResolveSubgroups()
+    {
+        return getLDAPParamAsLong("ldap_group_sync_resolve_subgroups", 1) == 1;
     }
 
     /**
@@ -844,6 +862,15 @@ public class DefaultXWikiLdapConfigImpl implements XWikiLdapConfig
     }
 
     /**
+     * @return the user search format string.
+     */
+    @Override
+    public String getUserSearchFormatString()
+    {
+        return getLDAPParam("ldap_user_search_fmt", "({0}={1})");
+    }
+
+    /**
      * @return the maximum number of elements to return in each search page
      */
     @Override
@@ -857,7 +884,7 @@ public class DefaultXWikiLdapConfigImpl implements XWikiLdapConfig
      */
     public String getUidAttributeName()
     {
-        return getLDAPParam(DefaultXWikiLdapConfigImpl.PREF_LDAP_UID, LDAP_DEFAULT_UID);
+        return getLDAPParam(PREF_LDAP_UID, PREF_LDAP_DEFAULT_UID);
     }
 
     /**
@@ -868,7 +895,7 @@ public class DefaultXWikiLdapConfigImpl implements XWikiLdapConfig
     {
         Set<String> binaryAttributes = new HashSet<>();
 
-        binaryAttributes.add(getLDAPParam(DefaultXWikiLdapConfigImpl.PREF_LDAP_PHOTO_ATTRIBUTE, DEFAULT_PHOTO_ATTRIBUTE));
+        binaryAttributes.add(getLDAPParam(PREF_LDAP_PHOTO_ATTRIBUTE, DEFAULT_PHOTO_ATTRIBUTE));
 
         return binaryAttributes;
     }
