@@ -489,11 +489,11 @@ public class XWiki10LDAPAuthServiceImpl extends XWikiAuthServiceImpl
             // 3. find XWiki user profile page
             // ////////////////////////////////////////////////////////////////////
 
-            XWikiDocument userProfile = ldapUtils.getUserProfileByUid(validXWikiUserName, trimedAuthInput, context);
+            XWikiDocument userProfile = ldapUtils.getUserProfileByUid(validXWikiUserName, trimedAuthInput);
             if (userProfile == null) {
                 // Try to search just the UID (in case this user was created before a move to multidomain)
                 if (!trimedAuthInput.equals(uid) && getConfiguration().getTestLoginFor().contains(trimedAuthInput)) {
-                    userProfile = ldapUtils.getUserProfileByUid(validXWikiUserName, uid, context);
+                    userProfile = ldapUtils.getUserProfileByUid(validXWikiUserName, uid);
                 }
             }
 
@@ -522,7 +522,7 @@ public class XWiki10LDAPAuthServiceImpl extends XWikiAuthServiceImpl
                     LOGGER.debug("Checking if the user belongs to the user group: {}", filterGroupDN);
                 }
 
-                ldapDn = ldapUtils.isInGroup(connector, uid, ldapDn, filterGroupDN, context);
+                ldapDn = ldapUtils.isInGroup(uid, ldapDn, filterGroupDN, connector);
 
                 if (ldapDn == null) {
                     throw new XWikiException(XWikiException.MODULE_XWIKI_USER, XWikiException.ERROR_XWIKI_USER_INIT,
@@ -541,7 +541,7 @@ public class XWiki10LDAPAuthServiceImpl extends XWikiAuthServiceImpl
                     LOGGER.debug("Checking if the user does not belongs to the exclude group: {}", excludeGroupDN);
                 }
 
-                if (ldapUtils.isInGroup(connector, uid, ldapDn, excludeGroupDN, context) != null) {
+                if (ldapUtils.isInGroup(uid, ldapDn, excludeGroupDN, connector) != null) {
                     throw new XWikiException(XWikiException.MODULE_XWIKI_USER, XWikiException.ERROR_XWIKI_USER_INIT,
                         "LDAP user {0} should not belong to LDAP group {1}.", null,
                         new Object[] { uid, filterGroupDN });
@@ -557,7 +557,7 @@ public class XWiki10LDAPAuthServiceImpl extends XWikiAuthServiceImpl
             // if we still don't have a dn, search for it. Also get the attributes, we might need
             // them
             if (ldapDn == null) {
-                searchAttributes = ldapUtils.searchUserAttributesByUid(connector, uid, ldapUtils.getAttributeNameTable(context));
+                searchAttributes = ldapUtils.searchUserAttributesByUid(uid, ldapUtils.getAttributeNameTable(), connector);
 
                 if (searchAttributes != null) {
                     for (XWikiLDAPSearchAttribute searchAttribute : searchAttributes) {
@@ -622,7 +622,7 @@ public class XWiki10LDAPAuthServiceImpl extends XWikiAuthServiceImpl
             // ////////////////////////////////////////////////////////////////////
 
             try {
-                syncGroupsMembership(userProfile.getFullName(), ldapDn, isNewUser, ldapUtils, connector, context);
+                syncGroupsMembership(userProfile.getFullName(), ldapDn, isNewUser, ldapUtils, connector);
             } catch (XWikiException e) {
                 LOGGER.error("Failed to synchronise user's groups membership", e);
             }
@@ -648,7 +648,7 @@ public class XWiki10LDAPAuthServiceImpl extends XWikiAuthServiceImpl
     protected XWikiDocument syncUser(XWikiDocument userProfile, List<XWikiLDAPSearchAttribute> searchAttributeListIn,
         String ldapDn, String authInput, XWikiLdapUtils ldapUtils, XWikiLdapConnection connection, XWikiContext context) throws XWikiException
     {
-        return ldapUtils.syncUser(connection, userProfile, searchAttributeListIn, ldapDn, authInput, context);
+        return ldapUtils.syncUser(userProfile, searchAttributeListIn, ldapDn, authInput, connection, context);
     }
 
     /**
@@ -658,11 +658,11 @@ public class XWiki10LDAPAuthServiceImpl extends XWikiAuthServiceImpl
      * @param ldapDn the LDAP DN of the user.
      * @param createuser indicate if the user is created or updated.
      * @param ldapUtils the LDAP communication tool.
-     * @param context the XWiki context.
+     * @param connection the ldap connection.
      * @throws XWikiException error when synchronizing user membership.
      */
     protected void syncGroupsMembership(String xwikiUserName, String ldapDn, boolean createuser,
-        XWikiLdapUtils ldapUtils, XWikiLdapConnection connection, XWikiContext context) throws XWikiException
+        XWikiLdapUtils ldapUtils, XWikiLdapConnection connection) throws XWikiException
     {
         XWikiLdapConfig configuration = getConfiguration();
 
@@ -676,7 +676,7 @@ public class XWiki10LDAPAuthServiceImpl extends XWikiAuthServiceImpl
             String syncmode = configuration.getLDAPParam("ldap_mode_group_sync", "always");
 
             if (!syncmode.equalsIgnoreCase("create") || createuser) {
-                syncGroupsMembership(xwikiUserName, ldapDn, groupMappings, ldapUtils, connection, context);
+                syncGroupsMembership(xwikiUserName, ldapDn, groupMappings, ldapUtils, connection);
             }
         }
     }
@@ -688,13 +688,13 @@ public class XWiki10LDAPAuthServiceImpl extends XWikiAuthServiceImpl
      * @param userDN the LDAP DN of the user.
      * @param groupMappings the mapping between XWiki groups names and LDAP groups names.
      * @param ldapUtils the LDAP communication tool.
-     * @param context the XWiki context.
+     * @param connection the ldap connection.
      * @throws XWikiException error when synchronizing user membership.
      */
     protected void syncGroupsMembership(String xwikiUserName, String userDN, Map<String, Set<String>> groupMappings,
-        XWikiLdapUtils ldapUtils, XWikiLdapConnection connection, XWikiContext context) throws XWikiException
+        XWikiLdapUtils ldapUtils, XWikiLdapConnection connection) throws XWikiException
     {
-        ldapUtils.syncGroupsMembership(connection, xwikiUserName, userDN, groupMappings, context);
+        ldapUtils.syncGroupsMembership(xwikiUserName, userDN, groupMappings, connection);
     }
 
 }
