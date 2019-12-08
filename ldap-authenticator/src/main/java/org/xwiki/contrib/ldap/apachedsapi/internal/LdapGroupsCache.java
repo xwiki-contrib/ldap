@@ -65,15 +65,14 @@ public class LdapGroupsCache implements Disposable
     /**
      * Get the cache with the provided name for a particular LDAP server.
      * 
-     * @param utils the LDAP tools
      * @return the cache.
      * @throws CacheException error when creating the cache.
      */
-    public Cache<Map<String, String>> getGroupCache(XWikiLDAPUtils utils) throws CacheException
+    public Cache<Map<String, String>> getGroupCache() throws CacheException
     {
         Cache<Map<String, String>> cache;
 
-        String cacheKey = utils.getUidAttributeName() + "." + ldapConfig.getLDAPHost() + ":"
+        String cacheKey = ldapConfig.getUidAttributeName() + "." + ldapConfig.getLDAPHost() + ":"
             + ldapConfig.getLDAPPort();
 
         synchronized (cachePool) {

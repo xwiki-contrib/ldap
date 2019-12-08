@@ -89,6 +89,11 @@ public class DefaultXWikiLDAPConfigImpl implements XWikiLdapConfig
     public static final String PREF_LDAP_UID = "ldap_UID_attr";
 
     /**
+     * Default unique user field name.
+     */
+    private static final String LDAP_DEFAULT_UID = "cn";
+
+    /**
      * Enable photo update property name in XWikiPreferences.
      */
     public static final String PREF_LDAP_UPDATE_PHOTO = "ldap_update_photo";
@@ -812,6 +817,14 @@ public class DefaultXWikiLDAPConfigImpl implements XWikiLdapConfig
     }
 
     /**
+     * @return the LDAP base DN from where to executes LDAP queries.
+     */
+    public String getBaseDN()
+    {
+        return getLDAPParam("ldap_base_DN", "");
+    }
+
+    /**
      * @return the maximum number of milliseconds the client waits for any operation under these constraints to
      *         complete.
      */
@@ -837,6 +850,14 @@ public class DefaultXWikiLDAPConfigImpl implements XWikiLdapConfig
     public int getSearchPageSize()
     {
         return (int) getLDAPParamAsLong("ldap_searchPageSize", 500);
+    }
+
+    /**
+     * @return the LDAP attribute containing the identifier for a user.
+     */
+    public String getUidAttributeName()
+    {
+        return getLDAPParam(DefaultXWikiLDAPConfigImpl.PREF_LDAP_UID, LDAP_DEFAULT_UID);
     }
 
     /**

@@ -45,15 +45,6 @@ public interface XWikiLdapConfig
     Map<String, String> getMemoryConfiguration();
 
     /**
-     * Parse the given user name for user id and group. 
-     * Given the regular expression from the "ldap_remoteUserParser" configuration variable
-     * parse the input and stores the "uid" and group information extracted from that expression.
-     * The group information is stored according  "ldap_remoteUserMapping.&lt;groupname>" mapping.
-     * @param ssoRemoteUser the id of the remote user; should not be null
-     */
-    void parseRemoteUser(String ssoRemoteUser);
-
-    /**
      * Try to find the configuration in the following order:
      * <ul>
      * <li>Local configuration stored in this {@link DefaultXWikiLDAPConfigImpl} instance (ldap_*name*)</li>
@@ -108,34 +99,6 @@ public interface XWikiLdapConfig
     List<String> getLDAPListParam(String name, List<String> def);
 
     /**
-     * @return a Java regexp used to parse the remote user provided by JAAS.
-     */
-    Pattern getRemoteUserPattern();
-
-    /**
-     * @param groupId the identifier of the group matched by the REMOTE_USER regexp
-     * @return the properties associated to the passed group
-     */
-    List<String> getRemoteUserMapping(int groupId);
-
-    /**
-     * @param propertyName the name of the property
-     * @param forceLowerCaseKey if true the keys will be stored lowered cased in the {@link Map}
-     * @return the mapping (the value for each domain) associated to the passed property
-     */
-    Map<String, String> getRemoteUserMapping(String propertyName, boolean forceLowerCaseKey);
-
-    /**
-     * @return try to find existing XWiki user with both complete user id and user login
-     */
-    Set<String> getTestLoginFor();
-
-    /**
-     * @return an HTTP header that could be used to retrieve the authenticated user.
-     */
-    String getHttpHeader();
-
-    /**
      * @param name the name of the property in XWikiPreferences.
      * @param separator the separator used to cut each element of the list
      * @param def the default value
@@ -172,6 +135,43 @@ public interface XWikiLdapConfig
     void setFinalProperty(String key, String value);
 
     /**
+     * Parse the given user name for user id and group.
+     * Given the regular expression from the "ldap_remoteUserParser" configuration variable
+     * parse the input and stores the "uid" and group information extracted from that expression.
+     * The group information is stored according  "ldap_remoteUserMapping.&lt;groupname>" mapping.
+     * @param ssoRemoteUser the id of the remote user; should not be null
+     */
+    void parseRemoteUser(String ssoRemoteUser);
+
+    /**
+     * @return a Java regexp used to parse the remote user provided by JAAS.
+     */
+    Pattern getRemoteUserPattern();
+
+    /**
+     * @param groupId the identifier of the group matched by the REMOTE_USER regexp
+     * @return the properties associated to the passed group
+     */
+    List<String> getRemoteUserMapping(int groupId);
+
+    /**
+     * @param propertyName the name of the property
+     * @param forceLowerCaseKey if true the keys will be stored lowered cased in the {@link Map}
+     * @return the mapping (the value for each domain) associated to the passed property
+     */
+    Map<String, String> getRemoteUserMapping(String propertyName, boolean forceLowerCaseKey);
+
+    /**
+     * @return try to find existing XWiki user with both complete user id and user login
+     */
+    Set<String> getTestLoginFor();
+
+    /**
+     * @return an HTTP header that could be used to retrieve the authenticated user.
+     */
+    String getHttpHeader();
+
+    /**
      * @return the collection of the LDAP groups classes.
      */
     Collection<String> getGroupClasses();
@@ -205,7 +205,7 @@ public interface XWikiLdapConfig
      * @return the name of the LDAP host.
      */
     String getLDAPHost();
-    
+
     /**
      * Get mapping between XWiki groups names and LDAP groups names.
      *
@@ -258,6 +258,11 @@ public interface XWikiLdapConfig
     String getLDAPBindPassword(String input, String password);
 
     /**
+     * @return the LDAP base DN from where to executes LDAP queries.
+     */
+    String getBaseDN();
+
+    /**
      * @return the maximum number of milliseconds the client waits for any operation under these constraints to
      *         complete.
      */
@@ -274,8 +279,12 @@ public interface XWikiLdapConfig
     int getSearchPageSize();
 
     /**
+     * @return the LDAP attribute containing the identifier for a user.
+     */
+    String getUidAttributeName();
+
+    /**
      * @return set of LDAP attributes that should be treated as binary data.
      */
     Set<String> getBinaryAttributes();
-
 }

@@ -106,11 +106,6 @@ public class XWikiLDAPUtils
     private static final String XWIKI_USER_SPACE = "XWiki";
 
     /**
-     * Default unique user field name.
-     */
-    private static final String LDAP_DEFAULT_UID = "cn";
-
-    /**
      * The name of the LDAP object field "dn".
      */
     private static final String LDAP_FIELD_DN = "dn";
@@ -128,20 +123,11 @@ public class XWikiLDAPUtils
     }
 
     /**
-     * @return the LDAP attribute containing the identifier for a user.
-     */
-    public String getUidAttributeName()
-    {
-        return configuration.getLDAPParam(DefaultXWikiLDAPConfigImpl.PREF_LDAP_UID, LDAP_DEFAULT_UID);
-    }
-
-
-    /**
      * @return the LDAP base DN from where to executes LDAP queries.
      */
     public String getBaseDN()
     {
-        return configuration.getLDAPParam("ldap_base_DN", "");
+        return configuration.getBaseDN();
     }
 
 
@@ -155,24 +141,6 @@ public class XWikiLDAPUtils
 
 
     /**
-     * @return the different LDAP implementations groups classes names.
-     * @deprecated use {@link XWikiLdapConfig#getGroupClasses()}
-     */
-    public Collection<String> getGroupClasses()
-    {
-        return configuration.getGroupClasses();
-    }
-
-    /**
-     * @return the different LDAP implementations groups member property name.
-     * @deprecated use {@link XWikiLdapConfig#getGroupMemberFields()}
-     */
-    public Collection<String> getGroupMemberFields()
-    {
-        return configuration.getGroupMemberFields();
-    }
-
-    /**
      * @return true if sub groups should be resolved too
      */
     public boolean isResolveSubgroups()
@@ -182,24 +150,7 @@ public class XWikiLDAPUtils
 
 
     /**
-     * Get the cache with the provided name for a particular LDAP server.
-     * 
-     * @param configuration the configuration to use to create the cache and to find it if it's already created.
-     * @param context the XWiki context.
-     * @return the cache.
-     * @throws CacheException error when creating the cache.
-     * @since 4.1M1
-     */
-    public Cache<Map<String, String>> getGroupCache(CacheConfiguration configuration, XWikiContext context)
-        throws CacheException
-    {
-        return caches.getGroupCache(this);
-    }
-
-    /**
      * Force to empty the group cache.
-     * 
-     * @since 4.1M1
      */
     public void resetGroupCache()
     {
@@ -223,16 +174,16 @@ public class XWikiLDAPUtils
      */
     private PagedLDAPSearchResults searchGroupsMembersByDN(XWikiLDAPConnection connection, String groupDN) throws LdapException
     {
-        String[] attrs = new String[2 + getGroupMemberFields().size()];
+        String[] attrs = new String[2 + configuration.getGroupMemberFields().size()];
 
         int i = 0;
         attrs[i++] = LDAP_OBJECTCLASS;
-        for (String groupMember : getGroupMemberFields()) {
+        for (String groupMember : configuration.getGroupMemberFields()) {
             attrs[i++] = groupMember;
         }
 
         // in case it's a organization unit get the users ids
-        attrs[i] = getUidAttributeName();
+        attrs[i] = configuration.getUidAttributeName();
 
         return connection.searchPaginated(groupDN, SearchScope.SUBTREE.getScope(), null, attrs, false);
     }
@@ -246,16 +197,16 @@ public class XWikiLDAPUtils
      */
     private PagedLDAPSearchResults searchGroupsMembersByFilter(XWikiLDAPConnection connection, String filter) throws LdapException
     {
-        String[] attrs = new String[2 + getGroupMemberFields().size()];
+        String[] attrs = new String[2 + configuration.getGroupMemberFields().size()];
 
         int i = 0;
         attrs[i++] = LDAP_OBJECTCLASS;
-        for (String groupMember : getGroupMemberFields()) {
+        for (String groupMember : configuration.getGroupMemberFields()) {
             attrs[i++] = groupMember;
         }
 
         // in case it's a organization unit get the users ids
-        attrs[i] = getUidAttributeName();
+        attrs[i] = configuration.getUidAttributeName();
 
         return connection.searchPaginated(getBaseDN(), SearchScope.SUBTREE.getScope(), filter, attrs, false);
     }
@@ -273,7 +224,7 @@ public class XWikiLDAPUtils
     {
         for (XWikiLDAPSearchAttribute searchAttribute : searchAttributeList) {
             String key = searchAttribute.name;
-            if (getGroupMemberFields().contains(key.toLowerCase())) {
+            if (configuration.getGroupMemberFields().contains(key.toLowerCase())) {
 
                 // or subgroup
                 String member = searchAttribute.value;
@@ -299,7 +250,7 @@ public class XWikiLDAPUtils
     private void getGroupMembersFromLDAPEntry(XWikiLDAPConnection connection, Entry ldapEntry, Map<String, String> memberMap,
         List<String> subgroups, XWikiContext context)
     {
-        for (String memberField : getGroupMemberFields()) {
+        for (String memberField : configuration.getGroupMemberFields()) {
             LOGGER.debug("try attr [{}] for membership", memberField); // debug log, remove
             Attribute attribute = ldapEntry.get(memberField);
             if (attribute != null) {
@@ -345,17 +296,17 @@ public class XWikiLDAPUtils
 
             if (key.equalsIgnoreCase(LDAP_OBJECTCLASS)) {
                 String objectName = searchAttribute.value;
-                if (getGroupClasses().contains(objectName.toLowerCase())) {
+                if (configuration.getGroupClasses().contains(objectName.toLowerCase())) {
                     isGroup = true;
                 }
-            } else if (key.equalsIgnoreCase(getUidAttributeName())) {
+            } else if (key.equalsIgnoreCase(configuration.getUidAttributeName())) {
                 id = searchAttribute.value;
             }
         }
 
         if (!isGroup) {
             if (id == null) {
-                LOGGER.error("Could not find attribute [{}] for LDAP dn [{}]", getUidAttributeName(), groupDN);
+                LOGGER.error("Could not find attribute [{}] for LDAP dn [{}]", configuration.getUidAttributeName(), groupDN);
             }
 
             if (!memberMap.containsKey(groupDN.toLowerCase())) {
@@ -390,7 +341,7 @@ public class XWikiLDAPUtils
     {
         boolean isGroup = false;
 
-        final Collection<String> groupClasses = getGroupClasses();
+        final Collection<String> groupClasses = configuration.getGroupClasses();
         // Check if the entry is a group
         Attribute objClasses = ldapEntry.get(LDAP_OBJECTCLASS);
         if (objClasses != null) {
@@ -414,7 +365,7 @@ public class XWikiLDAPUtils
 
             getGroupMembersFromLDAPEntry(connection, ldapEntry, memberMap, subgroups, context);
         } else {
-            Attribute uidAttribute = ldapEntry.get(getUidAttributeName());
+            Attribute uidAttribute = ldapEntry.get(configuration.getUidAttributeName());
 
             if (uidAttribute != null) {
                 String uid = uidAttribute.getString();
@@ -657,7 +608,7 @@ public class XWikiLDAPUtils
 
         Cache<Map<String, String>> cache;
         try {
-            cache = caches.getGroupCache(this);
+            cache = caches.getGroupCache();
 
             synchronized (cache) {
                 groupMembers = cache.get(groupDN);
@@ -742,7 +693,7 @@ public class XWikiLDAPUtils
     protected String findUidInGroup(String userName, Map<String, String> groupMembers)
     {
         Pattern ldapuserPattern = Pattern
-            .compile("^" + Pattern.quote(getUidAttributeName()) + "=" + Pattern.quote(userName.toLowerCase()) + " *,");
+            .compile("^" + Pattern.quote(configuration.getUidAttributeName()) + "=" + Pattern.quote(userName.toLowerCase()) + " *,");
 
         for (Map.Entry<String, String> entry : groupMembers.entrySet()) {
             // implementing it case-insensitive for now
@@ -847,12 +798,12 @@ public class XWikiLDAPUtils
     {
         // search for the user in LDAP
         String filter = MessageFormat.format(this.getUserSearchFormatString(),
-            XWikiLDAPConnection.escapeLDAPSearchFilter(this.getUidAttributeName()),
+            XWikiLDAPConnection.escapeLDAPSearchFilter(this.configuration.getUidAttributeName()),
             XWikiLDAPConnection.escapeLDAPSearchFilter(uid));
 
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Searching for the user in LDAP: user [{}] base [{}] query [{}] uid [{}]", uid, this.getBaseDN(),
-                filter, this.getUidAttributeName());
+                filter, this.configuration.getUidAttributeName());
         }
 
         return connection.searchLDAP(this.getBaseDN(), filter, attributeNameTable, SearchScope.SUBTREE.getScope());
@@ -1519,7 +1470,7 @@ public class XWikiLDAPUtils
         if (attributes != null) {
             for (XWikiLDAPSearchAttribute attribute : attributes) {
                 valueMap.put("ldap." + attribute.name, attribute.value);
-                if (attribute.name.equals(this.getUidAttributeName())) {
+                if (attribute.name.equals(this.configuration.getUidAttributeName())) {
                     // Override the default uid value with the real one coming from LDAP
                     valueMap.put("uid", attribute.value);
                 }
