@@ -43,6 +43,9 @@ import org.apache.directory.api.ldap.model.entry.Entry;
 import org.apache.directory.api.ldap.model.entry.Value;
 import org.apache.directory.api.ldap.model.exception.LdapException;
 import org.apache.directory.api.ldap.model.message.AliasDerefMode;
+import org.apache.directory.api.ldap.model.message.BindRequest;
+import org.apache.directory.api.ldap.model.message.BindRequestImpl;
+import org.apache.directory.api.ldap.model.message.BindResponse;
 import org.apache.directory.api.ldap.model.message.ResultCodeEnum;
 import org.apache.directory.api.ldap.model.message.SearchRequest;
 import org.apache.directory.api.ldap.model.message.SearchRequestImpl;
@@ -273,9 +276,14 @@ public class XWikiLdapConnection
     {
         LOGGER.debug("Binding to LDAP server with credentials login=[{}]", loginDN);
 
+        BindRequest bind = new BindRequestImpl();
+        bind.setName(loginDN);
+        bind.setCredentials(password);
+
         try {
             // authenticate to the server
-            this.connection.bind(loginDN, password);
+            BindResponse bindResponse = this.connection.bind(bind);
+            ResultCodeEnum.processResponse(bindResponse);
         } catch (LdapException e) {
             throw new XWikiLDAPException("LDAP bind failed with LdapException.", e);
         }
