@@ -1,3 +1,4 @@
+org.xwiki.contrib.ldap.internal.ExtensionInitializerListener
 org.xwiki.contrib.ldap.internal.GroupCacheExpirationEventListener
 org.xwiki.contrib.ldap.internal.LDAPGroupsCache
 org.xwiki.contrib.ldap.apachedsapi.XWikiLdapUtils
