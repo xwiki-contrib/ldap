@@ -167,14 +167,17 @@ public class XWikiLdapConnection
         String bindPassword = this.configuration.getLDAPBindPassword(ldapUserName, password);
 
         boolean bind;
-        if ("1".equals(this.configuration.getLDAPParam("ldap_ssl", "0"))) {
+        boolean useTLS = "1".equals(this.configuration.getLDAPParam("ldap_tls", "0"));
+        boolean useSSL = "1".equals(this.configuration.getLDAPParam("ldap_ssl", "0"));
+
+        if (useTLS || useSSL) {
             String keyStore = this.configuration.getLDAPParam("ldap_ssl.keystore", "");
 
-            LOGGER.debug("Connecting to LDAP using SSL");
+            LOGGER.debug("Connecting to LDAP using " +(useTLS?"TLS":"SSL"));
 
-            bind = open(ldapHost, ldapPort, bindDN, bindPassword, keyStore, true, context);
+            bind = open(ldapHost, ldapPort, bindDN, bindPassword, keyStore, useTLS, useSSL, context);
         } else {
-            bind = open(ldapHost, ldapPort, bindDN, bindPassword, null, false, context);
+            bind = open(ldapHost, ldapPort, bindDN, bindPassword, null, false, false, context);
         }
 
         return bind;
@@ -187,14 +190,15 @@ public class XWikiLdapConnection
      * @param ldapPort the port of the server to connect to.
      * @param loginDN the user DN to connect to LDAP server.
      * @param password the password to connect to LDAP server.
-     * @param pathToKeys the path to SSL keystore to use.
+     * @param pathToKeys the path to TLS/SSL keystore to use.
+     * @param tls if true connect using TLS.
      * @param ssl if true connect using SSL.
      * @param context the XWiki context.
      * @return true if the connection succeed, false otherwise.
      * @throws XWikiLDAPException error when trying to open connection.
      */
     public boolean open(String ldapHost, int ldapPort, String loginDN, String password, String pathToKeys,
-        boolean ssl, XWikiContext context) throws XWikiLDAPException
+        boolean tls, boolean ssl, XWikiContext context) throws XWikiLDAPException
     {
         int port = ldapPort;
 
@@ -206,12 +210,12 @@ public class XWikiLdapConnection
 
         LdapConnectionConfig config = new LdapConnectionConfig();
 
-        KeyStore ourKeyStore = null;
         try {
-            if (ssl) {
+            if (tls || ssl) {
                 // Dynamically set JSSE as a security provider
                 Security.addProvider(this.configuration.getSecureProvider());
 
+                KeyStore ourKeyStore = null;
                 if (pathToKeys != null && pathToKeys.length() > 0) {
                     // Dynamically set the property that JSSE uses to identify
                     // the keystore that holds trusted root certificates
@@ -226,16 +230,19 @@ public class XWikiLdapConnection
                     }
                 }
 
-                // FIXME: here use trust manager instead of secure provider ? which one?
+                // DS API: use trust manager instead of secure provider
                 TrustManagerFactory tm = TrustManagerFactory.getInstance(
                     TrustManagerFactory.getDefaultAlgorithm(), this.configuration.getSecureProvider());
                 tm.init(ourKeyStore);
                 config.setTrustManagers(tm.getTrustManagers());
             }
 
- 
-            config.setUseSsl(ssl);
-            // config.setUseTls(useTls); // where this? new config variable?
+            config.setUseTls(tls);
+            if (!tls) {
+                config.setUseSsl(ssl);
+            } else {
+                config.setUseSsl(false);
+            }
             config.setLdapHost(ldapHost);
             config.setLdapPort(port);
             config.setTimeout(getTimeout());
