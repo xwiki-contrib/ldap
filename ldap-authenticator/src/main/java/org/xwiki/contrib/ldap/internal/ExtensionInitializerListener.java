@@ -27,6 +27,7 @@ import javax.inject.Singleton;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.phase.Initializable;
 import org.xwiki.component.phase.InitializationException;
+import org.xwiki.contrib.ldap.XWiki10LDAPAuthServiceImpl;
 import org.xwiki.contrib.ldap.XWikiLDAPAuthServiceImpl;
 import org.xwiki.observation.AbstractEventListener;
 import org.xwiki.observation.event.Event;
@@ -79,6 +80,13 @@ public class ExtensionInitializerListener extends AbstractEventListener implemen
                 && authService.getClass().getName().equals(XWikiLDAPAuthServiceImpl.class.getName())) {
                 // Replace the current auth service if it's the old LDAP one
                 xcontext.getWiki().setAuthService(new XWikiLDAPAuthServiceImpl());
+            }
+
+            // same for the authService using the Apache DS API
+            if (!(authService instanceof XWiki10LDAPAuthServiceImpl)
+                && authService.getClass().getName().equals(XWiki10LDAPAuthServiceImpl.class.getName())) {
+                // Replace the current auth service if it's the new LDAP one
+                xcontext.getWiki().setAuthService(new XWiki10LDAPAuthServiceImpl());
             }
         }
     }
