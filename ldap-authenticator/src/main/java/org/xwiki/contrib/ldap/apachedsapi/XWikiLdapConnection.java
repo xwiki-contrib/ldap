@@ -20,8 +20,10 @@
 package org.xwiki.contrib.ldap.apachedsapi;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.Security;
 import java.security.cert.CertificateException;
@@ -60,6 +62,7 @@ import org.slf4j.LoggerFactory;
 import org.xwiki.contrib.ldap.XWikiLDAPException;
 import org.xwiki.contrib.ldap.XWikiLDAPSearchAttribute;
 
+import com.novell.ldap.util.Base64;
 import com.xpn.xwiki.XWikiContext;
 
 /**
@@ -282,6 +285,16 @@ public class XWikiLdapConnection
     public void bind(String loginDN, String password) throws XWikiLDAPException
     {
         LOGGER.debug("Binding to LDAP server with credentials login=[{}]", loginDN);
+
+        // debug log sha256 sum of passwd just when sending it to the server
+        try {
+            final byte[] pwAsBytes = password.getBytes("UTF8");
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            String result = Base64.encode(digest.digest(pwAsBytes));
+            LOGGER.debug("Binding to LDAP server with credentials passwdHash=[{}]", result);
+        } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
+            LOGGER.debug("no sha-256 or UTF-8 found", e);
+        }
 
         BindRequest bind = new BindRequestImpl();
         bind.setName(loginDN);

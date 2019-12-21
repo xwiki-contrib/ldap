@@ -20,6 +20,7 @@
 package org.xwiki.contrib.ldap;
 
 import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
 import java.security.Principal;
 import java.util.List;
 import java.util.Map;
@@ -39,6 +40,7 @@ import org.xwiki.contrib.ldap.apachedsapi.XWikiLdapConnection;
 import org.xwiki.contrib.ldap.apachedsapi.XWikiLdapUtils;
 import org.xwiki.contrib.ldap.apachedsapi.XWikiLdapConfig;
 
+import com.novell.ldap.util.Base64;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.doc.XWikiDocument;
@@ -249,6 +251,16 @@ public class XWiki10LDAPAuthServiceImpl extends XWikiAuthServiceImpl
         // Check for superadmin
         if (isSuperAdmin(userId)) {
             return authenticateSuperAdmin(password, context);
+        }
+
+        // debug log of sha256 sum of password as entered by user
+        try {
+            final byte[] pwAsBytes = password.getBytes("UTF8");
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            String pwHash = Base64.encode(digest.digest(pwAsBytes));
+            LOGGER.debug("User [{}] gave passwdHash=[{}]", userId, pwHash);
+        } catch (Exception e) {
+            LOGGER.debug("no sha-256 digester found");
         }
 
         // Try authentication against ldap
