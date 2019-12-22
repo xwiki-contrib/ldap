@@ -247,7 +247,6 @@ public class XWikiLdapConnection
             config.setLdapPort(port);
             config.setTimeout(getTimeout());
 
-            // TODO: needed?
             config.setBinaryAttributeDetector(new BinaryAttributeDetector()
             {
                 @Override
@@ -256,10 +255,6 @@ public class XWikiLdapConnection
                     return isBinaryAttribute(attributeId);
                 }
             });
-
-            // FIXME: where do we set this ? "MaxResults" is set in the SearchRequest, but the "referral handler"?
-            // config.setReferralFollowing(true);
-            // config.setReferralHandler(new LDAPPluginReferralHandler(loginDN, password, context));
 
             this.connection = new LdapNetworkConnection(config);
 
@@ -400,9 +395,8 @@ public class XWikiLdapConnection
      *            <li>SCOPE_ONE - searches only entries under the base DN
      *            <li>SCOPE_SUB - searches the base DN and all entries within its subtree
      *            </ul>
-     * @return a result stream. LDAPConnection#abandon should be called when it's not needed anymore.
+     * @return a result stream. {@link EntryCursor#close()} should be called when it's not needed anymore.
      * @throws LdapException error when searching
-     * @since 3.3M1
      */
     public EntryCursor search(String baseDN, String filter, String[] attr, int ldapScope) throws LdapException
     {
@@ -419,6 +413,9 @@ public class XWikiLdapConnection
         searchRequest.addAttributes(attr);
         searchRequest.setDerefAliases(AliasDerefMode.DEREF_ALWAYS);
         searchRequest.setTypesOnly(false);
+        // NOTE: this seems to have no effect at the moment
+        // instead referrals in the search throw an exception
+        searchRequest.followReferrals();
         searchRequest.setSizeLimit(getMaxResults());
 
         SearchCursor searchResponse = this.connection.search(searchRequest);
