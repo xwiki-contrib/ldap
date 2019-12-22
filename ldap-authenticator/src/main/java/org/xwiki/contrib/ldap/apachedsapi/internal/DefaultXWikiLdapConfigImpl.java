@@ -61,7 +61,7 @@ public class DefaultXWikiLdapConfigImpl implements XWikiLdapConfig
     /**
      * Mapping fields separator.
      */
-    public static final String DEFAULT_SEPARATOR = ",";
+    public static final char DEFAULT_SEPARATOR = ',';
 
     /**
      * LDAP properties names suffix in xwiki.cfg.
@@ -111,7 +111,7 @@ public class DefaultXWikiLdapConfigImpl implements XWikiLdapConfig
     /**
      * Mapping fields separator.
      */
-    public static final String USERMAPPING_SEP = DEFAULT_SEPARATOR;
+    public static final String USERMAPPING_SEP = String.valueOf(DEFAULT_SEPARATOR);
 
     /**
      * Character user to link XWiki field name and LDAP field name in user mappings property.
@@ -152,6 +152,11 @@ public class DefaultXWikiLdapConfigImpl implements XWikiLdapConfig
      * Default unique user field name.
      */
     private static final String PREF_LDAP_DEFAULT_UID = "cn";
+
+    /**
+     * LDAP host property name in XWikiPreferences.
+     */
+    private static final String PREF_LDAP_SERVER = "ldap_server";
 
     /**
      * the key to store the thread dependent "in memory" configuration in the execution context.
@@ -365,7 +370,7 @@ public class DefaultXWikiLdapConfigImpl implements XWikiLdapConfig
     @Override
     public List<String> getLDAPListParam(String name, List<String> def)
     {
-        return getLDAPListParam(name, ',', def);
+        return getLDAPListParam(name, DEFAULT_SEPARATOR, def);
     }
 
     /**
@@ -493,7 +498,7 @@ public class DefaultXWikiLdapConfigImpl implements XWikiLdapConfig
     @Override
     public Set<String> getTestLoginFor()
     {
-        List<String> list = getLDAPListParam("ldap_testLoginFor", ',', Collections.<String>emptyList());
+        List<String> list = getLDAPListParam("ldap_testLoginFor", Collections.<String>emptyList());
 
         Set<String> set = new HashSet<>(list.size());
         for (String uid : list) {
@@ -534,7 +539,7 @@ public class DefaultXWikiLdapConfigImpl implements XWikiLdapConfig
     @Override
     public Map<String, String> getRemoteUserMapping(String propertyName, boolean forceLowerCaseKey)
     {
-        return getLDAPMapParam(REMOTE_USER_MAPPING_CONFIG_PREFIX + propertyName, '|',
+        return getLDAPMapParam(REMOTE_USER_MAPPING_CONFIG_PREFIX + propertyName,
             Collections.<String, String>emptyMap(), forceLowerCaseKey);
     }
 
@@ -558,7 +563,7 @@ public class DefaultXWikiLdapConfigImpl implements XWikiLdapConfig
         Collection<String> set;
 
         if (param != null) {
-            String[] table = param.split(DEFAULT_SEPARATOR);
+            String[] table = param.split(String.valueOf(DEFAULT_SEPARATOR));
 
             set = new HashSet<>();
             for (String name : table) {
@@ -586,7 +591,7 @@ public class DefaultXWikiLdapConfigImpl implements XWikiLdapConfig
         Collection<String> set;
 
         if (param != null) {
-            String[] table = param.split(DEFAULT_SEPARATOR);
+            String[] table = param.split(String.valueOf(DEFAULT_SEPARATOR));
 
             set = new HashSet<String>();
             for (String name : table) {
@@ -656,8 +661,7 @@ public class DefaultXWikiLdapConfigImpl implements XWikiLdapConfig
     @Override
     public String getLDAPHost()
     {
-        // FIXME: constants needed for this?
-        return getLDAPParam("ldap_server", "localhost");
+        return getLDAPParam(PREF_LDAP_SERVER, "localhost");
     }
 
     /**
