@@ -694,7 +694,7 @@ $services.localization.render('ldap.ldapAuthenticationIsNotEnabledWarning')
 = {{velocity}}$services.localization.render('ldap.adminHeadingMiscellaneous'){{/velocity}} =
 
 {{velocity}}
-#if ($request.action_resetgroupcache)
+#if ($request.resetgroupcache_action)
  #set($void = $services.ldap.resetGroupCache())
  {{success}}$services.localization.render('ldap.resetGroupCacheSuccess'){{/success}}
 #end
@@ -702,9 +702,9 @@ $services.localization.render('ldap.ldapAuthenticationIsNotEnabledWarning')
 
 {{velocity}}
 {{html wiki="false"}}
-&lt;form method="post" action="${escapetool.xml($xwiki.requestURL)}" enctype="multipart/form-data"&gt;
+&lt;form method="post" action="${escapetool.xml($xwiki.requestURL)}#H-1"&gt;
 &lt;fieldset&gt;
-&lt;span class="buttonwrapper"&gt;&lt;input name="action_resetgroupcache" value="$services.localization.render('ldap.resetGroupCacheButton')" class="button" type="submit"&gt;&lt;/span&gt;
+&lt;span class="buttonwrapper"&gt;&lt;input name="resetgroupcache_action" value="$services.localization.render('ldap.resetGroupCacheButton')" class="button" type="submit"&gt;&lt;/span&gt;
 &lt;/fieldset&gt;
 &lt;/form&gt;
 {{/html}}
