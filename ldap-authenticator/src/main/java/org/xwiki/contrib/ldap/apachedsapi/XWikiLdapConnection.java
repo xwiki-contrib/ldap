@@ -209,6 +209,25 @@ public class XWikiLdapConnection
         setBinaryAttributes(this.configuration.getBinaryAttributes());
 
         LdapConnectionConfig config = new LdapConnectionConfig();
+        config.setUseTls(tls);
+        if (!tls) {
+            config.setUseSsl(ssl);
+        } else {
+            config.setUseSsl(false);
+        }
+
+        config.setLdapHost(ldapHost);
+        config.setLdapPort(port);
+        config.setTimeout(getTimeout());
+
+        config.setBinaryAttributeDetector(new BinaryAttributeDetector()
+        {
+            @Override
+            public boolean isBinary(String attributeId)
+            {
+                return isBinaryAttribute(attributeId);
+            }
+        });
 
         try {
             if (tls || ssl) {
@@ -237,33 +256,12 @@ public class XWikiLdapConnection
                 config.setTrustManagers(tm.getTrustManagers());
             }
 
-            config.setUseTls(tls);
-            if (!tls) {
-                config.setUseSsl(ssl);
-            } else {
-                config.setUseSsl(false);
-            }
-            config.setLdapHost(ldapHost);
-            config.setLdapPort(port);
-            config.setTimeout(getTimeout());
-
-            config.setBinaryAttributeDetector(new BinaryAttributeDetector()
-            {
-                @Override
-                public boolean isBinary(String attributeId)
-                {
-                    return isBinaryAttribute(attributeId);
-                }
-            });
-
-            this.connection = new LdapNetworkConnection(config);
-
-            // bind
-            bind(loginDN, password);
         } catch (NoSuchAlgorithmException | KeyStoreException | CertificateException | IOException e) {
             throw new XWikiLDAPException("LDAP bind failed while loading SSL keystore.", e);
         }
 
+        this.connection = new LdapNetworkConnection(config);
+        bind(loginDN, password);
         return true;
     }
 
