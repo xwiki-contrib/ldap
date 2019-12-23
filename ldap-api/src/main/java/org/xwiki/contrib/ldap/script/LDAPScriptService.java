@@ -28,6 +28,9 @@ import org.xwiki.context.Execution;
 import org.xwiki.contrib.ldap.XWikiLDAPConfig;
 import org.xwiki.contrib.ldap.XWikiLDAPConnection;
 import org.xwiki.contrib.ldap.XWikiLDAPException;
+import org.xwiki.contrib.ldap.apachedsapi.XWikiLdapConfig;
+import org.xwiki.contrib.ldap.apachedsapi.XWikiLdapConnection;
+import org.xwiki.contrib.ldap.apachedsapi.internal.LdapGroupsCache;
 import org.xwiki.contrib.ldap.internal.LDAPGroupsCache;
 import org.xwiki.script.service.ScriptService;
 import org.xwiki.stability.Unstable;
@@ -58,6 +61,12 @@ public class LDAPScriptService implements ScriptService
     @Inject
     private LDAPGroupsCache caches;
 
+    @Inject
+    private LdapGroupsCache dsApiCaches;
+
+    @Inject
+    private XWikiLdapConfig dsApiConfig;
+
     /**
      * @return the XWiki context associated with this execution.
      */
@@ -86,25 +95,54 @@ public class LDAPScriptService implements ScriptService
         boolean ssl)
     {
         setError(null);
-        XWikiLDAPConnection connection = new XWikiLDAPConnection(new XWikiLDAPConfig(null));
-        try {
-            connection.open(ldapHost, ldapPort, loginDN, password, pathToKeys, ssl, getXWikiContext());
-            return true;
-        } catch (XWikiLDAPException e) {
-            setError(e);
+        if (isNovellLDAPApi()) {
+            XWikiLDAPConnection connection = new XWikiLDAPConnection(new XWikiLDAPConfig(null));
+            try {
+                connection.open(ldapHost, ldapPort, loginDN, password, pathToKeys, ssl, getXWikiContext());
+                return true;
+            } catch (XWikiLDAPException e) {
+                setError(e);
+                return false;
+            } finally {
+                connection.close();
+            }
+        } else if (isApacheDSApi()) {
+            XWikiLdapConnection connection = new XWikiLdapConnection(dsApiConfig);
+            try {
+                // TODO: no check for TLS at the moment
+                return connection.open(ldapHost, ldapPort, loginDN, password, pathToKeys,
+                                       false, ssl, getXWikiContext());
+            } catch (XWikiLDAPException e) {
+                setError(e);
+                return false;
+            } finally {
+                connection.close();
+            }
+        } else {
+            setError(new XWikiLDAPException("No LDAP Authenticator configured."));
             return false;
-        } finally {
-            connection.close();
         }
     }
 
     /**
      * @return {@code true} if the currently configured authentication class extends or is an instance of
-     *         {@link org.xwiki.contrib.ldap.XWikiLDAPAuthServiceImpl}. Returns {@code false} otherwise.
+     *         {@link org.xwiki.contrib.ldap.XWikiLDAPAuthServiceImpl} or {@link org.xwiki.contrib.ldap.XWiki10LDAPAuthServiceImpl}.
+     *         Returns {@code false} otherwise.
      */
     public boolean isXWikiLDAPAuthenticator()
     {
+        return isNovellLDAPApi() || isApacheDSApi();
+    }
+
+    private boolean isNovellLDAPApi()
+    {
         return org.xwiki.contrib.ldap.XWikiLDAPAuthServiceImpl.class
+            .isAssignableFrom(getXWikiContext().getWiki().getAuthService().getClass());
+    }
+
+    private boolean isApacheDSApi()
+    {
+        return org.xwiki.contrib.ldap.XWiki10LDAPAuthServiceImpl.class
             .isAssignableFrom(getXWikiContext().getWiki().getAuthService().getClass());
     }
 
@@ -116,6 +154,7 @@ public class LDAPScriptService implements ScriptService
     public void resetGroupCache()
     {
         this.caches.reset();
+        this.dsApiCaches.reset();
     }
 
     /**
