@@ -50,7 +50,7 @@ import com.xpn.xwiki.web.Utils;
 import com.xpn.xwiki.web.XWikiRequest;
 
 /**
- * This class provides an authentication method that validates a user trough LDAP against a directory. It gives LDAP
+ * This class provides an authentication method that validates a user through LDAP against a directory. It gives LDAP
  * users access if they belong to a particular group, creates XWiki users if they have never logged in before and
  * synchronizes membership to XWiki groups based on membership to LDAP groups.
  * 

@@ -119,6 +119,7 @@ public class PagedLdapSearchResults implements AutoCloseable
         searchRequest.setDerefAliases(AliasDerefMode.DEREF_ALWAYS);
         searchRequest.setTypesOnly(typesOnly);
         searchRequest.setSizeLimit(this.connection.getMaxResults());
+        searchRequest.followReferrals();
         searchRequest.addControl(pageControl);
 
         if (LOGGER.isDebugEnabled()) {
@@ -179,7 +180,11 @@ public class PagedLdapSearchResults implements AutoCloseable
                 if (results.isEntry()) {
                     return true;
                 }
-                // TODO: here we should throw an exception, as we likely got a referral, right?
+                // FIXME: here we should handle referrals
+                // instead we just skip them
+                if (results.isReferral()) {
+                    LOGGER.warn("skipping referral to [{}] in search", results.getReferral().getLdapUrls());
+                }
             }
 
         } catch (LdapException | CursorException e) {
