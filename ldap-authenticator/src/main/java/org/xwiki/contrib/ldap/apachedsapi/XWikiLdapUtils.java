@@ -279,8 +279,11 @@ public class XWikiLdapUtils
                     configuration.getUidAttributeName(), groupDN);
             }
 
-            if (!memberMap.containsKey(groupDN.toLowerCase())) {
-                memberMap.put(groupDN.toLowerCase(), id == null ? "" : id.toLowerCase());
+            final String lowerCaseDn = groupDN.toLowerCase();
+            final String uid = (id == null) ? "" : id.toLowerCase();
+            if (!memberMap.containsKey(lowerCaseDn)) {
+                LOGGER.debug("found [{}] aka [{}] as member to group", lowerCaseDn, uid);
+                memberMap.put(lowerCaseDn, uid);
             }
         } else {
             // remember this group
@@ -340,6 +343,7 @@ public class XWikiLdapUtils
                 String uid = uidAttribute.getString();
 
                 if (!memberMap.containsKey(lowerCaseDn)) {
+                    LOGGER.debug("found [{}] aka [{}] as member to group", lowerCaseDn, uid);
                     memberMap.put(lowerCaseDn, uid.toLowerCase());
                 }
             } else {
@@ -399,9 +403,21 @@ public class XWikiLdapUtils
             LOGGER.debug("Looks like [{}] is not a DN, lets try filter or id", userOrGroup);
 
             try {
+                // b/w compat: for the jldap library an empty filter was acceptable
+                // for apache-ds it is not; replace it by the "search everything" filter
+                String userOrGroupQuery = StringUtils.stripToEmpty(userOrGroup);
+                if ("".equals(userOrGroupQuery)) {
+                    userOrGroupQuery = "(objectClass=*)";
+                } else {
+                    // next b/w compat: the jldap library accepted filters not enclosed in round braces
+                    // the apache-ds considers these filters as syntactically incorrect
+                    if (userOrGroupQuery.charAt(0) != '(') {
+                        userOrGroupQuery = '(' + userOrGroupQuery + ')';
+                    }
+                }
                 // Test if it's valid LDAP filter syntax
-                FilterParser.parse(userOrGroup);
-                isGroup = getGroupMembersFromFilter(userOrGroup, memberMap, subgroups, connection);
+                FilterParser.parse(userOrGroupQuery);
+                isGroup = getGroupMembersFromFilter(userOrGroupQuery, memberMap, subgroups, connection);
             } catch (ParseException e) {
                 LOGGER.debug("[{}] is not a valid LDAP filter, lets try id", userOrGroup);
 
