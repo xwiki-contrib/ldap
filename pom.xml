@@ -29,7 +29,7 @@
   </parent>
   <groupId>org.xwiki.contrib.ldap</groupId>
   <artifactId>ldap</artifactId>
-  <version>9.4-DEBUG-pl2</version>
+  <version>9.4.1-DEBUG-pl3-SNAPSHOT</version>
   <name>LDAP - Parent POM</name>
   <description>Various tools to manipulate LDAP servers in XWiki</description>
   <packaging>pom</packaging>
