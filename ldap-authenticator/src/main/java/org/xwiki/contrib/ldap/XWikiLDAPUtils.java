@@ -517,6 +517,8 @@ public class XWikiLDAPUtils
         // Get members or user id if it's a user
 
         if (isGroup) {
+            LOGGER.debug("[{}] is a group", ldapEntry.getDN());
+
             // remember this group
             if (subgroups != null) {
                 subgroups.add(ldapEntry.getDN().toLowerCase());
@@ -524,6 +526,8 @@ public class XWikiLDAPUtils
 
             getGroupMembersFromLDAPEntry(ldapEntry, memberMap, subgroups, context);
         } else {
+            LOGGER.debug("[{}] is a user", ldapEntry.getDN());
+
             LDAPAttribute uidAttribute = ldapEntry.getAttribute(getUidAttributeName());
 
             if (uidAttribute != null) {
@@ -597,7 +601,7 @@ public class XWikiLDAPUtils
 
                 // Not a valid filter, try as uid
                 List<XWikiLDAPSearchAttribute> searchAttributeList =
-                    searchUserAttributesByUid(userOrGroup, new String[] { LDAP_FIELD_DN });
+                    searchUserAttributesByUid(userOrGroup, new String[] {LDAP_FIELD_DN});
 
                 if (searchAttributeList != null && !searchAttributeList.isEmpty()) {
                     String dn = searchAttributeList.get(0).value;
@@ -771,27 +775,32 @@ public class XWikiLDAPUtils
     {
         boolean isGroup = false;
 
-        LDAPEntry resultEntry = null;
         // For some weird reason result.hasMore() is always true before the first call to next() even if nothing is
         // found
         if (result.hasMore()) {
+            LDAPEntry resultEntry = null;
             try {
                 resultEntry = result.next();
             } catch (LDAPException e) {
                 LOGGER.debug("Failed to get group members", e);
             }
-        }
 
-        if (resultEntry != null) {
-            do {
-                try {
-                    isGroup |= getGroupMembers(memberMap, subgroups, resultEntry, context);
+            if (resultEntry != null) {
+                do {
+                    try {
+                        isGroup |= getGroupMembers(memberMap, subgroups, resultEntry, context);
 
-                    resultEntry = result.hasMore() ? result.next() : null;
-                } catch (LDAPException e) {
-                    LOGGER.debug("Failed to get group members", e);
-                }
-            } while (resultEntry != null);
+                        resultEntry = result.hasMore() ? result.next() : null;
+                    } catch (LDAPException e) {
+                        LOGGER.debug("Failed to get group members", e);
+                    }
+                } while (resultEntry != null);
+            } else {
+                LOGGER.debug(
+                    "The LDAP request returned no result (hasMore() is true but first next() call returned nothing)");
+            }
+        } else {
+            LOGGER.debug("The LDAP request returned no result (hasMore is false)");
         }
 
         return isGroup;
@@ -1059,8 +1068,7 @@ public class XWikiLDAPUtils
     {
         String userDN = null;
 
-        List<XWikiLDAPSearchAttribute> searchAttributes =
-            searchUserAttributesByUid(uid, new String[] { LDAP_FIELD_DN });
+        List<XWikiLDAPSearchAttribute> searchAttributes = searchUserAttributesByUid(uid, new String[] {LDAP_FIELD_DN});
 
         if (searchAttributes != null && !searchAttributes.isEmpty()) {
             userDN = searchAttributes.get(0).value;
