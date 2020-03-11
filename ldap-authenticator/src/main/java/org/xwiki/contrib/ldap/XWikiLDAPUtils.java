@@ -348,6 +348,9 @@ public class XWikiLDAPUtils
         // in case it's a organization unit get the users ids
         attrs[i] = getUidAttributeName();
 
+        // Using LDAPConnection.SCOPE_SUB here because we want to cover two use case at the same time:
+        // * if it's an actual group entry there should be only one result with that entry
+        // * if it's a OU there should be several entries with each sub member
         return getConnection().searchPaginated(groupDN, LDAPConnection.SCOPE_SUB, null, attrs, false);
     }
 
