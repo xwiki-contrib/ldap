@@ -348,7 +348,7 @@ public class XWikiLDAPUtils
         // in case it's a organization unit get the users ids
         attrs[i] = getUidAttributeName();
 
-        return getConnection().searchPaginated(groupDN, LDAPConnection.SCOPE_SUB, null, attrs, false);
+        return getConnection().searchPaginated(groupDN, LDAPConnection.SCOPE_BASE, null, attrs, false);
     }
 
     /**
