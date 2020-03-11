@@ -174,6 +174,8 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
 
     private Principal checkSessionPrincipal(String remoteUser, XWikiRequest request)
     {
+        LOGGER.debug("Try to find principal in the session for remote user [{}]", remoteUser);
+
         // Get the current user
         Principal principal =
             (Principal) request.getSession().getAttribute(SecurityRequestWrapper.PRINCIPAL_SESSION_KEY);
@@ -184,7 +186,12 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
             // If the remote user changed authenticate again
             if (remoteUser.equals(storedRemoteUser)) {
                 return principal;
+            } else {
+                LOGGER.debug("  There is a principal in the sessions but it does not match remote user [{}]"
+                    + " (stored remote user is [{}])", remoteUser, storedRemoteUser);
             }
+        } else {
+            LOGGER.debug("  There is no principal at all in the session");
         }
 
         return null;
@@ -594,7 +601,7 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
 
                 if (ldapDn == null) {
                     throw new XWikiException(XWikiException.MODULE_XWIKI_USER, XWikiException.ERROR_XWIKI_USER_INIT,
-                        "LDAP user {0} does not belong to LDAP group {1}.", null, new Object[] { uid, filterGroupDN });
+                        "LDAP user {0} does not belong to LDAP group {1}.", null, new Object[] {uid, filterGroupDN});
                 }
             }
 
@@ -611,8 +618,7 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
 
                 if (ldapUtils.isInGroup(uid, ldapDn, excludeGroupDN, context) != null) {
                     throw new XWikiException(XWikiException.MODULE_XWIKI_USER, XWikiException.ERROR_XWIKI_USER_INIT,
-                        "LDAP user {0} should not belong to LDAP group {1}.", null,
-                        new Object[] { uid, filterGroupDN });
+                        "LDAP user {0} should not belong to LDAP group {1}.", null, new Object[] {uid, filterGroupDN});
                 }
             }
 
