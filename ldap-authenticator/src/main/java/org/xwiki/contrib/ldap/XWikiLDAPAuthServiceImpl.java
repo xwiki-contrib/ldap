@@ -215,7 +215,7 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
 
             // Remember user in the session
             request.getSession().setAttribute(SecurityRequestWrapper.PRINCIPAL_SESSION_KEY, principal);
-            request.getSession().setAttribute("ldap.remoteuser", context.getRequest().getRemoteUser());
+            request.getSession().setAttribute("ldap.remoteuser", remoteUser);
 
             user = new XWikiUser(principal.getName());
         } else {
