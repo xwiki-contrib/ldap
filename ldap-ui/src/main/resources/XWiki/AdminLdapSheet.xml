@@ -527,6 +527,8 @@ $services.localization.render('ldap.ldapAuthenticationIsNotEnabledWarning')
           return ""
         }
         return key.value + "=" + key.next("input").value;
+      }).filter(function(value) {
+        return value != '' &amp;&amp; value != '=';
       }).join(this.options.separator);
 
       if (this.input.tagName.toLowerCase() === "textarea") {
