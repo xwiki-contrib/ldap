@@ -40,13 +40,13 @@
   <syntaxId>plain/1.0</syntaxId>
   <hidden>true</hidden>
   <content>ldap.missingLdapService=LDAP-service er ikke tilgængelig. Check venligst server-installationen.
-ldap.ldapAuthenticationIsNotEnabledWarning=LDAP-sikkerhed er ikke slået til. Definer LDAP-service i konfigurationsfilen \#\#xwiki.cfg\#\#
+ldap.ldapAuthenticationIsNotEnabledWarning=LDAP-sikkerhed er ikke slået til. Definer LDAP-service i konfigurationsfilen ##xwiki.cfg##
 ldap.ldapGroupTip=LDAP-gruppe...
 ldap.xwikiGroupTip=XWiki-gruppee...
 ldap.ldapUserField=LDAP-felt...
 ldap.xwikiUserField=XWiki-brugeregenskab...
 ldap.adminHeadingConfiguration=Konfiguration
-### Missing: ldap.adminHeadingMiscellaneous=Miscellaneous
+ldap.adminHeadingMiscellaneous=Andet
 ldap.resetGroupCacheSuccess=Mellemlager for gruppe er nulstil
 ldap.resetGroupCacheButton=Nulstil gruppe-mellemlager</content>
 </xwikidoc>

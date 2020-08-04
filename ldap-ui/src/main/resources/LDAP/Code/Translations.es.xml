@@ -40,13 +40,13 @@
   <syntaxId>plain/1.0</syntaxId>
   <hidden>true</hidden>
   <content>ldap.missingLdapService=El servicio LDAP no se encuentra disponible. Por favor, verifique su instalación.
-ldap.ldapAuthenticationIsNotEnabledWarning=La autenticación con LDAP no está habilitada. Por favor, confgiure la autenticación con LDAP como servicio en ##xwiki.cfg##
+ldap.ldapAuthenticationIsNotEnabledWarning=La autenticación LDAP no está activada. Por favor, configure LDAP como servicio de autenticación en ##xwiki.cfg##
 ldap.ldapGroupTip=Grupo LDAP...
 ldap.xwikiGroupTip=Grupo XWiki...
 ldap.ldapUserField=Campo LDAP...
-ldap.xwikiUserField=Característica de usuario XWiki...
+ldap.xwikiUserField=Propiedad de usuario XWiki...
 ldap.adminHeadingConfiguration=Configuración
-ldap.adminHeadingMiscellaneous=Misceláneas
-ldap.resetGroupCacheSuccess=El cache de grupos ha sido reseteado
+ldap.adminHeadingMiscellaneous=Varios
+ldap.resetGroupCacheSuccess=Se ha reiniciado la caché de grupos
 ldap.resetGroupCacheButton=Resetear el cache de grupos</content>
 </xwikidoc>
