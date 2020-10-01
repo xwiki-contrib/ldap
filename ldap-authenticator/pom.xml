@@ -32,12 +32,12 @@
   <description>Authenticate using a LDAP server</description>
   <properties>
     <xwiki.jacoco.instructionRatio>0.14</xwiki.jacoco.instructionRatio>
-
     <!-- Name to display by the Extension Manager -->
     <xwiki.extension.name>LDAP Authenticator</xwiki.extension.name>
-
     <!-- XWiki supports only one authenticator for the same instance -->
     <xwiki.extension.namespaces>{root}</xwiki.extension.namespaces>
+    <!-- Mark it as an authenticator -->
+    <xwiki.extension.category>authenticator</xwiki.extension.category>
   </properties>
   <dependencies>
     <dependency>
@@ -49,13 +49,11 @@
       <artifactId>xwiki-platform-oldcore</artifactId>
       <version>${platform.version}</version>
     </dependency>
-
     <dependency>
       <groupId>com.novell.ldap</groupId>
       <artifactId>jldap</artifactId>
       <version>2009-10-07</version>
     </dependency>
-
     <!-- Testing dependencies -->
     <dependency>
       <groupId>org.xwiki.commons</groupId>

@@ -46,7 +46,6 @@
       <artifactId>ldap-api</artifactId>
       <version>${project.version}</version>
     </dependency>
-
     <!-- Test dependencies -->
     <dependency>
       <groupId>org.xwiki.platform</groupId>
@@ -54,7 +53,6 @@
       <version>${platform.version}</version>
       <scope>test</scope>
     </dependency>
-
     <!-- Dependencies for LDAP unit tests -->
     <dependency>
       <groupId>org.apache.directory.server</groupId>

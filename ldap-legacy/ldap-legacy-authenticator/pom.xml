@@ -34,13 +34,11 @@
   <properties>
     <!-- Name to display by the Extension Manager -->
     <xwiki.extension.name>Legacy LDAP Authenticator</xwiki.extension.name>
-
     <!-- Old name -->
     <xwiki.extension.features>
       org.xwiki.platform:xwiki-platform-legacy-ldap-authenticator,
       org.xwiki.platform:xwiki-platform-ldap-authenticator
     </xwiki.extension.features>
-
     <!-- XWiki supports only one authenticator for the same instance -->
     <xwiki.extension.namespaces>{root}</xwiki.extension.namespaces>
   </properties>

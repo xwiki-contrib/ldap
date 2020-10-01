@@ -33,18 +33,12 @@
   <name>LDAP - Parent POM</name>
   <description>Various tools to manipulate LDAP servers in XWiki</description>
   <packaging>pom</packaging>
-
-  <properties>
-    <xwiki.release.jira.skip>false</xwiki.release.jira.skip>
-    <xwiki.issueManagement.jira.id>LDAP</xwiki.issueManagement.jira.id>
-  </properties>
-
-  <modules>
-    <module>ldap-authenticator</module>
-    <module>ldap-api</module>
-    <module>ldap-ui</module>
-  </modules>
-
+  <scm>
+    <connection>scm:git:git://github.com/xwiki-contrib/ldap.git</connection>
+    <developerConnection>scm:git:git@github.com:xwiki-contrib/ldap.git</developerConnection>
+    <url>https://github.com/xwiki-contrib/ldap/tree/master</url>
+    <tag>HEAD</tag>
+  </scm>
   <developers>
     <developer>
       <id>dgervalle</id>
@@ -67,22 +61,10 @@
       <name>XWiki Development Team</name>
     </developer>
   </developers>
-
-  <profiles>
-    <profile>
-      <id>integration-tests</id>
-      <modules>
-        <module>ldap-test</module>
-      </modules>
-    </profile>
-    <profile>
-      <id>legacy</id>
-      <modules>
-        <module>ldap-legacy</module>
-      </modules>
-    </profile>
-  </profiles>
-
+  <properties>
+    <xwiki.release.jira.skip>false</xwiki.release.jira.skip>
+    <xwiki.issueManagement.jira.id>LDAP</xwiki.issueManagement.jira.id>
+  </properties>
   <build>
     <pluginManagement>
       <plugins>
@@ -126,11 +108,23 @@
       </plugin>
     </plugins>
   </build>
-
-  <scm>
-    <connection>scm:git:git://github.com/xwiki-contrib/ldap.git</connection>
-    <developerConnection>scm:git:git@github.com:xwiki-contrib/ldap.git</developerConnection>
-    <url>https://github.com/xwiki-contrib/ldap/tree/master</url>
-    <tag>HEAD</tag>
-  </scm>
+  <modules>
+    <module>ldap-api</module>
+    <module>ldap-authenticator</module>
+    <module>ldap-ui</module>
+  </modules>
+  <profiles>
+    <profile>
+      <id>integration-tests</id>
+      <modules>
+        <module>ldap-test</module>
+      </modules>
+    </profile>
+    <profile>
+      <id>legacy</id>
+      <modules>
+        <module>ldap-legacy</module>
+      </modules>
+    </profile>
+  </profiles>
 </project>
