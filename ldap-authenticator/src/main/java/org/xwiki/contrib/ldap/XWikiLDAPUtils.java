@@ -1706,7 +1706,7 @@ public class XWikiLDAPUtils
      */
     private String getUserPageName(List<XWikiLDAPSearchAttribute> attributes, XWikiContext context)
     {
-        String userPageName = getConfiguration().getLDAPParam("userPageName", "${uid}", context);
+        String userPageName = getConfiguration().getLDAPParam("ldap_userPageName", "${uid}");
 
         Map<String, String> valueMap = new HashMap<>(getConfiguration().getMemoryConfiguration());
         if (attributes != null) {
