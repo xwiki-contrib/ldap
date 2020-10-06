@@ -237,6 +237,18 @@ public class XWikiLDAPAuthServiceImplTest extends AbstractLDAPTestCase
     }
 
     /**
+     * Make sure we can customize the user page name.
+     */
+    @Test
+    public void testAuthenticateWithCustomUserPageName() throws XWikiException
+    {
+        this.mocker.getMockXWikiCfg().setProperty("xwiki.authentication.ldap.userPageName", "${uid}-custom");
+
+        assertAuthenticate(LDAPTestSetup.HORATIOHORNBLOWER_CN, LDAPTestSetup.HORATIOHORNBLOWER_PWD,
+            userProfileName(LDAPTestSetup.HORATIOHORNBLOWER_CN + "-custom"), LDAPTestSetup.HORATIOHORNBLOWER_DN);
+    }
+
+    /**
      * Make sure the "real" uid is used by default as XWiki user page name.
      */
     @Test
