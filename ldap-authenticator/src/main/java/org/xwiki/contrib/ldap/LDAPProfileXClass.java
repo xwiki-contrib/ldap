@@ -235,32 +235,51 @@ public class LDAPProfileXClass
     /**
      * Search the XWiki storage for a existing user profile with provided LDAP user uid stored.
      * <p>
-     * If more than one profile is found the first one in returned and an error is logged.
-     * 
+     * If more than one profile is found the first one is returned and an error is logged.
+     *
      * @param uid the LDAP unique id.
      * @return the user profile containing LDAP uid.
      */
     public XWikiDocument searchDocumentByUid(String uid)
     {
+        return searchDocumentByLdapProfileClassAttribute(LDAP_XFIELD_UID, uid);
+    }
+
+    /**
+     * Search XWiki storage for a existing user profile with provided LDAP dn stored.
+     * <p>
+     * If more than one profile is found the first one is returned and an error is logged.
+     *
+     * @param dn the LDAP DN.
+     * @return the user profile containing LDAP dn.
+     */
+    public XWikiDocument searchDocumentByDn(String dn)
+    {
+        return searchDocumentByLdapProfileClassAttribute(LDAP_XFIELD_DN, dn);
+    }
+
+    private XWikiDocument searchDocumentByLdapProfileClassAttribute(String attrName, String attrValue)
+    {
         XWikiDocument doc = null;
 
         List<XWikiDocument> documentList;
         try {
-            // Search for uid in database, make sure to compare uids lower cased to make to to not take into account the
-            // case since LDAP does not
-            String sql =
-                ", BaseObject as obj, StringProperty as prop where doc.fullName=obj.name and obj.className=? and obj.id=prop.id.id and prop.name=? and lower(prop.value)=?";
+            // Search for the value in the database, make sure to compare values lower cased to not take
+            // into account the case since LDAP does not
+            String sql = ", BaseObject as obj, "
+                + (LDAP_XFIELD_DN.equals(attrName) ? "LargeStringProperty" : "StringProperty") + " as prop"
+                + " where doc.fullName=obj.name and obj.className=? and obj.id=prop.id.id"
+                + " and prop.name=? and lower(prop.value)=?";
 
             documentList = this.context.getWiki().getStore().searchDocuments(sql, false, false, false, 0, 0,
-                Arrays.asList(LDAP_XCLASS, LDAP_XFIELD_UID, uid.toLowerCase()), this.context);
+                Arrays.asList(LDAP_XCLASS, attrName, attrValue.toLowerCase()), this.context);
         } catch (XWikiException e) {
-            LOGGER.error("Fail to search for document containing ldap uid [" + uid + "]", e);
-
+            LOGGER.error("Fail to search for document containing ldap " + attrName + " [" + attrValue + "]", e);
             documentList = Collections.emptyList();
         }
 
         if (documentList.size() > 1) {
-            LOGGER.error("There is more than one user profile for LDAP uid [" + uid + "]");
+            LOGGER.error("There is more than one user profile for LDAP {} [{}]", attrName, attrValue);
         }
 
         if (!documentList.isEmpty()) {

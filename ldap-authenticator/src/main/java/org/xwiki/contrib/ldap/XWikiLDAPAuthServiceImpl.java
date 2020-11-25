@@ -677,10 +677,19 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
             }
 
             // ////////////////////////////////////////////////////////////////////
-            // 9. sync user
+            // 9. if not already found, search for XWiki user profile page by dn
             // ////////////////////////////////////////////////////////////////////
 
             boolean isNewUser = userProfile == null || userProfile.isNew();
+            if (isNewUser) {
+                userProfile = ldapUtils.getUserProfileByDn(validXWikiUserName, ldapDn, context);
+                isNewUser = userProfile == null || userProfile.isNew();
+                LOGGER.info("PATCH: is user profile found for [{}] ? {} :: {}", ldapDn, !isNewUser, userProfile);
+            }
+
+            // ////////////////////////////////////////////////////////////////////
+            // 10. sync user
+            // ////////////////////////////////////////////////////////////////////
 
             userProfile = syncUser(userProfile, searchAttributes, ldapDn, trimedAuthInput, ldapUtils, context);
 

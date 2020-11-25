@@ -1634,6 +1634,22 @@ public class XWikiLDAPUtils
     public XWikiDocument getUserProfileByUid(String validXWikiUserName, String userId, XWikiContext context)
         throws XWikiException
     {
+        return getUserProfileByUniqueAttribute(validXWikiUserName, userId, false, context);
+    }
+
+    /**
+     * Look up user profile using the DN as unique identifier.
+     * @see {@link #getUserProfileByUid(String, String, XWikiContext)}
+     */
+    public XWikiDocument getUserProfileByDn(String validXWikiUserName, String userId, XWikiContext context)
+        throws XWikiException
+    {
+        return getUserProfileByUniqueAttribute(validXWikiUserName, userId, true, context);
+    }
+
+    private XWikiDocument getUserProfileByUniqueAttribute(String validXWikiUserName, String userId, boolean tryDn, XWikiContext context)
+        throws XWikiException
+    {
         LDAPProfileXClass ldapXClass = new LDAPProfileXClass(context);
 
         // Try default profile name (generally in the cache)
@@ -1646,8 +1662,8 @@ public class XWikiLDAPUtils
         }
 
         if (!userId.equalsIgnoreCase(ldapXClass.getUid(userProfile))) {
-            // Search for existing profile with provided uid
-            userProfile = ldapXClass.searchDocumentByUid(userId);
+            // Search for existing profile with provided unique attribute
+            userProfile = (tryDn) ? ldapXClass.searchDocumentByDn(userId) : ldapXClass.searchDocumentByUid(userId);
 
             // Resolve default profile patch of an uid
             if (userProfile == null && validXWikiUserName != null) {
