@@ -684,7 +684,6 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
             if (isNewUser) {
                 userProfile = ldapUtils.getUserProfileByDn(validXWikiUserName, ldapDn, context);
                 isNewUser = userProfile == null || userProfile.isNew();
-                LOGGER.info("PATCH: is user profile found for [{}] ? {} :: {}", ldapDn, !isNewUser, userProfile);
             }
 
             // ////////////////////////////////////////////////////////////////////
