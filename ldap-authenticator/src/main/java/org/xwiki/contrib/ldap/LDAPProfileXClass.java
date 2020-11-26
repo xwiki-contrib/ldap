@@ -19,8 +19,6 @@
  */
 package org.xwiki.contrib.ldap;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +28,10 @@ import org.slf4j.LoggerFactory;
 import org.xwiki.model.EntityType;
 import org.xwiki.model.reference.EntityReference;
 import org.xwiki.model.reference.LocalDocumentReference;
+import org.xwiki.query.Query;
+import org.xwiki.query.QueryException;
+import org.xwiki.query.QueryFilter;
+import org.xwiki.query.QueryManager;
 
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
@@ -38,6 +40,7 @@ import com.xpn.xwiki.objects.BaseObject;
 import com.xpn.xwiki.objects.classes.BaseClass;
 import com.xpn.xwiki.objects.classes.TextAreaClass;
 import com.xpn.xwiki.user.api.XWikiRightService;
+import com.xpn.xwiki.web.Utils;
 
 /**
  * Helper to manager LDAP profile XClass and XObject.
@@ -263,28 +266,28 @@ public class LDAPProfileXClass
     {
         XWikiDocument doc = null;
 
-        List<XWikiDocument> documentList;
         try {
-            // Search for the value in the database, make sure to compare values lower cased to not take
-            // into account the case since LDAP does not
-            String sql = ", BaseObject as obj, "
-                + (LDAP_XFIELD_DN.equals(attrName) ? "LargeStringProperty" : "StringProperty") + " as prop"
-                + " where doc.fullName=obj.name and obj.className=? and obj.id=prop.id.id"
-                + " and prop.name=? and lower(prop.value)=?";
+            QueryManager queryManager = Utils.getComponent(QueryManager.class);
 
-            documentList = this.context.getWiki().getStore().searchDocuments(sql, false, false, false, 0, 0,
-                Arrays.asList(LDAP_XCLASS, attrName, attrValue.toLowerCase()), this.context);
-        } catch (XWikiException e) {
+            // note: we can do a simple string substitution of attrName here as long as this method is private
+            // and the callers from this class only pass in sane values
+            String xwql = String.format("from doc.object(%s) as ldap where ldap.%s = :value", LDAP_XCLASS, attrName);
+
+            List<String> documentList  = queryManager.createQuery(xwql, Query.XWQL)
+                .addFilter(Utils.getComponent(QueryFilter.class, "unique"))
+                .bindValue("value", attrValue)
+                .execute();
+
+            if (documentList.size() > 1) {
+                LOGGER.error("There is more than one user profile for LDAP {} [{}]", attrName, attrValue);
+            }
+
+            if (!documentList.isEmpty()) {
+                doc = this.context.getWiki().getDocument(documentList.get(0), this.context);
+            }
+
+        } catch (XWikiException | QueryException e) {
             LOGGER.error("Fail to search for document containing ldap " + attrName + " [" + attrValue + "]", e);
-            documentList = Collections.emptyList();
-        }
-
-        if (documentList.size() > 1) {
-            LOGGER.error("There is more than one user profile for LDAP {} [{}]", attrName, attrValue);
-        }
-
-        if (!documentList.isEmpty()) {
-            doc = documentList.get(0);
         }
 
         return doc;
