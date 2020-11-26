@@ -252,6 +252,7 @@ public class LDAPProfileXClass
      *
      * @param dn the LDAP DN.
      * @return the user profile containing LDAP dn.
+     * @since 9.4.6
      */
     public XWikiDocument searchDocumentByDn(String dn)
     {
