@@ -1640,7 +1640,7 @@ public class XWikiLDAPUtils
     /**
      * Look up user profile using the DN as unique identifier.
      * @see {@link #getUserProfileByUid(String, String, XWikiContext)}
-     * @since 9.4.6
+     * @since 9.5
      */
     public XWikiDocument getUserProfileByDn(String validXWikiUserName, String userId, XWikiContext context)
         throws XWikiException
