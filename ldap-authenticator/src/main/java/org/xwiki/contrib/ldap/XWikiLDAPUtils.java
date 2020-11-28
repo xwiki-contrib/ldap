@@ -1662,9 +1662,10 @@ public class XWikiLDAPUtils
             userProfile = null;
         }
 
-        if (!userId.equalsIgnoreCase(ldapXClass.getUid(userProfile))) {
+        if (!userId.equalsIgnoreCase(tryDn ? ldapXClass.getDn(userProfile) : ldapXClass.getUid(userProfile))) {
             // Search for existing profile with provided unique attribute
-            userProfile = (tryDn) ? ldapXClass.searchDocumentByDn(userId) : ldapXClass.searchDocumentByUid(userId);
+            userProfile = (tryDn) ? ldapXClass.searchDocumentByDn(userId)
+                : ldapXClass.searchDocumentByUid(userId);
 
             // Resolve default profile patch of an uid
             if (userProfile == null && validXWikiUserName != null) {

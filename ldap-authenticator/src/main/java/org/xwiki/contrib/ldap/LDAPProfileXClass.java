@@ -134,7 +134,8 @@ public class LDAPProfileXClass
      */
     public String getDn(XWikiDocument userDocument)
     {
-        BaseObject ldapObject = userDocument.getXObject(this.ldapClass.getDocumentReference());
+        BaseObject ldapObject = (userDocument == null) ? null
+            :  userDocument.getXObject(this.ldapClass.getDocumentReference());
 
         return ldapObject == null ? null : getDn(ldapObject);
     }
@@ -271,11 +272,11 @@ public class LDAPProfileXClass
 
             // note: we can do a simple string substitution of attrName here as long as this method is private
             // and the callers from this class only pass in sane values
-            String xwql = String.format("from doc.object(%s) as ldap where ldap.%s = :value", LDAP_XCLASS, attrName);
+            String xwql = String.format("from doc.object(%s) as ldap where lower(ldap.%s) = :value", LDAP_XCLASS, attrName);
 
             List<String> documentList  = queryManager.createQuery(xwql, Query.XWQL)
                 .addFilter(Utils.getComponent(QueryFilter.class, "unique"))
-                .bindValue("value", attrValue)
+                .bindValue("value", attrValue.toLowerCase())
                 .execute();
 
             if (documentList.size() > 1) {

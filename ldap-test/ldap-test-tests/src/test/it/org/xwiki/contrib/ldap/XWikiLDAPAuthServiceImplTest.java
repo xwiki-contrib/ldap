@@ -168,8 +168,8 @@ public class XWikiLDAPAuthServiceImplTest extends AbstractLDAPTestCase
         when(mockQueryForDn.<String>execute()).thenReturn(mockQueryResult);
 
         QueryManager queryMock = mock(QueryManager.class);
-        when(queryMock.createQuery(eq("from doc.object(XWiki.LDAPProfileClass) as ldap where ldap.uid = :value"), eq(Query.XWQL))).thenReturn(mockQueryForUid);
-        when(queryMock.createQuery(eq("from doc.object(XWiki.LDAPProfileClass) as ldap where ldap.dn = :value"), eq(Query.XWQL))).thenReturn(mockQueryForDn);
+        when(queryMock.createQuery(eq("from doc.object(XWiki.LDAPProfileClass) as ldap where lower(ldap.uid) = :value"), eq(Query.XWQL))).thenReturn(mockQueryForUid);
+        when(queryMock.createQuery(eq("from doc.object(XWiki.LDAPProfileClass) as ldap where lower(ldap.dn) = :value"), eq(Query.XWQL))).thenReturn(mockQueryForDn);
         this.mocker.getMocker().registerComponent(QueryManager.class, queryMock);
 
         this.ldapAuth = new XWikiLDAPAuthServiceImpl();

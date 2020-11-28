@@ -31,7 +31,7 @@
   <name>LDAP - Authenticator</name>
   <description>Authenticate using a LDAP server</description>
   <properties>
-    <xwiki.jacoco.instructionRatio>0.13</xwiki.jacoco.instructionRatio>
+    <xwiki.jacoco.instructionRatio>0.16</xwiki.jacoco.instructionRatio>
     <!-- Name to display by the Extension Manager -->
     <xwiki.extension.name>LDAP Authenticator</xwiki.extension.name>
     <!-- XWiki supports only one authenticator for the same instance -->
