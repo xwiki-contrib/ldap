@@ -82,7 +82,7 @@ public class LDAPGroupsCache implements Disposable
                 cachePool.put(cacheKey, cacheMap);
             }
 
-            LRUCacheConfiguration cacheConfiguration = createCacheConfiguration(utils.getConfiguration());
+            LRUCacheConfiguration cacheConfiguration = createCacheConfiguration(utils.getConfiguration(), cacheKey);
 
             cache = cacheMap.get(cacheConfiguration.getConfigurationId());
 
@@ -101,7 +101,18 @@ public class LDAPGroupsCache implements Disposable
      */
     public LRUCacheConfiguration createCacheConfiguration(XWikiLDAPConfig config)
     {
-        LRUCacheConfiguration cacheConfiguration = new LRUCacheConfiguration(CACHE_NAME_GROUPS);
+        return createCacheConfiguration(config, null);
+    }
+
+    /**
+     * @param config the current LDAP configuration
+     * @param cacheKeySuffix an extra suffix to make the cache key unique, if not null
+     * @return the cache configuration
+     */
+    protected LRUCacheConfiguration createCacheConfiguration(XWikiLDAPConfig config, String cacheKeySuffix)
+    {
+        LRUCacheConfiguration cacheConfiguration = new LRUCacheConfiguration(
+            (cacheKeySuffix == null) ? CACHE_NAME_GROUPS : CACHE_NAME_GROUPS + '.' + cacheKeySuffix);
         cacheConfiguration.getLRUEvictionConfiguration().setLifespan(config.getCacheExpiration());
 
         return cacheConfiguration;

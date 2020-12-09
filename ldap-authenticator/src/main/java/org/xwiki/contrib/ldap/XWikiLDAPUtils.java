@@ -844,7 +844,9 @@ public class XWikiLDAPUtils
                 }
             }
         } catch (CacheException e) {
-            LOGGER.error("Unknown error with cache", e);
+            // rethrow the exception to stop group synchronization
+            // otherwise users will loose all mapped groups if there is a problem with the cache
+            throw new XWikiException("Unknown error with cache", e);
         }
 
         LOGGER.debug("Found group [{}] members [{}]", groupDN, groupMembers);
