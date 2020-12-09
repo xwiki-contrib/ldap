@@ -96,9 +96,12 @@ public class LDAPGroupsCache implements Disposable
     }
 
     /**
+     * Only used by the (also deprecated) {@link XWikiLDAPUtils#getGroupCacheConfiguration}.
      * @param config the current LDAP configuration
      * @return the cache configuration
+     * @deprecated since 9.5.1
      */
+    @Deprecated
     public LRUCacheConfiguration createCacheConfiguration(XWikiLDAPConfig config)
     {
         return createCacheConfiguration(config, null);
@@ -109,7 +112,7 @@ public class LDAPGroupsCache implements Disposable
      * @param cacheKeySuffix an extra suffix to make the cache key unique, if not null
      * @return the cache configuration
      */
-    protected LRUCacheConfiguration createCacheConfiguration(XWikiLDAPConfig config, String cacheKeySuffix)
+    private LRUCacheConfiguration createCacheConfiguration(XWikiLDAPConfig config, String cacheKeySuffix)
     {
         LRUCacheConfiguration cacheConfiguration = new LRUCacheConfiguration(
             (cacheKeySuffix == null) ? CACHE_NAME_GROUPS : CACHE_NAME_GROUPS + '.' + cacheKeySuffix);
