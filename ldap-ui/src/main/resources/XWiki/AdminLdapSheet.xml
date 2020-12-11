@@ -20,30 +20,76 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 -->
 
-<xwikidoc>
+<xwikidoc version="1.2" reference="XWiki.AdminLdapSheet" locale="">
   <web>XWiki</web>
   <name>AdminLdapSheet</name>
   <language/>
   <defaultLanguage/>
   <translation>0</translation>
-  <parent>XWiki.AdminSheet</parent>
   <creator>xwiki:XWiki.Admin</creator>
-  <author>xwiki:XWiki.Admin</author>
-  <customClass/>
-  <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1296125380000</creationDate>
+  <parent>XWiki.AdminSheet</parent>
+  <author>xwiki:XWiki.Admin</author>
+  <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <date>1336064952000</date>
   <contentUpdateDate>1336064952000</contentUpdateDate>
   <version>1.1</version>
   <title>LDAP Admin sheet</title>
-  <template/>
-  <defaultTemplate/>
-  <validationScript/>
   <comment/>
   <minorEdit>false</minorEdit>
   <syntaxId>xwiki/2.0</syntaxId>
   <hidden>true</hidden>
+  <content>{{velocity output="false"}}
+$xwiki.jsx.use('XWiki.AdminLdapSheet')
+$xwiki.ssx.use('XWiki.AdminLdapSheet')
+#set ($params = {
+  'ldap': ['ldap', 'ldap_server', 'ldap_port', 'ldap_bind_DN','ldap_bind_pass', 'ldap_user_group', 'ldap_exclude_group',
+          'ldap_base_DN', 'ldap_UID_attr', 'ldap_trylocal','ldap_update_user', 'ldap_update_photo', 'ldap_photo_attachment_name',
+          'ldap_photo_attribute', 'ldap_fields_mapping','ldap_group_mapping', 'ldap_groupcache_expiration', 'ldap_mode_group_sync']
+})
+
+Note : 'ldap_validate_password' has been voluntary left out, has it's xwiki.cfg documentation precises that "[it is] covering very rare and bad use cases."
+{{/velocity}}
+
+{{velocity}}
+#if(!$services.ldap)
+{{error}}
+$services.localization.render('ldap.missingLdapService')
+{{/error}}
+#elseif(!$services.ldap.isXWikiLDAPAuthenticator())
+{{warning}}
+$services.localization.render('ldap.ldapAuthenticationIsNotEnabledWarning')
+{{/warning}}
+#end
+{{/velocity}}
+
+= {{velocity}}$services.localization.render('ldap.adminHeadingConfiguration'){{/velocity}} =
+
+{{include reference="XWiki.AdminFieldsDisplaySheet" /}}
+
+= {{velocity}}$services.localization.render('ldap.adminHeadingMiscellaneous'){{/velocity}} =
+
+{{velocity}}
+#if ($request.resetgroupcache_action)
+ #set($void = $services.ldap.resetGroupCache())
+ {{success}}$services.localization.render('ldap.resetGroupCacheSuccess'){{/success}}
+#end
+{{/velocity}}
+
+{{velocity}}
+{{html wiki="false"}}
+&lt;form method="post" action="${escapetool.xml($xwiki.requestURL)}#H-1"&gt;
+&lt;fieldset&gt;
+&lt;span class="buttonwrapper"&gt;&lt;input name="resetgroupcache_action" value="$services.localization.render('ldap.resetGroupCacheButton')" class="button" type="submit"&gt;&lt;/span&gt;
+&lt;/fieldset&gt;
+&lt;/form&gt;
+{{/html}}
+{{/velocity}}</content>
   <object>
+    <name>XWiki.AdminLdapSheet</name>
+    <number>0</number>
+    <className>XWiki.ConfigurableClass</className>
+    <guid>f78447aa-c069-4be9-b1e2-62d083f7bd8a</guid>
     <class>
       <name>XWiki.ConfigurableClass</name>
       <customClass/>
@@ -53,7 +99,21 @@
       <defaultWeb/>
       <nameField/>
       <validationScript/>
+      <categoryIcon>
+        <customDisplay/>
+        <disabled>0</disabled>
+        <name>categoryIcon</name>
+        <number>11</number>
+        <picker>0</picker>
+        <prettyName>categoryIcon</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <validationMessage/>
+        <validationRegExp/>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </categoryIcon>
       <codeToExecute>
+        <customDisplay/>
         <disabled>0</disabled>
         <editor>---</editor>
         <name>codeToExecute</name>
@@ -68,6 +128,7 @@
         <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
       </codeToExecute>
       <configurationClass>
+        <customDisplay/>
         <disabled>0</disabled>
         <name>configurationClass</name>
         <number>3</number>
@@ -80,6 +141,7 @@
         <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
       </configurationClass>
       <configureGlobally>
+        <customDisplay/>
         <defaultValue/>
         <disabled>0</disabled>
         <displayFormType>checkbox</displayFormType>
@@ -92,7 +154,34 @@
         <validationRegExp/>
         <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
       </configureGlobally>
+      <displayBeforeCategory>
+        <customDisplay/>
+        <disabled>0</disabled>
+        <name>displayBeforeCategory</name>
+        <number>10</number>
+        <picker>0</picker>
+        <prettyName>displayBeforeCategory</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <validationMessage/>
+        <validationRegExp/>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </displayBeforeCategory>
+      <displayInCategory>
+        <customDisplay/>
+        <disabled>0</disabled>
+        <name>displayInCategory</name>
+        <number>9</number>
+        <picker>0</picker>
+        <prettyName>displayInCategory</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <validationMessage/>
+        <validationRegExp/>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </displayInCategory>
       <displayInSection>
+        <customDisplay/>
         <disabled>0</disabled>
         <name>displayInSection</name>
         <number>1</number>
@@ -105,6 +194,7 @@
         <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
       </displayInSection>
       <heading>
+        <customDisplay/>
         <disabled>0</disabled>
         <name>heading</name>
         <number>2</number>
@@ -117,6 +207,7 @@
         <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
       </heading>
       <iconAttachment>
+        <customDisplay/>
         <disabled>0</disabled>
         <name>iconAttachment</name>
         <number>8</number>
@@ -129,6 +220,7 @@
         <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
       </iconAttachment>
       <linkPrefix>
+        <customDisplay/>
         <disabled>0</disabled>
         <name>linkPrefix</name>
         <number>5</number>
@@ -142,6 +234,7 @@
       </linkPrefix>
       <propertiesToShow>
         <cache>0</cache>
+        <customDisplay/>
         <disabled>0</disabled>
         <displayType>input</displayType>
         <multiSelect>1</multiSelect>
@@ -160,11 +253,23 @@
         <values/>
         <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
       </propertiesToShow>
+      <sectionOrder>
+        <customDisplay/>
+        <disabled>0</disabled>
+        <name>sectionOrder</name>
+        <number>12</number>
+        <numberType>integer</numberType>
+        <prettyName>sectionOrder</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <validationMessage/>
+        <validationRegExp/>
+        <classType>com.xpn.xwiki.objects.classes.NumberClass</classType>
+      </sectionOrder>
     </class>
-    <name>XWiki.AdminLdapSheet</name>
-    <number>0</number>
-    <className>XWiki.ConfigurableClass</className>
-    <guid>f78447aa-c069-4be9-b1e2-62d083f7bd8a</guid>
+    <property>
+      <categoryIcon/>
+    </property>
     <property>
       <codeToExecute>{{include reference="XWiki.AdminLdapSheet" /}}</codeToExecute>
     </property>
@@ -173,6 +278,12 @@
     </property>
     <property>
       <configureGlobally>1</configureGlobally>
+    </property>
+    <property>
+      <displayBeforeCategory/>
+    </property>
+    <property>
+      <displayInCategory/>
     </property>
     <property>
       <displayInSection>LDAP</displayInSection>
@@ -189,8 +300,15 @@
     <property>
       <propertiesToShow/>
     </property>
+    <property>
+      <sectionOrder/>
+    </property>
   </object>
   <object>
+    <name>XWiki.AdminLdapSheet</name>
+    <number>0</number>
+    <className>XWiki.JavaScriptExtension</className>
+    <guid>b6d4b62c-2ee9-40ed-ba15-60ee3f85e5e8</guid>
     <class>
       <name>XWiki.JavaScriptExtension</name>
       <customClass/>
@@ -210,7 +328,7 @@
         <prettyName>Caching policy</prettyName>
         <relationalStorage>0</relationalStorage>
         <separator> </separator>
-        <separators> ,|</separators>
+        <separators>|, </separators>
         <size>1</size>
         <unmodifiable>0</unmodifiable>
         <values>long|short|default|forbid</values>
@@ -255,17 +373,13 @@
         <prettyName>Use this extension</prettyName>
         <relationalStorage>0</relationalStorage>
         <separator> </separator>
-        <separators> ,|</separators>
+        <separators>|, </separators>
         <size>1</size>
         <unmodifiable>0</unmodifiable>
-        <values>currentPage=Always on this page|onDemand=On demand|always=Always on this wiki</values>
+        <values>currentPage|onDemand|always</values>
         <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
       </use>
     </class>
-    <name>XWiki.AdminLdapSheet</name>
-    <number>0</number>
-    <className>XWiki.JavaScriptExtension</className>
-    <guid>b6d4b62c-2ee9-40ed-ba15-60ee3f85e5e8</guid>
     <property>
       <cache>long</cache>
     </property>
@@ -443,6 +557,10 @@ document.observe("xwiki:dom:loaded", function(){
     </property>
   </object>
   <object>
+    <name>XWiki.AdminLdapSheet</name>
+    <number>1</number>
+    <className>XWiki.JavaScriptExtension</className>
+    <guid>78f08751-a251-47cc-a8f9-a37c307d6e76</guid>
     <class>
       <name>XWiki.JavaScriptExtension</name>
       <customClass/>
@@ -462,7 +580,7 @@ document.observe("xwiki:dom:loaded", function(){
         <prettyName>Caching policy</prettyName>
         <relationalStorage>0</relationalStorage>
         <separator> </separator>
-        <separators> ,|</separators>
+        <separators>|, </separators>
         <size>1</size>
         <unmodifiable>0</unmodifiable>
         <values>long|short|default|forbid</values>
@@ -507,17 +625,13 @@ document.observe("xwiki:dom:loaded", function(){
         <prettyName>Use this extension</prettyName>
         <relationalStorage>0</relationalStorage>
         <separator> </separator>
-        <separators> ,|</separators>
+        <separators>|, </separators>
         <size>1</size>
         <unmodifiable>0</unmodifiable>
-        <values>currentPage=Always on this page|onDemand=On demand|always=Always on this wiki</values>
+        <values>currentPage|onDemand|always</values>
         <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
       </use>
     </class>
-    <name>XWiki.AdminLdapSheet</name>
-    <number>1</number>
-    <className>XWiki.JavaScriptExtension</className>
-    <guid>78f08751-a251-47cc-a8f9-a37c307d6e76</guid>
     <property>
       <cache>long</cache>
     </property>
@@ -548,6 +662,10 @@ document.observe("xwiki:dom:loaded", function(){
     </property>
   </object>
   <object>
+    <name>XWiki.AdminLdapSheet</name>
+    <number>0</number>
+    <className>XWiki.StyleSheetExtension</className>
+    <guid>d00f9e74-d22b-4236-8504-2addd7b49d7f</guid>
     <class>
       <name>XWiki.StyleSheetExtension</name>
       <customClass/>
@@ -563,11 +681,11 @@ document.observe("xwiki:dom:loaded", function(){
         <displayType>select</displayType>
         <multiSelect>0</multiSelect>
         <name>cache</name>
-        <number>5</number>
+        <number>6</number>
         <prettyName>Caching policy</prettyName>
         <relationalStorage>0</relationalStorage>
         <separator> </separator>
-        <separators> ,|</separators>
+        <separators>|, </separators>
         <size>1</size>
         <unmodifiable>0</unmodifiable>
         <values>long|short|default|forbid</values>
@@ -576,17 +694,33 @@ document.observe("xwiki:dom:loaded", function(){
       <code>
         <disabled>0</disabled>
         <name>code</name>
-        <number>2</number>
+        <number>3</number>
         <prettyName>Code</prettyName>
         <rows>20</rows>
         <size>50</size>
         <unmodifiable>0</unmodifiable>
         <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
       </code>
+      <contentType>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <multiSelect>0</multiSelect>
+        <name>contentType</name>
+        <number>1</number>
+        <prettyName>Content Type</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators>|, </separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>CSS|LESS</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </contentType>
       <name>
         <disabled>0</disabled>
         <name>name</name>
-        <number>1</number>
+        <number>2</number>
         <prettyName>Name</prettyName>
         <size>30</size>
         <unmodifiable>0</unmodifiable>
@@ -597,7 +731,7 @@ document.observe("xwiki:dom:loaded", function(){
         <displayFormType>select</displayFormType>
         <displayType>yesno</displayType>
         <name>parse</name>
-        <number>4</number>
+        <number>5</number>
         <prettyName>Parse content</prettyName>
         <unmodifiable>0</unmodifiable>
         <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
@@ -608,21 +742,17 @@ document.observe("xwiki:dom:loaded", function(){
         <displayType>select</displayType>
         <multiSelect>0</multiSelect>
         <name>use</name>
-        <number>3</number>
+        <number>4</number>
         <prettyName>Use this extension</prettyName>
         <relationalStorage>0</relationalStorage>
         <separator> </separator>
-        <separators> ,|</separators>
+        <separators>|, </separators>
         <size>1</size>
         <unmodifiable>0</unmodifiable>
-        <values>currentPage=Always on this page|onDemand=On demand|always=Always on this wiki</values>
+        <values>currentPage|onDemand|always</values>
         <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
       </use>
     </class>
-    <name>XWiki.AdminLdapSheet</name>
-    <number>0</number>
-    <className>XWiki.StyleSheetExtension</className>
-    <guid>d00f9e74-d22b-4236-8504-2addd7b49d7f</guid>
     <property>
       <cache>long</cache>
     </property>
@@ -656,6 +786,9 @@ span.new-entry {
 </code>
     </property>
     <property>
+      <contentType>CSS</contentType>
+    </property>
+    <property>
       <name/>
     </property>
     <property>
@@ -665,50 +798,4 @@ span.new-entry {
       <use>onDemand</use>
     </property>
   </object>
-  <content>{{velocity output="false"}}
-$xwiki.jsx.use('XWiki.AdminLdapSheet')
-$xwiki.ssx.use('XWiki.AdminLdapSheet')
-#set ($params = {
-  'ldap': ['ldap', 'ldap_server', 'ldap_port', 'ldap_bind_DN','ldap_bind_pass', 'ldap_user_group', 'ldap_exclude_group',
-          'ldap_base_DN', 'ldap_UID_attr', 'ldap_trylocal','ldap_update_user', 'ldap_update_photo', 'ldap_photo_attachment_name',
-          'ldap_photo_attribute', 'ldap_fields_mapping','ldap_group_mapping', 'ldap_groupcache_expiration', 'ldap_mode_group_sync']
-})
-
-Note : 'ldap_validate_password' has been voluntary left out, has it's xwiki.cfg documentation precises that "[it is] covering very rare and bad use cases."
-{{/velocity}}
-
-{{velocity}}
-#if(!$services.ldap)
-{{error}}
-$services.localization.render('ldap.missingLdapService')
-{{/error}}
-#elseif(!$services.ldap.isXWikiLDAPAuthenticator())
-{{warning}}
-$services.localization.render('ldap.ldapAuthenticationIsNotEnabledWarning')
-{{/warning}}
-#end
-{{/velocity}}
-
-= {{velocity}}$services.localization.render('ldap.adminHeadingConfiguration'){{/velocity}} =
-
-{{include reference="XWiki.AdminFieldsDisplaySheet" /}}
-
-= {{velocity}}$services.localization.render('ldap.adminHeadingMiscellaneous'){{/velocity}} =
-
-{{velocity}}
-#if ($request.resetgroupcache_action)
- #set($void = $services.ldap.resetGroupCache())
- {{success}}$services.localization.render('ldap.resetGroupCacheSuccess'){{/success}}
-#end
-{{/velocity}}
-
-{{velocity}}
-{{html wiki="false"}}
-&lt;form method="post" action="${escapetool.xml($xwiki.requestURL)}#H-1"&gt;
-&lt;fieldset&gt;
-&lt;span class="buttonwrapper"&gt;&lt;input name="resetgroupcache_action" value="$services.localization.render('ldap.resetGroupCacheButton')" class="button" type="submit"&gt;&lt;/span&gt;
-&lt;/fieldset&gt;
-&lt;/form&gt;
-{{/html}}
-{{/velocity}}</content>
 </xwikidoc>
