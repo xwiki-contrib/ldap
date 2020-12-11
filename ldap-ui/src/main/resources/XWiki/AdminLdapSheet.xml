@@ -407,6 +407,7 @@ $services.localization.render('ldap.ldapAuthenticationIsNotEnabledWarning')
     initialize:function(input, options) {
       this.input = $(input);
       this.options = Object.extend(Object.clone(this.options), options || {});
+      this.options.newEntryMessage = this.input.getAttribute("data-add-entry-text") || this.options.newEntryMessage;
 
       (this.input.up("dd") || this.input).addClassName("hidden");
       this.inputContainer = (this.input.up("dd") || this.input).up();
@@ -642,11 +643,13 @@ document.observe("xwiki:dom:loaded", function(){
 
   groupMapping.setAttribute("data-key-tip", "${escapetool.javascript($services.localization.render('ldap.xwikiGroupTip'))}")
   groupMapping.setAttribute("data-value-tip", "${escapetool.javascript($services.localization.render('ldap.ldapGroupTip'))}")
+  groupMapping.setAttribute("data-add-entry-text", "$!{escapetool.javascript($services.localization.render('ldap.addNewEntry'))}")
   groupMapping.setAttribute("data-separator", "|")
   groupMapping.addClassName("properties-editor");
 
   fieldMapping.setAttribute("data-key-tip", "${escapetool.javascript($services.localization.render('ldap.xwikiUserField'))}")
   fieldMapping.setAttribute("data-value-tip", "${escapetool.javascript($services.localization.render('ldap.ldapUserField'))}")
+  fieldMapping.setAttribute("data-add-entry-text", "$!{escapetool.javascript($services.localization.render('ldap.addNewEntry'))}")
   fieldMapping.addClassName("properties-editor");
 
 });</code>

@@ -48,5 +48,6 @@ ldap.xwikiUserField=XWiki Benutzer-Eigenschaft…
 ldap.adminHeadingConfiguration=Einstellungen
 ldap.adminHeadingMiscellaneous=Sonstiges
 ldap.resetGroupCacheSuccess=Gruppen-Cache wurde zurückgesetzt
-ldap.resetGroupCacheButton=Gruppencache zurücksetzen</content>
+ldap.resetGroupCacheButton=Gruppencache zurücksetzen
+ldap.addNewEntry=Neuer Eintrag</content>
 </xwikidoc>
