@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.1" encoding="UTF-8"?>
 
 <!--
  * See the NOTICE file distributed with this work for additional
@@ -48,5 +48,7 @@ ldap.xwikiUserField=Propiedad de usuario XWiki...
 ldap.adminHeadingConfiguration=Configuración
 ldap.adminHeadingMiscellaneous=Varios
 ldap.resetGroupCacheSuccess=Se ha reiniciado la caché de grupos
-ldap.resetGroupCacheButton=Resetear el cache de grupos</content>
+ldap.resetGroupCacheButton=Resetear el cache de grupos
+### Missing: ldap.addNewEntry=New entry
+</content>
 </xwikidoc>
