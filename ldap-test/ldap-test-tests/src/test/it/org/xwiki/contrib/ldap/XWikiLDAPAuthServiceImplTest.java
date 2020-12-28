@@ -215,11 +215,6 @@ public class XWikiLDAPAuthServiceImplTest extends AbstractLDAPTestCase
     {
         Principal principal;
 
-        // Register user profile data to mock so that it's found by following queries
-        authUid.set(storedUid);
-        authDn.set(storedDn);
-        authUserPageName.set(xwikiUserName);
-
         if (sso) {
             when(this.mocker.getXWikiContext().getRequest().getRemoteUser()).thenReturn(login);
             XWikiUser user = this.ldapAuth.checkAuth(this.mocker.getXWikiContext());
@@ -234,6 +229,11 @@ public class XWikiLDAPAuthServiceImplTest extends AbstractLDAPTestCase
     protected XWikiDocument assertAuthenticate(String login, String password, String xwikiUserName, String storedDn,
         String storedUid, boolean sso) throws XWikiException
     {
+        // Register user profile data to mock so that it's found by following queries
+        authUid.set(storedUid);
+        authDn.set(storedDn);
+        authUserPageName.set(xwikiUserName);
+
         Principal principal = authenticate(login, password, sso);
 
         // Check that authentication return a valid Principal
