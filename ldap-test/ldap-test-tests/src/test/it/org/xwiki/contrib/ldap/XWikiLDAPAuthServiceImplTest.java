@@ -211,8 +211,7 @@ public class XWikiLDAPAuthServiceImplTest extends AbstractLDAPTestCase
         return assertAuthenticate(login, password, xwikiUserName, storedDn, storedUid, false);
     }
 
-    protected XWikiDocument assertAuthenticate(String login, String password, String xwikiUserName, String storedDn,
-        String storedUid, boolean sso) throws XWikiException
+    protected Principal authenticate(String login, String password, boolean sso) throws XWikiException
     {
         Principal principal;
 
@@ -228,6 +227,14 @@ public class XWikiLDAPAuthServiceImplTest extends AbstractLDAPTestCase
         } else {
             principal = this.ldapAuth.authenticate(login, password, this.mocker.getXWikiContext());
         }
+
+        return principal;
+    }
+
+    protected XWikiDocument assertAuthenticate(String login, String password, String xwikiUserName, String storedDn,
+        String storedUid, boolean sso) throws XWikiException
+    {
+        Principal principal = authenticate(login, password, sso);
 
         // Check that authentication return a valid Principal
         assertNotNull("Authentication failed", principal);
@@ -394,6 +401,22 @@ public class XWikiLDAPAuthServiceImplTest extends AbstractLDAPTestCase
 
         assertAuthenticate(LDAPTestSetup.HORATIOHORNBLOWER_CN, LDAPTestSetup.HORATIOHORNBLOWER_PWD,
             LDAPTestSetup.HORATIOHORNBLOWER_DN);
+    }
+
+    @Test
+    public void testAuthenticateTwiceAndWrongPassword() throws XWikiException
+    {
+        XWikiDocument document = assertAuthenticate(LDAPTestSetup.HORATIOHORNBLOWER_CN,
+            LDAPTestSetup.HORATIOHORNBLOWER_PWD, LDAPTestSetup.HORATIOHORNBLOWER_DN);
+
+        when(this.mocker.getMockStore().searchDocuments(anyString(), anyBoolean(), anyBoolean(), anyBoolean(), anyInt(),
+            anyInt(), anyList(), anyXWikiContext())).thenReturn(Collections.singletonList(document));
+
+        try {
+            authenticate(LDAPTestSetup.HORATIOHORNBLOWER_CN, "wrong", false);
+        } catch (XWikiLDAPException e) {
+            assertEquals("Invalid Credentials", e.getCause().getMessage());
+        }
     }
 
     /**
