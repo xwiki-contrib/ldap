@@ -49,6 +49,6 @@ ldap.adminHeadingConfiguration=Configuración
 ldap.adminHeadingMiscellaneous=Varios
 ldap.resetGroupCacheSuccess=Se ha reiniciado la caché de grupos
 ldap.resetGroupCacheButton=Resetear el cache de grupos
-### Missing: ldap.addNewEntry=New entry
+ldap.addNewEntry=Entrada nueva
 </content>
 </xwikidoc>
