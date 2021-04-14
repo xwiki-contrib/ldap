@@ -1724,7 +1724,7 @@ public class XWikiLDAPUtils
      * @param context the XWiki context
      * @return the name of the XWiki user profile page
      */
-    private String getUserPageName(List<XWikiLDAPSearchAttribute> attributes, XWikiContext context)
+    public String getUserPageName(List<XWikiLDAPSearchAttribute> attributes, XWikiContext context)
     {
         String userPageName = getConfiguration().getLDAPParam("ldap_userPageName", "${uid}");
 
