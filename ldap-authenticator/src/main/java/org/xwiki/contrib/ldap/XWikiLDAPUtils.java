@@ -1711,7 +1711,7 @@ public class XWikiLDAPUtils
      * @return the name of the XWiki user profile page
      * @throws XWikiException when a problem occurs while retrieving the user profile
      */
-    private XWikiDocument getAvailableUserProfile(List<XWikiLDAPSearchAttribute> attributes, XWikiContext context)
+    public XWikiDocument getAvailableUserProfile(List<XWikiLDAPSearchAttribute> attributes, XWikiContext context)
         throws XWikiException
     {
         String pageName = getUserPageName(attributes, context);

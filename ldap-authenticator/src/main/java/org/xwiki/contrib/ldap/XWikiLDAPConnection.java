@@ -410,7 +410,7 @@ public class XWikiLDAPConnection
      * @param searchAttributeList the XWiki attributes.
      * @param attributeSet the LDAP attributes.
      */
-    protected void ldapToXWikiAttribute(List<XWikiLDAPSearchAttribute> searchAttributeList,
+    public void ldapToXWikiAttribute(List<XWikiLDAPSearchAttribute> searchAttributeList,
         LDAPAttributeSet attributeSet)
     {
         for (LDAPAttribute attribute : (Set<LDAPAttribute>) attributeSet) {
