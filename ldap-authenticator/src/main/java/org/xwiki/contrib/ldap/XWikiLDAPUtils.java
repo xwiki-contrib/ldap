@@ -1731,20 +1731,41 @@ public class XWikiLDAPUtils
         Map<String, String> valueMap = new HashMap<>(getConfiguration().getMemoryConfiguration());
         if (attributes != null) {
             for (XWikiLDAPSearchAttribute attribute : attributes) {
-                valueMap.put("ldap." + attribute.name, attribute.value);
+                putVariable(valueMap, "ldap." + attribute.name, attribute.value);
                 if (attribute.name.equals(this.uidAttributeName)) {
                     // Override the default uid value with the real one coming from LDAP
-                    valueMap.put("uid", attribute.value);
+                    putVariable(valueMap, "uid", attribute.value);
                 }
             }
         }
 
         String pageName = StrSubstitutor.replace(userPageName, valueMap);
 
+        // Do the minimal needed cleanup anyway, even if it is not requested in the userPageName property.
         pageName = cleanXWikiUserPageName(pageName);
 
         LOGGER.debug("UserPageName: {}", pageName);
 
         return pageName;
+    }
+
+    private void putVariable(Map<String, String> map, String key, String value)
+    {
+        if (value != null) {
+            map.put(key, value);
+
+            map.put(key + "._lowerCase", value.toLowerCase());
+            map.put(key + "._upperCase", value.toUpperCase());
+
+            String cleanValue = clean(value);
+            map.put(key + "._clean", cleanValue);
+            map.put(key + "._clean._lowerCase", cleanValue.toLowerCase());
+            map.put(key + "._clean._upperCase", cleanValue.toUpperCase());
+        }
+    }
+
+    private String clean(String str)
+    {
+        return StringUtils.removePattern(str, "[\\.\\:\\s,@\\^]");
     }
 }
