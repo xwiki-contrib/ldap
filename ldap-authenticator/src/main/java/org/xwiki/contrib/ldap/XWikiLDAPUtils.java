@@ -1766,6 +1766,6 @@ public class XWikiLDAPUtils
 
     private String clean(String str)
     {
-        return StringUtils.removePattern(str, "[\\.\\:\\s,@\\^]");
+        return StringUtils.removePattern(str, "[\\.\\:\\s,@\\^\\/]");
     }
 }
