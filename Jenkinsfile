@@ -29,7 +29,5 @@ node {
   def firefoxVersionSystemProperty = getFirefoxVersionSystemProperty()
   xwikiBuild {
     properties = firefoxVersionSystemProperty
-    goals = 'clean deploy jacoco:report sonar:sonar'
-    sonar = true
   }
 }
