@@ -112,6 +112,7 @@
     <module>ldap-api</module>
     <module>ldap-authenticator</module>
     <module>ldap-ui</module>
+    <module>application-ldap-cleanup</module>
   </modules>
   <profiles>
     <profile>

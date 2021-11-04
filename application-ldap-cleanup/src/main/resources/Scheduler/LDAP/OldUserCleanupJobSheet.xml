@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ * See the NOTICE file distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this software; if not, write to the Free
+ * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+-->
+
+<xwikidoc version="1.2" reference="Scheduler.LDAP.OldUserCleanupJobSheet" locale="">
+  <web>Scheduler.LDAP</web>
+  <name>OldUserCleanupJobSheet</name>
+  <language/>
+  <defaultLanguage/>
+  <translation>0</translation>
+  <creator>xwiki:XWiki.Admin</creator>
+  <creationDate>1636029135000</creationDate>
+  <parent>WebHome</parent>
+  <author>xwiki:XWiki.Admin</author>
+  <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
+  <date>1636029135000</date>
+  <contentUpdateDate>1636029135000</contentUpdateDate>
+  <version>1.1</version>
+  <title>OldUserCleanupJobSheet</title>
+  <comment/>
+  <minorEdit>false</minorEdit>
+  <syntaxId>xwiki/2.1</syntaxId>
+  <hidden>true</hidden>
+  <content>{{velocity}}
+#set ($obj = $doc.getObject($doc.fullName))
+#if($obj)
+  #set ($class = $obj.xWikiClass)
+== $services.localization.render('org.xwiki.contrib.ldap.scheduler.LDAP.OldUserCleanupJob.settings.subtitle') ==
+
+#if(!$services.ldap)
+{{warning}}
+$services.localization.render('ldap.missingLdapService')
+{{/warning}}
+
+#elseif(!$services.ldap.isXWikiLDAPAuthenticator())
+{{warning}}
+$services.localization.render('ldap.ldapAuthenticationIsNotEnabledWarning')
+{{/warning}}
+
+#end
+##
+#set($confBindDn = $xwiki.getXWiki().getXWikiPreference( 'ldap_bind_DN', 'xwiki.authentication.ldap.bind_DN', '', $xcontext.getContext()))
+#set($confBindPw = $xwiki.getXWiki().getXWikiPreference( 'ldap_bind_pass', 'xwiki.authentication.ldap.bind_pass', '', $xcontext.getContext()))
+#set($maybePlaceholder = $regextool.compile('(^$|\{(?:0|1)\})'))
+#set($paramsAlreadySet = (!$maybePlaceholder.matcher($confBindDn).find() &amp;&amp; !$maybePlaceholder.matcher($confBindPw).find()))
+{{html wiki='true' clean='false'}}
+&lt;div class='xform'&gt;
+&lt;dl&gt;
+  ## XXX loop over all class properties instead of explicit enumeration? why this?
+  #foreach($propName in $class.propertyNames)
+  #set ($prettyName = $class.get($propName).translatedPrettyName)
+  &lt;dt&gt;
+    &lt;label #if ($xcontext.action == 'edit')for="${class.getName()}_${obj.number}_${propName}"#end&gt;
+      $prettyName
+    &lt;/label&gt;
+  &lt;/dt&gt;
+  &lt;dd&gt;
+      $!doc.display($propName, $obj)
+      &lt;span class="xHint"&gt;$escapetool.xml($services.localization.render("org.xwiki.contrib.ldap.scheduler.LDAP.OldUserCleanupJob.${propName}.hint"))&lt;/span&gt;
+      #if($paramsAlreadySet &amp;&amp; ($propName == 'ldapBindDn' || $propName == 'ldapBindPass'))
+      &lt;span class="xHint"&gt;$escapetool.xml($services.localization.render('org.xwiki.contrib.ldap.scheduler.LDAP.OldUserCleanupJob.settings.loginOk'))&lt;/span&gt;
+      #end
+  &lt;/dd&gt;
+  #end
+&lt;/dl&gt;
+&lt;/div&gt;
+{{/html}}
+#end
+
+----
+
+#if ($doc.getObject('XWiki.SchedulerJobClass'))
+== $services.localization.render('org.xwiki.contrib.ldap.scheduler.LDAP.OldUserCleanupJob.job.subtitle') ==
+{{include reference='XWiki.SchedulerJobSheet' /}}
+#end
+{{/velocity}}</content>
+</xwikidoc>
