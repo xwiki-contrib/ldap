@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ * See the NOTICE file distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this software; if not, write to the Free
+ * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+-->
+
+<xwikidoc version="1.2" reference="Scheduler.LDAP.Translations" locale="de">
+  <web>Scheduler.LDAP</web>
+  <name>Translations</name>
+  <language>de</language>
+  <defaultLanguage>en</defaultLanguage>
+  <translation>1</translation>
+  <creator>xwiki:XWiki.Admin</creator>
+  <creationDate>1628621207000</creationDate>
+  <parent>Scheduler.LDAP.OldUserCleanupJob</parent>
+  <author>xwiki:XWiki.Admin</author>
+  <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
+  <date>1636028814000</date>
+  <contentUpdateDate>1636028814000</contentUpdateDate>
+  <version>1.1</version>
+  <title/>
+  <comment/>
+  <minorEdit>false</minorEdit>
+  <syntaxId>plain/1.0</syntaxId>
+  <hidden>true</hidden>
+  <content># Class fields
+Scheduler.LDAP.OldUserCleanupJob_ldapBindDn=LDAP Verbindungsnutzer
+Scheduler.LDAP.OldUserCleanupJob_ldapBindPass=LDAP Verbindungspasswort
+Scheduler.LDAP.OldUserCleanupJob_replacementUser=Ersatznutzer
+Scheduler.LDAP.OldUserCleanupJob_replacementAdmin=Ersatzadmin
+Scheduler.LDAP.OldUserCleanupJob_replaceCreator=Ersteller ersetzen?
+Scheduler.LDAP.OldUserCleanupJob_replaceAuthor=Bearbeiter ersetzen?
+Scheduler.LDAP.OldUserCleanupJob_replaceContentAuthor=Inhaltsbearbeiter ersetzen?
+Scheduler.LDAP.OldUserCleanupJob_replaceCommentAuthor=Ersteller von Kommentaren ersetzen?
+Scheduler.LDAP.OldUserCleanupJob_dryRun=Testlauf
+# hints
+org.xwiki.contrib.ldap.scheduler.LDAP.OldUserCleanupJob.ldapBindDn.hint=Der Name bzw. die DN des Nutzers, der bei der LDAP-Abfrage verwendet wird.
+#org.xwiki.contrib.ldap.scheduler.LDAP.OldUserCleanupJob.ldapBindDn.existingOk=Es scheint, dass in Ihrer LDAP-Konfiguration schon ein geeigneter Nutzer hinterlegt ist; daher können Sie dieses Feld leer lassen.
+org.xwiki.contrib.ldap.scheduler.LDAP.OldUserCleanupJob.ldapBindPass.hint=Das Passwort des Nutzers, der bei der LDAP Abfrage verwendet wird.
+#org.xwiki.contrib.ldap.scheduler.LDAP.OldUserCleanupJob.ldapBindPass.existingOk=Es scheint, dass in Ihrer LDAP-Konfiguration schon ein geeignetes Passwort hinterlegt ist; daher können Sie dieses Feld leer lassen.
+org.xwiki.contrib.ldap.scheduler.LDAP.OldUserCleanupJob.replacementUser.hint=Der XWiki Nutzer, zu dem die Inhalte gelöschter Nutzerprofile übertragen werden. Dieser Nutzer braucht nicht zu existieren.
+org.xwiki.contrib.ldap.scheduler.LDAP.OldUserCleanupJob.replacementAdmin.hint=Der XWiki Nutzer, zu dem die Inhalte gelöschter Nutzerprofile übertragen werden, deren Nutzer das "Programmieren"-Recht hatten. Dies sollte ebenfalls ein Nutzer sein, der das "Programmieren"-Recht hat, und welcher ggf. deaktiviert ist. ##XWiki.superadmin## ist in der Regel geeignet.
+org.xwiki.contrib.ldap.scheduler.LDAP.OldUserCleanupJob.replaceCreator.hint=Bitte anwählen, wenn gelöschte Nutzer als Ersteller von Seiten durch den Ersatznutzer ersetzt werden sollen.
+org.xwiki.contrib.ldap.scheduler.LDAP.OldUserCleanupJob.replaceAuthor.hint=Bitte anwählen, wenn gelöschte Nutzer als letzte Bearbeiter von Seiten durch den Ersatznutzer ersetzt werden sollen.
+org.xwiki.contrib.ldap.scheduler.LDAP.OldUserCleanupJob.replaceContentAuthor.hint=Bitte anwählen, wenn gelöschte Nutzer als letzte Bearbeiter des Inhalts von Seiten durch den Ersatznutzer ersetzt werden sollen.
+org.xwiki.contrib.ldap.scheduler.LDAP.OldUserCleanupJob.replaceCommentAuthor.hint=Bitte anwählen, wenn gelöschte Nutzer als Ersteller bzw. Bearbeiter von Kommentaren durch den Ersatznutzer ersetzt werden sollen.
+org.xwiki.contrib.ldap.scheduler.LDAP.OldUserCleanupJob.dryRun.hint=Wenn aktiviert, wird nur protokolliert, welche Aktionen ausgeführt würden, ohne etwas zu verändern.
+
+# other
+org.xwiki.contrib.ldap.scheduler.LDAP.OldUserCleanupJob.title=Alte Profildaten löschen
+org.xwiki.contrib.ldap.scheduler.LDAP.OldUserCleanupJob.settings.subtitle=Einstellungen zur Nutzerersetzung
+org.xwiki.contrib.ldap.scheduler.LDAP.OldUserCleanupJob.settings.loginOk=Die in der LDAP Konfiguration hinterlegten Zugangsdaten sind verwendbar; Sie brauchen in diesem Feld keine Eingabe vorzunehmen.
+
+org.xwiki.contrib.ldap.scheduler.LDAP.OldUserCleanupJob.job.subtitle=Einstellungen zur Ausführung</content>
+</xwikidoc>

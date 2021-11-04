@@ -1,0 +1,777 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ * See the NOTICE file distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this software; if not, write to the Free
+ * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+-->
+
+<xwikidoc version="1.2" reference="Scheduler.LDAP.OldUserCleanupJob" locale="">
+  <web>Scheduler.LDAP</web>
+  <name>OldUserCleanupJob</name>
+  <language/>
+  <defaultLanguage/>
+  <translation>0</translation>
+  <creator>xwiki:XWiki.Admin</creator>
+  <creationDate>1636013616000</creationDate>
+  <parent>xwiki:Scheduler.LDAP.WebHome</parent>
+  <author>xwiki:XWiki.Admin</author>
+  <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
+  <date>1636029162000</date>
+  <contentUpdateDate>1636028813000</contentUpdateDate>
+  <version>1.1</version>
+  <title>Old Users Cleanup Job</title>
+  <comment/>
+  <minorEdit>false</minorEdit>
+  <syntaxId>xwiki/2.1</syntaxId>
+  <hidden>true</hidden>
+  <content/>
+  <class>
+    <name>Scheduler.LDAP.OldUserCleanupJob</name>
+    <customClass/>
+    <customMapping/>
+    <defaultViewSheet/>
+    <defaultEditSheet/>
+    <defaultWeb/>
+    <nameField/>
+    <validationScript/>
+    <dryRun>
+      <customDisplay/>
+      <defaultValue>1</defaultValue>
+      <disabled>0</disabled>
+      <displayFormType>checkbox</displayFormType>
+      <displayType/>
+      <name>dryRun</name>
+      <number>9</number>
+      <prettyName>dryRun</prettyName>
+      <unmodifiable>0</unmodifiable>
+      <validationMessage/>
+      <validationRegExp/>
+      <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+    </dryRun>
+    <ldapBindDn>
+      <customDisplay/>
+      <disabled>0</disabled>
+      <name>ldapBindDn</name>
+      <number>1</number>
+      <picker>0</picker>
+      <prettyName/>
+      <size>30</size>
+      <unmodifiable>0</unmodifiable>
+      <validationMessage/>
+      <validationRegExp/>
+      <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+    </ldapBindDn>
+    <ldapBindPass>
+      <algorithm/>
+      <customDisplay/>
+      <disabled>0</disabled>
+      <name>ldapBindPass</name>
+      <number>2</number>
+      <picker>0</picker>
+      <prettyName/>
+      <size>30</size>
+      <storageType>Clear</storageType>
+      <unmodifiable>0</unmodifiable>
+      <validationMessage/>
+      <validationRegExp/>
+      <classType>com.xpn.xwiki.objects.classes.PasswordClass</classType>
+    </ldapBindPass>
+    <replaceAuthor>
+      <customDisplay/>
+      <defaultValue>1</defaultValue>
+      <disabled>0</disabled>
+      <displayFormType>checkbox</displayFormType>
+      <displayType/>
+      <name>replaceAuthor</name>
+      <number>6</number>
+      <prettyName>replaceAuthor</prettyName>
+      <unmodifiable>0</unmodifiable>
+      <validationMessage/>
+      <validationRegExp/>
+      <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+    </replaceAuthor>
+    <replaceCommentAuthor>
+      <customDisplay/>
+      <defaultValue>1</defaultValue>
+      <disabled>0</disabled>
+      <displayFormType>checkbox</displayFormType>
+      <displayType/>
+      <name>replaceCommentAuthor</name>
+      <number>8</number>
+      <prettyName>replaceCommentAuthor</prettyName>
+      <unmodifiable>0</unmodifiable>
+      <validationMessage/>
+      <validationRegExp/>
+      <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+    </replaceCommentAuthor>
+    <replaceContentAuthor>
+      <customDisplay/>
+      <defaultValue>1</defaultValue>
+      <disabled>0</disabled>
+      <displayFormType>checkbox</displayFormType>
+      <displayType/>
+      <name>replaceContentAuthor</name>
+      <number>7</number>
+      <prettyName>replaceContentAuthor</prettyName>
+      <unmodifiable>0</unmodifiable>
+      <validationMessage/>
+      <validationRegExp/>
+      <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+    </replaceContentAuthor>
+    <replaceCreator>
+      <customDisplay/>
+      <defaultValue>1</defaultValue>
+      <disabled>0</disabled>
+      <displayFormType>checkbox</displayFormType>
+      <displayType/>
+      <name>replaceCreator</name>
+      <number>5</number>
+      <prettyName>replaceCreator</prettyName>
+      <unmodifiable>0</unmodifiable>
+      <validationMessage/>
+      <validationRegExp/>
+      <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+    </replaceCreator>
+    <replacementAdmin>
+      <customDisplay/>
+      <disabled>0</disabled>
+      <name>replacementAdmin</name>
+      <number>4</number>
+      <picker>0</picker>
+      <prettyName/>
+      <size>30</size>
+      <unmodifiable>0</unmodifiable>
+      <validationMessage/>
+      <validationRegExp/>
+      <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+    </replacementAdmin>
+    <replacementUser>
+      <customDisplay/>
+      <disabled>0</disabled>
+      <name>replacementUser</name>
+      <number>3</number>
+      <picker>0</picker>
+      <prettyName/>
+      <size>30</size>
+      <unmodifiable>0</unmodifiable>
+      <validationMessage/>
+      <validationRegExp/>
+      <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+    </replacementUser>
+  </class>
+  <object>
+    <name>Scheduler.LDAP.OldUserCleanupJob</name>
+    <number>0</number>
+    <className>Scheduler.LDAP.OldUserCleanupJob</className>
+    <guid>eba94da0-a6f3-429a-a10d-21d556d5efc4</guid>
+    <class>
+      <name>Scheduler.LDAP.OldUserCleanupJob</name>
+      <customClass/>
+      <customMapping/>
+      <defaultViewSheet/>
+      <defaultEditSheet/>
+      <defaultWeb/>
+      <nameField/>
+      <validationScript/>
+      <dryRun>
+        <customDisplay/>
+        <defaultValue>1</defaultValue>
+        <disabled>0</disabled>
+        <displayFormType>checkbox</displayFormType>
+        <displayType/>
+        <name>dryRun</name>
+        <number>9</number>
+        <prettyName>dryRun</prettyName>
+        <unmodifiable>0</unmodifiable>
+        <validationMessage/>
+        <validationRegExp/>
+        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+      </dryRun>
+      <ldapBindDn>
+        <customDisplay/>
+        <disabled>0</disabled>
+        <name>ldapBindDn</name>
+        <number>1</number>
+        <picker>0</picker>
+        <prettyName/>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <validationMessage/>
+        <validationRegExp/>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </ldapBindDn>
+      <ldapBindPass>
+        <algorithm/>
+        <customDisplay/>
+        <disabled>0</disabled>
+        <name>ldapBindPass</name>
+        <number>2</number>
+        <picker>0</picker>
+        <prettyName/>
+        <size>30</size>
+        <storageType>Clear</storageType>
+        <unmodifiable>0</unmodifiable>
+        <validationMessage/>
+        <validationRegExp/>
+        <classType>com.xpn.xwiki.objects.classes.PasswordClass</classType>
+      </ldapBindPass>
+      <replaceAuthor>
+        <customDisplay/>
+        <defaultValue>1</defaultValue>
+        <disabled>0</disabled>
+        <displayFormType>checkbox</displayFormType>
+        <displayType/>
+        <name>replaceAuthor</name>
+        <number>6</number>
+        <prettyName>replaceAuthor</prettyName>
+        <unmodifiable>0</unmodifiable>
+        <validationMessage/>
+        <validationRegExp/>
+        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+      </replaceAuthor>
+      <replaceCommentAuthor>
+        <customDisplay/>
+        <defaultValue>1</defaultValue>
+        <disabled>0</disabled>
+        <displayFormType>checkbox</displayFormType>
+        <displayType/>
+        <name>replaceCommentAuthor</name>
+        <number>8</number>
+        <prettyName>replaceCommentAuthor</prettyName>
+        <unmodifiable>0</unmodifiable>
+        <validationMessage/>
+        <validationRegExp/>
+        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+      </replaceCommentAuthor>
+      <replaceContentAuthor>
+        <customDisplay/>
+        <defaultValue>1</defaultValue>
+        <disabled>0</disabled>
+        <displayFormType>checkbox</displayFormType>
+        <displayType/>
+        <name>replaceContentAuthor</name>
+        <number>7</number>
+        <prettyName>replaceContentAuthor</prettyName>
+        <unmodifiable>0</unmodifiable>
+        <validationMessage/>
+        <validationRegExp/>
+        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+      </replaceContentAuthor>
+      <replaceCreator>
+        <customDisplay/>
+        <defaultValue>1</defaultValue>
+        <disabled>0</disabled>
+        <displayFormType>checkbox</displayFormType>
+        <displayType/>
+        <name>replaceCreator</name>
+        <number>5</number>
+        <prettyName>replaceCreator</prettyName>
+        <unmodifiable>0</unmodifiable>
+        <validationMessage/>
+        <validationRegExp/>
+        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+      </replaceCreator>
+      <replacementAdmin>
+        <customDisplay/>
+        <disabled>0</disabled>
+        <name>replacementAdmin</name>
+        <number>4</number>
+        <picker>0</picker>
+        <prettyName/>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <validationMessage/>
+        <validationRegExp/>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </replacementAdmin>
+      <replacementUser>
+        <customDisplay/>
+        <disabled>0</disabled>
+        <name>replacementUser</name>
+        <number>3</number>
+        <picker>0</picker>
+        <prettyName/>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <validationMessage/>
+        <validationRegExp/>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </replacementUser>
+    </class>
+    <property>
+      <dryRun>1</dryRun>
+    </property>
+    <property>
+      <ldapBindDn/>
+    </property>
+    <property>
+      <ldapBindPass/>
+    </property>
+    <property>
+      <replaceAuthor>1</replaceAuthor>
+    </property>
+    <property>
+      <replaceCommentAuthor>1</replaceCommentAuthor>
+    </property>
+    <property>
+      <replaceContentAuthor>1</replaceContentAuthor>
+    </property>
+    <property>
+      <replaceCreator>1</replaceCreator>
+    </property>
+    <property>
+      <replacementAdmin>XWiki.superadmin</replacementAdmin>
+    </property>
+    <property>
+      <replacementUser>XWiki.XWikiGuest</replacementUser>
+    </property>
+  </object>
+  <object>
+    <name>Scheduler.LDAP.OldUserCleanupJob</name>
+    <number>0</number>
+    <className>XWiki.ClassSheetBinding</className>
+    <guid>d12ee55b-b44d-4ee2-9d7c-8f10bffcd364</guid>
+    <class>
+      <name>XWiki.ClassSheetBinding</name>
+      <customClass/>
+      <customMapping/>
+      <defaultViewSheet/>
+      <defaultEditSheet/>
+      <defaultWeb/>
+      <nameField/>
+      <validationScript/>
+      <sheet>
+        <customDisplay/>
+        <disabled>0</disabled>
+        <name>sheet</name>
+        <number>1</number>
+        <picker>0</picker>
+        <prettyName>Sheet</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <validationMessage/>
+        <validationRegExp/>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </sheet>
+    </class>
+    <property>
+      <sheet>Scheduler.LDAP.OldUserCleanupJobSheet</sheet>
+    </property>
+  </object>
+  <object>
+    <name>Scheduler.LDAP.OldUserCleanupJob</name>
+    <number>0</number>
+    <className>XWiki.RequiredRightClass</className>
+    <guid>4a5d9988-7ce4-4c23-8347-4a37a54a7c94</guid>
+    <class>
+      <name>XWiki.RequiredRightClass</name>
+      <customClass/>
+      <customMapping/>
+      <defaultViewSheet/>
+      <defaultEditSheet/>
+      <defaultWeb/>
+      <nameField/>
+      <validationScript/>
+      <level>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <multiSelect>0</multiSelect>
+        <name>level</name>
+        <number>1</number>
+        <picker>0</picker>
+        <prettyName>level</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators> ,|</separators>
+        <size>1</size>
+        <sort>none</sort>
+        <unmodifiable>0</unmodifiable>
+        <validationMessage/>
+        <validationRegExp/>
+        <values>edit|programming</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </level>
+    </class>
+    <property>
+      <level>programming</level>
+    </property>
+  </object>
+  <object>
+    <name>Scheduler.LDAP.OldUserCleanupJob</name>
+    <number>0</number>
+    <className>XWiki.SchedulerJobClass</className>
+    <guid>20b82726-4cc9-49bd-a385-6bfe481737f0</guid>
+    <class>
+      <name>XWiki.SchedulerJobClass</name>
+      <customClass/>
+      <customMapping/>
+      <defaultViewSheet/>
+      <defaultEditSheet/>
+      <defaultWeb/>
+      <nameField/>
+      <validationScript/>
+      <contextDatabase>
+        <disabled>0</disabled>
+        <name>contextDatabase</name>
+        <number>9</number>
+        <prettyName>Job execution context database</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </contextDatabase>
+      <contextLang>
+        <disabled>0</disabled>
+        <name>contextLang</name>
+        <number>8</number>
+        <prettyName>Job execution context lang</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </contextLang>
+      <contextUser>
+        <disabled>0</disabled>
+        <name>contextUser</name>
+        <number>7</number>
+        <prettyName>Job execution context user</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </contextUser>
+      <cron>
+        <disabled>0</disabled>
+        <name>cron</name>
+        <number>5</number>
+        <prettyName>Cron Expression</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </cron>
+      <jobClass>
+        <disabled>0</disabled>
+        <name>jobClass</name>
+        <number>3</number>
+        <prettyName>Job Class</prettyName>
+        <size>60</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </jobClass>
+      <jobDescription>
+        <disabled>0</disabled>
+        <name>jobDescription</name>
+        <number>2</number>
+        <prettyName>Job Description</prettyName>
+        <rows>10</rows>
+        <size>45</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+      </jobDescription>
+      <jobName>
+        <disabled>0</disabled>
+        <name>jobName</name>
+        <number>1</number>
+        <prettyName>Job Name</prettyName>
+        <size>60</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </jobName>
+      <script>
+        <disabled>0</disabled>
+        <editor>PureText</editor>
+        <name>script</name>
+        <number>6</number>
+        <prettyName>Job Script</prettyName>
+        <rows>10</rows>
+        <size>60</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+      </script>
+      <status>
+        <disabled>0</disabled>
+        <name>status</name>
+        <number>4</number>
+        <prettyName>Status</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </status>
+    </class>
+    <property>
+      <contextDatabase>xwiki</contextDatabase>
+    </property>
+    <property>
+      <contextLang>en</contextLang>
+    </property>
+    <property>
+      <contextUser>XWiki.superadmin</contextUser>
+    </property>
+    <property>
+      <cron>0 12 1 * * ?</cron>
+    </property>
+    <property>
+      <jobClass>com.xpn.xwiki.plugin.scheduler.GroovyJob</jobClass>
+    </property>
+    <property>
+      <jobDescription/>
+    </property>
+    <property>
+      <jobName>Remove profile data for users no longer in LDAP</jobName>
+    </property>
+    <property>
+      <script>import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+import org.xwiki.contrib.ldap.XWikiLDAPUtils;
+import org.xwiki.contrib.ldap.XWikiLDAPConfig;
+import org.xwiki.contrib.ldap.XWikiLDAPConnection;
+import org.xwiki.security.authorization.Right;
+import com.xpn.xwiki.doc.XWikiAttachment;
+import com.xpn.xwiki.XWikiException;
+
+
+def logger = LoggerFactory.getLogger('org.xwiki.contrib.ldap.scheduler.jh.GroupMembershipUpdater')
+def document = xcontext.getDoc()
+def doc = xwiki.getDocument(document.getFullName())
+
+logger.info('running scheduler job {} in version [{}]', doc.getPlainTitle(), doc.getVersion())
+
+// a lengthy helper to replace the user references in one (sub-)wiki
+def adjustDocumentAuthorAndComments(userReference, replacementUserRef, config, logger) {
+
+    def dryRun = (config.getValue('dryRun') != 0)
+    def replaceAuthor = (config.getValue('replaceAuthor') == 1)
+    def replaceCreator = (config.getValue('replaceCreator') == 1)
+    def replaceContentAuthor = (config.getValue('replaceContentAuthor') == 1)
+    def replaceCommentAuthor = (config.getValue('replaceCommentAuthor') == 1)
+
+    def userName = services.model.serialize(userReference, 'compactwiki')
+    def replacementUserName = (replacementUserRef == null) ? "XWiki.XWikiGuest" : services.model.serialize(replacementUserRef, 'compactwiki')
+
+    if (replaceAuthor || replaceCreator || replaceContentAuthor) {
+
+      def arguments = ['user' : userName]
+      def queryString = 'WHERE '
+      def fromClause = ''
+      def queryStringParts = []
+      if (replaceAuthor) {
+        queryStringParts.add('doc.author = :user')
+      }
+      if (replaceCreator) {
+        queryStringParts.add('doc.creator = :user')
+      }
+      if (replaceContentAuthor) {
+        queryStringParts.add('doc.contentAuthor = :user')
+      }
+      queryString += String.join(" OR ", queryStringParts)
+      queryString = fromClause + queryString
+      logger.trace("run database query [${queryString}] with values [${arguments}]")
+
+      services.query.xwql(queryString).bindValues(arguments).addFilter('language').addFilter('unique').execute().each( { someDocRes -&gt;
+        def someDocName = someDocRes[0]
+        if (someDocRes[1] != '') {
+          someDocName = someDocName +'(lang='+someDocRes[1]+')'
+        }
+        logger.debug("found document to check [$someDocName]")
+        def someDoc = xwiki.getDocument(someDocRes[0]).getDocument()
+        if (someDocRes[1] != '') {
+          def someTranslation = someDoc.getTranslatedDocument(someDocRes[1], xcontext)
+          if (someTranslation != null &amp;&amp; !someTranslation.isNew()) {
+            logger.trace("actually use translation [$someTranslation] aka [$someTranslation.documentReferenceWithLocale]")
+            someDoc = someTranslation
+          } else {
+            logger.trace("actually use default language for [$someDoc.documentReferenceWithLocale]")
+          }
+        }
+        if (someDoc.isNew()) {
+          logger.warn("query found non-existing document ${someDocName} aka [" + xwiki.getDocument(someDocRes[0]).toString() + "] :: " +  xwiki.getDocument(someDocRes[0]).isNew())
+          return;
+        }
+        def needsSave = false
+        if (replaceCreator &amp;&amp; userReference.equals(someDoc.getCreatorReference())) {
+          logger.trace("&gt;&gt;&gt; document creator for [$someDocName]")
+          if (!dryRun) someDoc.setCreatorReference(replacementUserRef)
+          needsSave = true
+        } else if (replaceCreator) {
+          logger.trace("&gt;&gt;&gt; $userReference not document creator for [$someDocName], but ${someDoc.creator}")
+        }
+        if (replaceAuthor &amp;&amp; userReference.equals(someDoc.getAuthorReference())) {
+          logger.trace("&gt;&gt;&gt; document author for [$someDocName]")
+          if (!dryRun) someDoc.setAuthorReference(replacementUserRef)
+          needsSave = true
+        } else if (replaceAuthor) {
+          logger.trace("&gt;&gt;&gt; $userReference not document author for [$someDocName], but ${someDoc.author}")
+        }
+        if (replaceContentAuthor &amp;&amp; userReference.equals(someDoc.getContentAuthorReference())) {
+          logger.trace("&gt;&gt;&gt; content author for [$someDocName]")
+          if (!dryRun) someDoc.setContentAuthorReference(replacementUserRef)
+          needsSave = true
+        } else if (replaceContentAuthor) {
+          logger.trace("&gt;&gt;&gt; $userReference not content author for [$someDocName], but ${someDoc.contentAuthor}")
+        }
+
+        if (needsSave) {
+          logger.debug("save document [${someDocName}] with replacement user [${replacementUserRef}]")
+          if (!dryRun) xwiki.getXWiki().saveDocument(someDoc, "Replaced user [${userName}] with user [${replacementUserName}]", true, xcontext)
+        }
+
+      })
+    }
+
+    // we need to handle comments separately; if we include them in the above query we'd only check documents with comments for all checks
+    // on the other hand comments are always language independent
+    if (replaceCommentAuthor) {
+      queryString = 'FROM doc.object(XWiki.XWikiComments) AS comment WHERE comment.author = :user'
+      def arguments = ['user' : userName]
+      services.query.xwql(queryString).bindValues(arguments).addFilter('unique').execute().each( { someDocName -&gt;
+
+        logger.debug("found document with comments to check [$someDocName]")
+        def someDoc = xwiki.getDocument(someDocName).getDocument()
+        def needsSave = false
+        someDoc.getObjects('XWiki.XWikiComments').each( { comment -&gt;
+          if (comment != null &amp;&amp; comment.getStringValue('author') == userName) {
+            logger.trace("&gt;&gt;&gt; comment author for [$comment.reference]")
+            if (!dryRun) comment.set('author', replacementUserName, xcontext)
+            needsSave = true
+          }
+        })
+        if (needsSave) {
+          logger.debug("save comments in document [$someDocName] with replacement user [${replacementUserRef}]")
+          if (!dryRun) xwiki.getXWiki().saveDocument(someDoc, "Replaced user [${userName}] with user [${replacementUserName}]", true, xcontext)
+        }
+
+      })
+    }
+}
+
+// adjust references to replacement user and remove user
+def deleteUser(userName, config, logger) {
+  try {
+    def replacementUserName
+    if (services.security.authorization.hasAccess(Right.PROGRAM,
+                                                  xwiki.getDocument(userName).getDocumentReference(),
+                                                  xwiki.getDocument('XWiki.XWikiPreferences').getDocumentReference())) {
+      replacementUserName = config.get('replacementAdmin')
+      logger.debug('user [{}] has programming rights, replace by [{}]', userName, replacementUserName)
+    } else {
+      replacementUserName = config.getValue('replacementUser')
+      logger.debug('user [{}] has no programming rights, replace by [{}]', userName, replacementUserName)
+    }
+
+    def userRef = services.model.resolveDocument(userName)
+    def replacementUserRef = services.model.resolveDocument(replacementUserName)
+    if (replacementUserName == "XWiki.XWikiGuest") {
+      replacementUserRef = null
+    }
+
+    if (xcontext.isMainWiki()) {
+      def mainWikiId = xcontext.getWikiId()
+      services.wiki.allIds.each({ wikiId -&gt;
+        logger.debug("check for documents in ${wikiId}")
+        try {
+          xcontext.setWikiId(wikiId)
+          adjustDocumentAuthorAndComments(userRef, replacementUserRef, config, logger)
+        } finally {
+          xcontext.setWikiId(mainWikiId)
+        }
+      })
+    } else {
+      // just use the current wiki
+      adjustDocumentAuthorAndComments(userRef, replacementUserRef, config, logger)
+    }
+
+    def dryRun = (config.getValue('dryRun') != 0)
+    logger.info("delete the user [${userRef}]")
+    if (!dryRun) xwiki.getDocument(userRef).delete()
+
+  } catch (Exception e) {
+    logger.warn("Exception while deleting [${userName}].", e)
+  }
+}
+
+def user
+def password
+def config = doc.getObject(doc.getFullName())
+if (config == null) {
+  logger.info('Could not run update; configuration is missing')
+} else {
+
+  try {
+    def setupOk = false;
+    user = config.getValue('ldapBindDn')
+    password = config.getValue('ldapBindPass')
+    XWikiLDAPConfig configuration = new XWikiLDAPConfig(null);
+    if (!user) {
+      user = configuration.getLDAPParam("ldap_bind_DN","")
+    }
+    if (!password) {
+      password = configuration.getLDAPParam("ldap_bind_pass","")
+    }
+    setupOk = !(!user || !password)
+
+    if (!setupOk) {
+      logger.warn("cannot remove users without login data for a service user")
+    } else {
+
+      logger.info('Starting cleanup of removed users');
+
+      configuration = new XWikiLDAPConfig(null);
+      XWikiLDAPConnection connector = new XWikiLDAPConnection(configuration);
+      connector.open(user, password, xcontext);
+
+      XWikiLDAPUtils ldapUtils = new XWikiLDAPUtils(connector, configuration)
+      ldapUtils.setBaseDN(configuration.getLDAPParam("ldap_base_DN", ""))
+      try {
+        services.query.xwql("from doc.object(XWiki.LDAPProfileClass) as ldap_profile").execute().each( {
+          def userProfileDoc = xwiki.getDocument(it).getDocument()
+          logger.debug("check user [{}]", userProfileDoc.getDocumentReference().getName())
+          def userDn = userProfileDoc.getObject('XWiki.LDAPProfileClass').getStringValue('dn')
+          def userId = userProfileDoc.getObject('XWiki.LDAPProfileClass').getStringValue('uid')
+          String uid = configuration.getMemoryConfiguration().get("uid");
+
+          def userObj
+          if (uid != null &amp;&amp; !"dn".equalsIgnoreCase(uid)) {
+            ldapUtils.setUidAttributeName(uid)
+            logger.debug("the uid search term is [{}={}] and the dn [{}]", uid, userId, userDn)
+            def searchQuery = configuration.getLDAPParam("ldap_user_search_fmt", "({0}={1})")
+            logger.debug("we try to search with [{}]", searchQuery)
+            ldapUtils.setUserSearchFormatString(searchQuery)
+            userObj = ldapUtils.searchUserAttributesByUid(userId, null)
+          } else {
+            // one cannot search by dn=..., instead make a lookup:
+            logger.debug("lookup by DN for [{}]", userDn)
+            userObj = connector.searchLDAP(userDn, '(objectClass=*)', null, 0)
+          }
+          if (userObj == null || userObj.isEmpty()) {
+            logger.info("the user [{}] is no longer in LDAP; we are going to delete it", it)
+            deleteUser(it, config, logger)
+          }
+        })
+      } finally {
+        connector.close();
+      }
+    }
+  } catch (Exception e) {
+    logger.error('Error in user cleanup', e);
+  }
+}
+logger.info('Finished old user cleanup update')</script>
+    </property>
+    <property>
+      <status>Normal</status>
+    </property>
+  </object>
+</xwikidoc>
