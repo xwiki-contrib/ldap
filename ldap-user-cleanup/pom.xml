@@ -25,7 +25,7 @@
     <artifactId>ldap</artifactId>
     <version>9.5.7-SNAPSHOT</version>
   </parent>
-  <artifactId>application-ldap-user-cleanup</artifactId>
+  <artifactId>ldap-user-cleanup</artifactId>
   <packaging>xar</packaging>
   <name>LDAP - remove old users utility</name>
   <version>9.5.7-SNAPSHOT</version>
