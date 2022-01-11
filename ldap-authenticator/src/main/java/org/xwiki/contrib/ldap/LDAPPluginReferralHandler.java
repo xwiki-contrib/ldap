@@ -19,7 +19,7 @@
  */
 package org.xwiki.contrib.ldap;
 
-import java.text.MessageFormat;
+import java.nio.charset.StandardCharsets;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,11 +52,6 @@ public class LDAPPluginReferralHandler implements LDAPAuthHandler
     private String bindPassword;
 
     /**
-     * The XWiki context.
-     */
-    private XWikiContext xcontext;
-
-    /**
      * @param bindDN the DN to use when binding.
      * @param bindPassword the password to use when binding.
      * @param context the XWiki context.
@@ -65,18 +60,17 @@ public class LDAPPluginReferralHandler implements LDAPAuthHandler
     {
         this.bindDN = bindDN;
         this.bindPassword = bindPassword;
-        this.xcontext = context;
     }
 
     @Override
     public LDAPAuthProvider getAuthProvider(String host, int port)
     {
         try {
-            LOGGER.debug(MessageFormat.format("Looking for auth for referral to {0}:{1}", host, port));
+            LOGGER.debug("Looking for auth for referral to {}:{}", host, port);
 
-            return new LDAPAuthProvider(this.bindDN, this.bindPassword.getBytes("UTF8"));
+            return new LDAPAuthProvider(this.bindDN, this.bindPassword.getBytes(StandardCharsets.UTF_8));
         } catch (Exception e) {
-            LOGGER.error(MessageFormat.format("Failed to create LDAPAuthProvider for referral {0}:{1}", host, port));
+            LOGGER.error("Failed to create LDAPAuthProvider for referral {}:{}", host, port);
 
             return null;
         }
