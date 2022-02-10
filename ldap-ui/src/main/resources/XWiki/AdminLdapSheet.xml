@@ -397,6 +397,7 @@ $services.localization.render('ldap.ldapAuthenticationIsNotEnabledWarning')
     options: {
         separator: ","
       , mapsToString: " \u2192 "
+      , escapeChar: '\\'
       , newEntryMessage: "New entry"
     },
 
@@ -408,6 +409,7 @@ $services.localization.render('ldap.ldapAuthenticationIsNotEnabledWarning')
       this.input = $(input);
       this.options = Object.extend(Object.clone(this.options), options || {});
       this.options.newEntryMessage = this.input.getAttribute("data-add-entry-text") || this.options.newEntryMessage;
+      this.options.escapeChar = this.input.getAttribute("data-escape-character") || this.options.escapeChar;
 
       (this.input.up("dd") || this.input).addClassName("hidden");
       this.inputContainer = (this.input.up("dd") || this.input).up();
@@ -439,15 +441,40 @@ $services.localization.render('ldap.ldapAuthenticationIsNotEnabledWarning')
      * Initializes a collection of existing properties based on the original input value, and displays them as a pair of two input elements.
      */
     initializeAndDisplayExistingProperties: function() {
-      var props = this.value == "" ? [] : this.value.split(this.options.separator);
-      for (var i=0;i&lt;props.length;i++) {
-        var key = props[i].substring(0, props[i].indexOf("=")),
-            value = props[i].substring(props[i].indexOf("=") + 1) || "";
-        this.properties.push( [key, value] );
+      var propStr = this.value
+      var props = []
+      var escaped = false
+      var currentProp = ''
+      for (var i=0;i&lt;propStr.length;i++) {
+        var c = propStr[i]
+        if (escaped) {
+          currentProp += c
+          escaped = false
+        } else {
+          if (c == this.options.escapeChar) {
+            escaped = true
+          } else if (c == this.options.separator) {
+            this._addProp(currentProp)
+            currentProp = ''
+          } else {
+            currentProp += c
+          }
+        }
       }
+      if (currentProp.length &gt; 0) {
+        this._addProp(currentProp)
+      }
+
       for (var i=this.properties.length-1;i&gt;=0;i--) {
         (this.input.up("dd") || this.input).insert({'after': this.createPropertyEntry(this.properties[i][0], this.properties[i][1]) });
       }
+    },
+
+    _addProp: function(prop) {
+      // note: we do not handle escaped '=' in keys; currently there should be no need for this
+      var key = prop.substring(0, prop.indexOf("=")),
+          value = prop.substring(prop.indexOf("=") + 1) || "";
+      this.properties.push( [key, value] );
     },
 
     /**
@@ -504,6 +531,7 @@ $services.localization.render('ldap.ldapAuthenticationIsNotEnabledWarning')
      * Computes the new value for the original underlaying input element (textarea or input text), and updates its value with the result.
      */
     updateValue: function() {
+      var that = this
       var value = this.inputContainer.select("." + this.id + " .key[value!='']").collect(function(key){
         if (key.value == key.defaultValue) {
           return ""
@@ -511,6 +539,16 @@ $services.localization.render('ldap.ldapAuthenticationIsNotEnabledWarning')
         return key.value + "=" + key.next("input").value;
       }).filter(function(value) {
         return value != '' &amp;&amp; value != '=';
+      }).map(function(value) {
+        var escapedValue = ''
+        for (var i=0;i&lt;value.length;i++) {
+          var c = value[i]
+          if (c == that.options.separator || c == that.options.escapeChar) {
+            escapedValue += that.options.escapeChar
+          }
+          escapedValue += c
+        }
+        return escapedValue
       }).join(this.options.separator);
 
       if (this.input.tagName.toLowerCase() === "textarea") {
@@ -645,6 +683,7 @@ document.observe("xwiki:dom:loaded", function(){
   groupMapping.setAttribute("data-value-tip", "${escapetool.javascript($services.localization.render('ldap.ldapGroupTip'))}")
   groupMapping.setAttribute("data-add-entry-text", "$!{escapetool.javascript($services.localization.render('ldap.addNewEntry'))}")
   groupMapping.setAttribute("data-separator", "|")
+  groupMapping.setAttribute("data-escape-character", "\\")
   groupMapping.addClassName("properties-editor");
 
   fieldMapping.setAttribute("data-key-tip", "${escapetool.javascript($services.localization.render('ldap.xwikiUserField'))}")
