@@ -272,9 +272,14 @@ public class LDAPProfileXClass
 
             // note: we can do a simple string substitution of attrName here as long as this method is private
             // and the callers from this class only pass in sane values
-            String xwql = String.format("from doc.object(%s) as ldap where lower(ldap.%s) = :value", LDAP_XCLASS, attrName);
+            // we use HQL here, as JPQL (and thus XWQL) do not have a "str" function
+            // and this is needed to make large string values searchable with Oracle DB
+            // see https://jira.xwiki.org/browse/LDAP-109
+            String hql = String.format(", BaseObject as ldap, StringProperty as dn where doc.fullName = ldap.name"
+                + " and ldap.className = '%s' and ldap.id = dn.id.id and dn.id.name = '%s'"
+                + " and lower(str(dn.value)) = :value", LDAP_XCLASS, attrName);
 
-            List<String> documentList  = queryManager.createQuery(xwql, Query.XWQL)
+            List<String> documentList = queryManager.createQuery(hql, Query.HQL)
                 .addFilter(Utils.getComponent(QueryFilter.class, "unique"))
                 .bindValue("value", attrValue.toLowerCase())
                 .execute();

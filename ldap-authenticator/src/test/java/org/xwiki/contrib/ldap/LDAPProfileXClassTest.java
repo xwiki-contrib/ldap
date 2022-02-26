@@ -126,8 +126,10 @@ public class LDAPProfileXClassTest
 
     private void bindQueryBy(String attribute) throws QueryException
     {
-        when(mockQueryManager.createQuery("from doc.object(" + LDAPProfileXClass.LDAP_XCLASS
-            + ") as ldap where lower(ldap." + attribute + ") = :value", Query.XWQL)).thenReturn(mockQuery);
+        when(mockQueryManager.createQuery(
+            ", BaseObject as ldap, StringProperty as dn where doc.fullName = ldap.name"
+            + " and ldap.className = 'XWiki.LDAPProfileClass' and ldap.id = dn.id.id and dn.id.name = '"
+            + attribute + "' and lower(str(dn.value)) = :value", Query.HQL)).thenReturn(mockQuery);
     }
 
     @Test
