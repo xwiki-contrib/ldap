@@ -37,6 +37,7 @@ import org.xwiki.contrib.ldap.framework.LDAPTestSetup;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.LocalDocumentReference;
 import org.xwiki.query.Query;
+import org.xwiki.query.QueryException;
 import org.xwiki.query.QueryFilter;
 import org.xwiki.query.QueryManager;
 import org.xwiki.test.annotation.AfterComponent;
@@ -168,8 +169,8 @@ public class XWikiLDAPAuthServiceImplTest extends AbstractLDAPTestCase
         when(mockQueryForDn.<String>execute()).thenReturn(mockQueryResult);
 
         QueryManager queryMock = mock(QueryManager.class);
-        when(queryMock.createQuery(eq("from doc.object(XWiki.LDAPProfileClass) as ldap where lower(ldap.uid) = :value"), eq(Query.XWQL))).thenReturn(mockQueryForUid);
-        when(queryMock.createQuery(eq("from doc.object(XWiki.LDAPProfileClass) as ldap where lower(ldap.dn) = :value"), eq(Query.XWQL))).thenReturn(mockQueryForDn);
+        bindMockQuery(queryMock, "uid", mockQueryForUid);
+        bindMockQuery(queryMock, "dn", mockQueryForDn);
         this.mocker.getMocker().registerComponent(QueryManager.class, queryMock);
 
         this.ldapAuth = new XWikiLDAPAuthServiceImpl();
@@ -178,6 +179,15 @@ public class XWikiLDAPAuthServiceImplTest extends AbstractLDAPTestCase
         this.mocker.getXWikiContext().setRequest(mock(XWikiRequest.class));
         when(this.mocker.getXWikiContext().getRequest().getSession()).thenReturn(this.session);
     }
+
+    private void bindMockQuery(QueryManager queryMock, String prop, Query mockQuery) throws QueryException
+    {
+        when(queryMock.createQuery(
+            ", BaseObject as ldap, StringProperty as dn where doc.fullName = ldap.name"
+            + " and ldap.className = 'XWiki.LDAPProfileClass' and ldap.id = dn.id.id and dn.id.name = '"
+            + prop + "' and lower(str(dn.value)) = :value", Query.HQL)).thenReturn(mockQuery);
+    }
+
 
     protected String userProfileName(String uid)
     {
