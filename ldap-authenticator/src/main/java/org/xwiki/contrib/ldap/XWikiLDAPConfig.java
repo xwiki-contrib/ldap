@@ -626,6 +626,7 @@ public class XWikiLDAPConfig
                 } else {
                     if (c == '\\') {
                         escaped = true;
+                        mapping.append(c);
                     } else if (c == '|') {
                         addGroupMapping(mapping.toString(), groupMappings);
                         mapping.setLength(0);

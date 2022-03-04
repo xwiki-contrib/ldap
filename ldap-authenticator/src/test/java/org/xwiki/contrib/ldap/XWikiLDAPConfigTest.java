@@ -170,7 +170,7 @@ public class XWikiLDAPConfigTest
         Set<String> cfgLDAPGroups = new HashSet<String>();
         cfgLDAPGroups.add(LDAPTOTOGRP2_DN);
         cfgLDAPGroups.add(LDAPTITIGRP2_DN);
-        cfgLDAPGroups.add(FILTER);
+        cfgLDAPGroups.add(FILTER.replace("|", "\\|"));
         expectedCfgLDAPGroups.put(XADMINGROUP_FULLNAME, cfgLDAPGroups);
         expectedCfgLDAPGroups.put(XADMINGROUP2_FULLNAME, cfgLDAPGroups);
 
@@ -188,7 +188,7 @@ public class XWikiLDAPConfigTest
         Set<String> wikiLDAPGroups = new HashSet<>();
         wikiLDAPGroups.add(LDAPTOTOGRP_DN);
         wikiLDAPGroups.add(LDAPTITIGRP_DN);
-        wikiLDAPGroups.add(FILTER);
+        wikiLDAPGroups.add(FILTER.replace("|", "\\|"));
         expectedWikiLDAPGroups.put(XADMINGROUP_FULLNAME, wikiLDAPGroups);
         expectedWikiLDAPGroups.put(XADMINGROUP2_FULLNAME, wikiLDAPGroups);
 
