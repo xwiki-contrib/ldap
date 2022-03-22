@@ -23,6 +23,7 @@ import java.io.UnsupportedEncodingException;
 import java.security.Security;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
@@ -43,6 +44,11 @@ import com.novell.ldap.LDAPSearchConstraints;
 import com.novell.ldap.LDAPSearchResults;
 import com.novell.ldap.LDAPSocketFactory;
 import com.xpn.xwiki.XWikiContext;
+import org.xbill.DNS.SRVRecord;
+import org.xbill.DNS.Lookup;
+import org.xbill.DNS.Record;
+import org.xbill.DNS.Type;
+import org.xbill.DNS.TextParseException;
 
 /**
  * LDAP communication tool.
@@ -209,7 +215,8 @@ public class XWikiLDAPConnection
             }
 
             // connect
-            connect(ldapHost, port);
+            boolean doServiceDiscovery = "1".equals(this.configuration.getLDAPParam("ldap_service_discovery", "1"));
+            connect(ldapHost, port, doServiceDiscovery);
 
             // set referral following
             LDAPSearchConstraints constraints = new LDAPSearchConstraints(this.connection.getConstraints());
@@ -235,14 +242,75 @@ public class XWikiLDAPConnection
      * 
      * @param ldapHost the host of the server to connect to.
      * @param port the port of the server to connect to.
+     * @param doServiceDiscovery if true, LDAP hosts are discovered via a SRV record lookup. If no SRV record is found,
+     *            <code>ldapHost</code> is used as fallback.
      * @throws LDAPException error when trying to connect.
      */
-    private void connect(String ldapHost, int port) throws LDAPException
+    private void connect(String ldapHost, int port, boolean doServiceDiscovery) throws LDAPException
     {
+        if (doServiceDiscovery) {
+            SRVRecord ldapSRVRecord = discoverLDAPService(ldapHost);
+            if (ldapSRVRecord != null) {
+                LOGGER.debug("SRV record discovered. Highest priority/weight ldap server: " + ldapSRVRecord.toString());
+                ldapHost = ldapSRVRecord.getTarget().toString();
+                port = ldapSRVRecord.getPort();
+            }
+        }
+
         LOGGER.debug("Connection to LDAP server [{}:{}]", ldapHost, port);
 
         // connect to the server
         this.connection.connect(ldapHost, port);
+    }
+
+    /**
+     * This class sorts SRV records by priority and weight as per RFC 2782.
+     */
+    private class SRVRecordComparator implements Comparator<SRVRecord>
+    {
+        @Override
+        public int compare(SRVRecord o1, SRVRecord o2)
+        {
+            if (o1.getPriority() == o2.getPriority())
+                return Integer.compare(o2.getWeight(), o1.getWeight());
+            else
+               return Integer.compare(o1.getPriority(), o2.getPriority());
+        }
+    }
+
+    /**
+     * Performs an SRV record lookup on <code>_ldap._tcp.realm</code>.
+     * 
+     * @param realm the realm for which SRV records should be looked up
+     * @return the SRV record with the highest priority/weight, null if no SRV record was found
+     */
+    private SRVRecord discoverLDAPService(String realm)
+    {
+        List<SRVRecord> list = new ArrayList<SRVRecord>();
+        Lookup lookup;
+        try {
+            lookup = new Lookup("_ldap._tcp." + realm, Type.SRV);
+        } catch (TextParseException e) {
+            LOGGER.debug("DNS lookup failed.", e);
+            return null;
+        }
+
+        Record recs[] = lookup.run();
+        if (recs == null) {
+            LOGGER.trace("SRV record lookup came back empty");
+            return null;
+        }
+        for (Record record : recs) {
+            org.xbill.DNS.SRVRecord srvRecord = (org.xbill.DNS.SRVRecord) record;
+            LOGGER.trace("SRV record found: {}", srvRecord.toString());
+            if (srvRecord != null && srvRecord.getTarget() != null)
+                list.add(srvRecord);
+        }
+        list.sort(new SRVRecordComparator());
+        if (list.isEmpty())
+            return null;
+        else
+            return list.get(0);
     }
 
     /**
