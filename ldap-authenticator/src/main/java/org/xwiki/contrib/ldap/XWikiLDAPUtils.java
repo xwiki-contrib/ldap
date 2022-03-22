@@ -727,7 +727,7 @@ public class XWikiLDAPUtils
      * @param subgroups all the subgroups identified.
      * @param context the XWiki context.
      * @return whether the provided DN is actually a group or not.
-     * @deprecated since 9.3, use {@link #getGroupMembersSearchResult(XWikiLDAPSearchResults, Map, List, XWikiContext)}
+     * @deprecated since 9.3, use {@link #getGroupMembersSearchResult(PagedLDAPSearchResults, Map, List, XWikiContext)}
      *             instead
      */
     @Deprecated
@@ -928,7 +928,7 @@ public class XWikiLDAPUtils
      * @param groupMembers the members of LDAP group.
      * @param context the XWiki context.
      * @return the full user name.
-     * @deprecated since 8.4, use {@link #findInGroup(String, Map)} instead
+     * @deprecated since 8.4, use {@link #findUidInGroup(String, Map)} instead
      */
     @Deprecated
     protected String findInGroup(String userName, Map<String, String> groupMembers, XWikiContext context)
@@ -1641,7 +1641,7 @@ public class XWikiLDAPUtils
 
     /**
      * Look up user profile using the DN as unique identifier.
-     * @see {@link #getUserProfileByUid(String, String, XWikiContext)}
+     * @see #getUserProfileByUid(String, String, XWikiContext)
      * @since 9.5
      */
     public XWikiDocument getUserProfileByDn(String validXWikiUserName, String userId, XWikiContext context)
