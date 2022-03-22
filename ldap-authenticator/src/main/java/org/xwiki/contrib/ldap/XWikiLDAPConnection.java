@@ -23,6 +23,7 @@ import java.io.UnsupportedEncodingException;
 import java.security.Security;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.HashSet;
@@ -32,6 +33,11 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xbill.DNS.Lookup;
+import org.xbill.DNS.Record;
+import org.xbill.DNS.SRVRecord;
+import org.xbill.DNS.TextParseException;
+import org.xbill.DNS.Type;
 
 import com.novell.ldap.LDAPAttribute;
 import com.novell.ldap.LDAPAttributeSet;
@@ -44,11 +50,6 @@ import com.novell.ldap.LDAPSearchConstraints;
 import com.novell.ldap.LDAPSearchResults;
 import com.novell.ldap.LDAPSocketFactory;
 import com.xpn.xwiki.XWikiContext;
-import org.xbill.DNS.SRVRecord;
-import org.xbill.DNS.Lookup;
-import org.xbill.DNS.Record;
-import org.xbill.DNS.Type;
-import org.xbill.DNS.TextParseException;
 
 /**
  * LDAP communication tool.
@@ -251,7 +252,9 @@ public class XWikiLDAPConnection
         if (doServiceDiscovery) {
             SRVRecord ldapSRVRecord = discoverLDAPService(ldapHost);
             if (ldapSRVRecord != null) {
-                LOGGER.debug("SRV record discovered. Highest priority/weight ldap server: " + ldapSRVRecord.toString());
+                LOGGER.debug("SRV record discovered. Highest priority/weight ldap server: {}",
+                    ldapSRVRecord.toString());
+
                 ldapHost = ldapSRVRecord.getTarget().toString();
                 port = ldapSRVRecord.getPort();
             }
@@ -266,15 +269,18 @@ public class XWikiLDAPConnection
     /**
      * This class sorts SRV records by priority and weight as per RFC 2782.
      */
-    private class SRVRecordComparator implements Comparator<SRVRecord>
+    private static class SRVRecordComparator implements Comparator<SRVRecord>
     {
+        private static final SRVRecordComparator COMPARATOR = new SRVRecordComparator();
+
         @Override
         public int compare(SRVRecord o1, SRVRecord o2)
         {
-            if (o1.getPriority() == o2.getPriority())
+            if (o1.getPriority() == o2.getPriority()) {
                 return Integer.compare(o2.getWeight(), o1.getWeight());
-            else
-               return Integer.compare(o1.getPriority(), o2.getPriority());
+            } else {
+                return Integer.compare(o1.getPriority(), o2.getPriority());
+            }
         }
     }
 
@@ -286,7 +292,6 @@ public class XWikiLDAPConnection
      */
     private SRVRecord discoverLDAPService(String realm)
     {
-        List<SRVRecord> list = new ArrayList<SRVRecord>();
         Lookup lookup;
         try {
             lookup = new Lookup("_ldap._tcp." + realm, Type.SRV);
@@ -295,22 +300,27 @@ public class XWikiLDAPConnection
             return null;
         }
 
-        Record recs[] = lookup.run();
+        Record[] recs = lookup.run();
         if (recs == null) {
             LOGGER.trace("SRV record lookup came back empty");
+
             return null;
         }
-        for (Record record : recs) {
-            org.xbill.DNS.SRVRecord srvRecord = (org.xbill.DNS.SRVRecord) record;
-            LOGGER.trace("SRV record found: {}", srvRecord.toString());
-            if (srvRecord != null && srvRecord.getTarget() != null)
-                list.add(srvRecord);
+
+        List<SRVRecord> list = new ArrayList<>(recs.length);
+        for (Record rec : recs) {
+            org.xbill.DNS.SRVRecord srvRecord = (org.xbill.DNS.SRVRecord) rec;
+            if (srvRecord != null) {
+                LOGGER.trace("SRV record found: {}", srvRecord.toString());
+
+                if (srvRecord.getTarget() != null) {
+                    list.add(srvRecord);
+                }
+            }
         }
-        list.sort(new SRVRecordComparator());
-        if (list.isEmpty())
-            return null;
-        else
-            return list.get(0);
+        Collections.sort(list, SRVRecordComparator.COMPARATOR);
+
+        return list.isEmpty() ? null : list.get(0);
     }
 
     /**
@@ -478,8 +488,7 @@ public class XWikiLDAPConnection
      * @param searchAttributeList the XWiki attributes.
      * @param attributeSet the LDAP attributes.
      */
-    public void ldapToXWikiAttribute(List<XWikiLDAPSearchAttribute> searchAttributeList,
-        LDAPAttributeSet attributeSet)
+    public void ldapToXWikiAttribute(List<XWikiLDAPSearchAttribute> searchAttributeList, LDAPAttributeSet attributeSet)
     {
         for (LDAPAttribute attribute : (Set<LDAPAttribute>) attributeSet) {
             String attributeName = attribute.getName();
