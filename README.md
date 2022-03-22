@@ -7,7 +7,7 @@ Various tools to manipulate LDAP servers in XWiki.
 * [Issue Tracker](http://jira.xwiki.org/browse/LDAP)
 * Communication: [Mailing List](http://dev.xwiki.org/xwiki/bin/view/Community/MailingLists), [IRC](http://dev.xwiki.org/xwiki/bin/view/Community/IRC)
 * [Development Practices](http://dev.xwiki.org)
-* Minimal XWiki version supported: XWiki 7.4
+* Minimal XWiki version supported: XWiki 8.4
 * License: LGPL 2.1
 * Translations: https://l10n.xwiki.org/projects/xwiki-contrib/ldap-application/
 * Sonar Dashboard: N/A
