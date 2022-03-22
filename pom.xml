@@ -25,7 +25,7 @@
   <parent>
     <groupId>org.xwiki.contrib</groupId>
     <artifactId>parent-platform</artifactId>
-    <version>7.4-15</version>
+    <version>8.4-11</version>
   </parent>
   <groupId>org.xwiki.contrib.ldap</groupId>
   <artifactId>ldap</artifactId>
@@ -77,36 +77,6 @@
         </plugin>
       </plugins>
     </pluginManagement>
-    <plugins>
-     <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>clirr-maven-plugin</artifactId>
-        <configuration>
-          <!-- List of specific CLIRR excludes. Example:
-            <difference>
-              <differenceType>7012</differenceType>
-              <className>org/xwiki/ircbot/IRCBot</className>
-              <method>void initialize(java.lang.String)</method>
-              <justification>IRCBot is still a young API. Added a new initialize() method to support installing the
-                IRC Bot application in a subwiki</justification>
-            </difference>
-             See http://www.mojohaus.org/clirr-maven-plugin/examples/ignored-differences.html
-          -->
-          <ignored>
-            <difference>
-              <differenceType>8001</differenceType>
-              <className>org/xwiki/contrib/ldap/GroupCacheExpirationEventListener</className>
-              <justification>Should have never been public in the first place.</justification>
-            </difference>
-          </ignored>
-          <excludes>
-            <exclude>**/internal/**</exclude>
-            <exclude>**/test/**</exclude>
-            <!-- Remove the following excludes after we release the current version as final -->
-          </excludes>
-        </configuration>
-      </plugin>
-    </plugins>
   </build>
   <modules>
     <module>ldap-api</module>
