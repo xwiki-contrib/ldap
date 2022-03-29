@@ -217,7 +217,7 @@ public class XWikiLDAPConnection
 
             // connect
             boolean doServiceDiscovery = "1".equals(this.configuration.getLDAPParam("ldap_service_discovery", "1"));
-            connect(ldapHost, port, doServiceDiscovery);
+            connect(ldapHost, port, doServiceDiscovery, ssl);
 
             // set referral following
             LDAPSearchConstraints constraints = new LDAPSearchConstraints(this.connection.getConstraints());
@@ -247,10 +247,10 @@ public class XWikiLDAPConnection
      *            <code>ldapHost</code> is used as fallback.
      * @throws LDAPException error when trying to connect.
      */
-    private void connect(String ldapHost, int port, boolean doServiceDiscovery) throws LDAPException
+    private void connect(String ldapHost, int port, boolean doServiceDiscovery, boolean ssl) throws LDAPException
     {
         if (doServiceDiscovery) {
-            SRVRecord ldapSRVRecord = discoverLDAPService(ldapHost);
+            SRVRecord ldapSRVRecord = discoverLDAPService(ldapHost, ssl);
             if (ldapSRVRecord != null) {
                 LOGGER.debug("SRV record discovered. Highest priority/weight ldap server: {}",
                     ldapSRVRecord.toString());
@@ -290,11 +290,13 @@ public class XWikiLDAPConnection
      * @param realm the realm for which SRV records should be looked up
      * @return the SRV record with the highest priority/weight, null if no SRV record was found
      */
-    private SRVRecord discoverLDAPService(String realm)
+    private SRVRecord discoverLDAPService(String realm, boolean ldaps)
     {
         Lookup lookup;
+        String service = ldaps ? "_ldaps" : "_ldap";
+        String proto = "_tcp";
         try {
-            lookup = new Lookup("_ldap._tcp." + realm, Type.SRV);
+            lookup = new Lookup(service + "." + proto + "." + realm, Type.SRV);
         } catch (TextParseException e) {
             LOGGER.debug("DNS lookup failed.", e);
             return null;
