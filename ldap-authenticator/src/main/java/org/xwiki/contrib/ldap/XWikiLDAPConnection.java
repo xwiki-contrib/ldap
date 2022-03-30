@@ -245,19 +245,24 @@ public class XWikiLDAPConnection
      * @param port the port of the server to connect to.
      * @param doServiceDiscovery if true, LDAP hosts are discovered via a SRV record lookup. If no SRV record is found,
      *            <code>ldapHost</code> is used as fallback.
-     * @param ssl true if the connection should use LDAPS
+     * @param ssl if true service discovery is performed for LDAPS.
      * @throws LDAPException error when trying to connect.
      */
     private void connect(String ldapHost, int port, boolean doServiceDiscovery, boolean ssl) throws LDAPException
     {
         if (doServiceDiscovery) {
-            SRVRecord ldapSRVRecord = discoverLDAPService(ldapHost, ssl);
-            if (ldapSRVRecord != null) {
-                LOGGER.debug("SRV record discovered. Highest priority/weight ldap server: {}",
-                    ldapSRVRecord.toString());
-
-                ldapHost = ldapSRVRecord.getTarget().toString();
-                port = ldapSRVRecord.getPort();
+            List<SRVRecord> ldapSRVRecords = discoverLDAPService(ldapHost, ssl);
+            if (ldapSRVRecords != null && !ldapSRVRecords.isEmpty()) {
+                LOGGER.debug("{} SRV record(s) discovered", ldapSRVRecords.size());
+                StringBuilder ldapHostListBuilder = new StringBuilder();
+                final String SEPARATOR = " ";
+                for(SRVRecord ldapSRVRecord : ldapSRVRecords){
+                    ldapHostListBuilder.append(ldapSRVRecord.getTarget());
+                    ldapHostListBuilder.append(":");
+                    ldapHostListBuilder.append(ldapSRVRecord.getPort());
+                    ldapHostListBuilder.append(SEPARATOR);
+                }
+                ldapHost = ldapHostListBuilder.toString();
             }
         }
 
@@ -286,13 +291,14 @@ public class XWikiLDAPConnection
     }
 
     /**
-     * Performs an SRV record lookup on <code>_ldap._tcp.realm</code>.
+     * Performs an SRV record lookup on <code>_ldap._tcp.realm</code> or <code>_ldaps._tcp.realm</code> if ssl is
+     * enabled.
      * 
-     * @param realm the realm for which SRV records should be looked up
-     * @param ldaps true if the connection should use LDAPS
-     * @return the SRV record with the highest priority/weight, null if no SRV record was found
+     * @param realm the realm for which SRV records should be looked up.
+     * @param ldaps if true, service discovery uses <code>_ldaps._tcp</code>, if false <code>_ldap._tcp</code> is used.
+     * @return a list of SRV records sorted by priority/weight, null if SRV lookup failed or returned an empty result.
      */
-    private SRVRecord discoverLDAPService(String realm, boolean ldaps)
+    private List<SRVRecord> discoverLDAPService(String realm, boolean ldaps)
     {
         Lookup lookup;
         String service = ldaps ? "_ldaps" : "_ldap";
@@ -324,7 +330,7 @@ public class XWikiLDAPConnection
         }
         Collections.sort(list, SRVRecordComparator.COMPARATOR);
 
-        return list.isEmpty() ? null : list.get(0);
+        return list;
     }
 
     /**
