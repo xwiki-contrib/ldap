@@ -27,17 +27,21 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xbill.DNS.Lookup;
-import org.xbill.DNS.Record;
-import org.xbill.DNS.SRVRecord;
-import org.xbill.DNS.TextParseException;
-import org.xbill.DNS.Type;
+
+import javax.naming.Context;
+import javax.naming.NamingException;
+import javax.naming.NameNotFoundException;
+import javax.naming.directory.Attribute;
+import javax.naming.directory.Attributes;
+import javax.naming.directory.DirContext;
+import javax.naming.directory.InitialDirContext;
 
 import com.novell.ldap.LDAPAttribute;
 import com.novell.ldap.LDAPAttributeSet;
@@ -273,6 +277,73 @@ public class XWikiLDAPConnection
     }
 
     /**
+     * This class encapsulates an SRV record.
+     * 
+     * @see <a href="https://tools.ietf.org/html/rfc2782">RFC 2782: A DNS RR for
+     *      specifying the location of services (DNS SRV)</a>
+     */
+    private static class SRVRecord
+    {
+        private int priority, weight, port;
+        private String target;
+
+        /**
+         * Creates an SRV Record from the given data
+         *
+         * @param attributes A string array that contains priority, weight, port and
+         *                   name of the server (in that order)
+         * 
+         */
+        public SRVRecord(String[] attributes)
+        {
+            if (attributes.length != 4)
+                throw new IllegalArgumentException(
+                        "attributes array needs exactly 4 entries: priority, weight, port and server name");
+            // format for an JNDI SRV record lookup is "0 100 389 dc1.example.com."
+            this.priority = Integer.parseInt(attributes[0]);
+            this.weight = Integer.parseInt(attributes[1]);
+            this.port = Integer.parseInt(attributes[2]);
+            this.target = attributes[3];
+        }
+
+        /** Returns the priority */
+        public int getPriority()
+        {
+            return priority;
+        }
+
+        /** Returns the weight */
+        public int getWeight()
+        {
+            return weight;
+        }
+
+        /** Returns the port that the service runs on */
+        public int getPort()
+        {
+            return port;
+        }
+
+        /** Returns the host running the service */
+        public String getTarget()
+        {
+            return target;
+        }
+
+        /** Converts SRV record to a String */
+        @Override
+        public String toString()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.append(priority).append(" ");
+            sb.append(weight).append(" ");
+            sb.append(port).append(" ");
+            sb.append(target);
+            return sb.toString();
+        }
+    }
+
+    /**
      * This class sorts SRV records by priority and weight as per RFC 2782.
      */
     private static class SRVRecordComparator implements Comparator<SRVRecord>
@@ -300,32 +371,37 @@ public class XWikiLDAPConnection
      */
     private List<SRVRecord> discoverLDAPService(String realm, boolean ldaps)
     {
-        Lookup lookup;
         String service = ldaps ? "_ldaps" : "_ldap";
         String proto = "_tcp";
+        String lookup = service + "." + proto + "." + realm;
+        Hashtable<String, String> env = new Hashtable<String, String>();
+        env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.dns.DnsContextFactory");
+        Attributes attributes;
         try {
-            lookup = new Lookup(service + "." + proto + "." + realm, Type.SRV);
-        } catch (TextParseException e) {
+            DirContext ctx = new InitialDirContext(env);
+            attributes = ctx.getAttributes(lookup, new String[] { "SRV" });
+        } catch (NameNotFoundException e) {
+            LOGGER.debug("No SRV record for {} found.", lookup);
+            return null;
+        } catch (NamingException e) {
             LOGGER.debug("DNS lookup failed.", e);
             return null;
         }
 
-        Record[] recs = lookup.run();
-        if (recs == null) {
-            LOGGER.trace("SRV record lookup came back empty");
-
-            return null;
-        }
-
-        List<SRVRecord> list = new ArrayList<>(recs.length);
-        for (Record rec : recs) {
-            org.xbill.DNS.SRVRecord srvRecord = (org.xbill.DNS.SRVRecord) rec;
-            if (srvRecord != null) {
-                LOGGER.trace("SRV record found: {}", srvRecord.toString());
-
-                if (srvRecord.getTarget() != null) {
+        Attribute attirbute = attributes.get("SRV");
+        List<SRVRecord> list = new ArrayList<>(attirbute.size());
+        for (int i = 0; i < attirbute.size(); i++) {
+            try {
+                Object value = attirbute.get(i);
+                if (value != null) {
+                    SRVRecord srvRecord = new SRVRecord(value.toString().split(" "));
+                    LOGGER.trace("SRV record found: {}", srvRecord.toString());
                     list.add(srvRecord);
                 }
+            } catch (NamingException e) {
+                LOGGER.debug("Unable to get {}-th value from attributes.", i, e);
+            } catch (IllegalArgumentException e) {
+                LOGGER.debug("Unable to create SRVRecord object.", e);
             }
         }
         Collections.sort(list, SRVRecordComparator.COMPARATOR);
