@@ -54,11 +54,6 @@
       <artifactId>jldap</artifactId>
       <version>2009-10-07</version>
     </dependency>
-    <dependency>
-      <groupId>dnsjava</groupId>
-      <artifactId>dnsjava</artifactId>
-      <version>3.5.0</version>
-    </dependency>
     <!-- Testing dependencies -->
     <dependency>
       <groupId>org.xwiki.commons</groupId>
