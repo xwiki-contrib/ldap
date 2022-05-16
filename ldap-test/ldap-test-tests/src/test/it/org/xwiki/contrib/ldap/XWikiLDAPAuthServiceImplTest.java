@@ -317,6 +317,19 @@ public class XWikiLDAPAuthServiceImplTest extends AbstractLDAPTestCase
     }
 
     /**
+     * Make sure we support lower case in user page name customization.
+     */
+    @Test
+    public void testAuthenticateWithLowerCaseCustomUserPageName() throws XWikiException
+    {
+        this.mocker.getMockXWikiCfg().setProperty("xwiki.authentication.ldap.userPageName", "${uid._lowerCase}-custom");
+
+        assertAuthenticate(LDAPTestSetup.HORATIOHORNBLOWER_CN, LDAPTestSetup.HORATIOHORNBLOWER_PWD,
+            userProfileName(LDAPTestSetup.HORATIOHORNBLOWER_CN.toLowerCase() + "-custom"),
+            LDAPTestSetup.HORATIOHORNBLOWER_DN);
+    }
+
+    /**
      * Make sure the "real" uid is used by default as XWiki user page name.
      */
     @Test
