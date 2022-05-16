@@ -36,7 +36,6 @@ import org.xwiki.test.ui.po.ViewPage;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.xwiki.test.ui.TestUtils.RestTestUtils.object;
 import static org.xwiki.test.ui.TestUtils.RestTestUtils.property;
 
@@ -118,7 +117,8 @@ public class LDAPAuthTest extends AbstractGuestTest
         getUtil().rest().save(page);
         // Wait for group cache invalidation
         Thread.sleep(1000);
-        getUtil().login(LDAPTestSetup.WILLIAMBUSH_UID, LDAPTestSetup.WILLIAMBUSH_PWD);
+        getUtil().loginAndGotoPage(LDAPTestSetup.WILLIAMBUSH_UID, LDAPTestSetup.WILLIAMBUSH_PWD,
+            getUtil().getURL("XWiki", LDAPTestSetup.WILLIAMBUSH_UID.toUpperCase()));
         assertEquals(LDAPTestSetup.WILLIAMBUSH_UID.toUpperCase(), getUtil().getLoggedInUserName());
 
         // ///////////////////
