@@ -388,11 +388,16 @@ public class XWikiLDAPConnection
             return null;
         }
 
-        Attribute attirbute = attributes.get("SRV");
-        List<SRVRecord> list = new ArrayList<>(attirbute.size());
-        for (int i = 0; i < attirbute.size(); i++) {
+        Attribute attribute = attributes.get("SRV");
+        if (attribute == null) {
+            LOGGER.debug("No SRV record found in {}.", attribute);
+            return null;
+        }
+
+        List<SRVRecord> list = new ArrayList<>(attribute.size());
+        for (int i = 0; i < attribute.size(); i++) {
             try {
-                Object value = attirbute.get(i);
+                Object value = attribute.get(i);
                 if (value != null) {
                     SRVRecord srvRecord = new SRVRecord(value.toString().split(" "));
                     LOGGER.trace("SRV record found: {}", srvRecord.toString());
