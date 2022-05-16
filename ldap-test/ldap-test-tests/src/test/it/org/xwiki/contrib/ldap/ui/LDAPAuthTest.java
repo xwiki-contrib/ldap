@@ -119,7 +119,7 @@ public class LDAPAuthTest extends AbstractGuestTest
         // Wait for group cache invalidation
         Thread.sleep(1000);
         getUtil().login(LDAPTestSetup.WILLIAMBUSH_UID, LDAPTestSetup.WILLIAMBUSH_PWD);
-        assertTrue(getUtil().rest().exists(new LocalDocumentReference("XWiki", LDAPTestSetup.WILLIAMBUSH_UID)));
+        assertEquals(LDAPTestSetup.WILLIAMBUSH_UID.toUpperCase(), getUtil().getLoggedInUserName());
 
         // ///////////////////
         // Validate
