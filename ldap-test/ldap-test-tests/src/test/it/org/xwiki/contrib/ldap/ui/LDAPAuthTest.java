@@ -36,6 +36,7 @@ import org.xwiki.test.ui.po.ViewPage;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.xwiki.test.ui.TestUtils.RestTestUtils.object;
 import static org.xwiki.test.ui.TestUtils.RestTestUtils.property;
 
@@ -111,12 +112,14 @@ public class LDAPAuthTest extends AbstractGuestTest
             + ",last_name=sn,first_name=givenname,fullname=description,email=mail"));
         obj.getProperties()
             .add(property("ldap_group_mapping", "XWiki.XWikiAdminGroup=cn=HMS Lydia,ou=crews,ou=groups,o=sevenSeas"));
+        obj.getProperties().add(property("ldap_userPageName", "${uid._upperCase}"));
         page.setObjects(new Objects());
         page.getObjects().getObjectSummaries().add(obj);
         getUtil().rest().save(page);
         // Wait for group cache invalidation
         Thread.sleep(1000);
         getUtil().login(LDAPTestSetup.WILLIAMBUSH_UID, LDAPTestSetup.WILLIAMBUSH_PWD);
+        assertTrue(getUtil().rest().exists(new LocalDocumentReference("XWiki", LDAPTestSetup.WILLIAMBUSH_UID)));
 
         // ///////////////////
         // Validate
