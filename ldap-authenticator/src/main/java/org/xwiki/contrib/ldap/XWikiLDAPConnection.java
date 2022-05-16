@@ -31,17 +31,17 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import javax.naming.Context;
-import javax.naming.NamingException;
 import javax.naming.NameNotFoundException;
+import javax.naming.NamingException;
 import javax.naming.directory.Attribute;
 import javax.naming.directory.Attributes;
 import javax.naming.directory.DirContext;
 import javax.naming.directory.InitialDirContext;
+
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.novell.ldap.LDAPAttribute;
 import com.novell.ldap.LDAPAttributeSet;
@@ -260,7 +260,7 @@ public class XWikiLDAPConnection
                 LOGGER.debug("{} SRV record(s) discovered", ldapSRVRecords.size());
                 StringBuilder ldapHostListBuilder = new StringBuilder();
                 final String SEPARATOR = " ";
-                for(SRVRecord ldapSRVRecord : ldapSRVRecords){
+                for (SRVRecord ldapSRVRecord : ldapSRVRecords) {
                     ldapHostListBuilder.append(ldapSRVRecord.getTarget());
                     ldapHostListBuilder.append(":");
                     ldapHostListBuilder.append(ldapSRVRecord.getPort());
@@ -279,26 +279,25 @@ public class XWikiLDAPConnection
     /**
      * This class encapsulates an SRV record.
      * 
-     * @see <a href="https://tools.ietf.org/html/rfc2782">RFC 2782: A DNS RR for
-     *      specifying the location of services (DNS SRV)</a>
+     * @see <a href="https://tools.ietf.org/html/rfc2782">RFC 2782: A DNS RR for specifying the location of services
+     *      (DNS SRV)</a>
      */
     private static class SRVRecord
     {
         private int priority, weight, port;
+
         private String target;
 
         /**
          * Creates an SRV Record from the given data
          *
-         * @param attributes A string array that contains priority, weight, port and
-         *                   name of the server (in that order)
-         * 
+         * @param attributes A string array that contains priority, weight, port and name of the server (in that order)
          */
         public SRVRecord(String[] attributes)
         {
             if (attributes.length != 4)
                 throw new IllegalArgumentException(
-                        "attributes array needs exactly 4 entries: priority, weight, port and server name");
+                    "attributes array needs exactly 4 entries: priority, weight, port and server name");
             // format for an JNDI SRV record lookup is "0 100 389 dc1.example.com."
             this.priority = Integer.parseInt(attributes[0]);
             this.weight = Integer.parseInt(attributes[1]);
@@ -379,7 +378,7 @@ public class XWikiLDAPConnection
         Attributes attributes;
         try {
             DirContext ctx = new InitialDirContext(env);
-            attributes = ctx.getAttributes(lookup, new String[] { "SRV" });
+            attributes = ctx.getAttributes(lookup, new String[] {"SRV"});
         } catch (NameNotFoundException e) {
             LOGGER.debug("No SRV record for {} found.", lookup);
             return null;
