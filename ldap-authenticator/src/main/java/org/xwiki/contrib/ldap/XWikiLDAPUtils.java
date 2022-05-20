@@ -1053,12 +1053,12 @@ public class XWikiLDAPUtils
     {
         // search for the user in LDAP
         String filter = MessageFormat.format(this.userSearchFormatString,
-            XWikiLDAPConnection.escapeLDAPSearchFilter(this.uidAttributeName),
+            XWikiLDAPConnection.escapeLDAPSearchFilter(getUidAttributeName()),
             XWikiLDAPConnection.escapeLDAPSearchFilter(uid));
 
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Searching for the user in LDAP: user [{}] base [{}] query [{}] uid [{}]", uid, this.baseDN,
-                filter, this.uidAttributeName);
+                filter, getUidAttributeName());
         }
 
         return getConnection().searchLDAP(this.baseDN, filter, attributeNameTable, LDAPConnection.SCOPE_SUB);
@@ -1223,6 +1223,9 @@ public class XWikiLDAPUtils
         } else {
             LOGGER.debug("LDAP avatar photo synchronisation is disabled");
         }
+
+        // Add the uid field
+        attributeNameList.add(getUidAttributeName());
 
         int lsize = attributeNameList.size();
         if (lsize > 0) {
@@ -1641,6 +1644,7 @@ public class XWikiLDAPUtils
 
     /**
      * Look up user profile using the DN as unique identifier.
+     * 
      * @see #getUserProfileByUid(String, String, XWikiContext)
      * @since 9.5
      */
@@ -1650,8 +1654,8 @@ public class XWikiLDAPUtils
         return getUserProfileByUniqueAttribute(validXWikiUserName, userId, true, context);
     }
 
-    private XWikiDocument getUserProfileByUniqueAttribute(String validXWikiUserName, String userId, boolean tryDn, XWikiContext context)
-        throws XWikiException
+    private XWikiDocument getUserProfileByUniqueAttribute(String validXWikiUserName, String userId, boolean tryDn,
+        XWikiContext context) throws XWikiException
     {
         LDAPProfileXClass ldapXClass = new LDAPProfileXClass(context);
 
@@ -1666,8 +1670,7 @@ public class XWikiLDAPUtils
 
         if (!userId.equalsIgnoreCase(tryDn ? ldapXClass.getDn(userProfile) : ldapXClass.getUid(userProfile))) {
             // Search for existing profile with provided unique attribute
-            userProfile = (tryDn) ? ldapXClass.searchDocumentByDn(userId)
-                : ldapXClass.searchDocumentByUid(userId);
+            userProfile = (tryDn) ? ldapXClass.searchDocumentByDn(userId) : ldapXClass.searchDocumentByUid(userId);
 
             // Resolve default profile patch of an uid
             if (userProfile == null && validXWikiUserName != null) {
@@ -1728,11 +1731,18 @@ public class XWikiLDAPUtils
     {
         String userPageName = getConfiguration().getLDAPParam("ldap_userPageName", "${uid}");
 
-        Map<String, String> valueMap = new HashMap<>(getConfiguration().getMemoryConfiguration());
+        Map<String, String> memoryConfiguration = getConfiguration().getMemoryConfiguration();
+        Map<String, String> valueMap = new HashMap<>();
         if (attributes != null) {
+            // Complete existing configuration
+            for (Map.Entry<String, String> entry : memoryConfiguration.entrySet()) {
+                putVariable(valueMap, entry.getKey(), entry.getValue());
+            }
+
+            // Inject attributes
             for (XWikiLDAPSearchAttribute attribute : attributes) {
                 putVariable(valueMap, "ldap." + attribute.name, attribute.value);
-                if (attribute.name.equals(this.uidAttributeName)) {
+                if (attribute.name.equals(getUidAttributeName())) {
                     // Override the default uid value with the real one coming from LDAP
                     putVariable(valueMap, "uid", attribute.value);
                 }

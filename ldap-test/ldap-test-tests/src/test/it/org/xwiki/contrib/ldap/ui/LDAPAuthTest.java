@@ -57,10 +57,14 @@ public class LDAPAuthTest extends AbstractGuestTest
     @BeforeClass
     public static void beforeClass() throws Exception
     {
+        // Find the LDAP server port
         if (System.getProperty(LDAPTestSetup.SYSPROPNAME_LDAPPORT) == null) {
             ldap = new LDAPRunner();
             ldap.start();
         }
+
+        // Add missing properties to the XWikiPreferences class
+        getUtil().addClassProperty("XWiki", "XWikiPreferences", "ldap_userPageName", "String");
     }
 
     @AfterClass
@@ -145,7 +149,14 @@ public class LDAPAuthTest extends AbstractGuestTest
         // ///////////////////
         // Validate
         // - XWIKI-2264: LDAP authentication does not support "." in login names
-        assertLogin(LDAPTestSetup.USERWITHPOINTS_UID, LDAPTestSetup.WILLIAMBUSH_PWD,
+        assertLogin(LDAPTestSetup.USERWITHPOINTS_UID, LDAPTestSetup.USERWITHPOINTS_PWD,
             LDAPTestSetup.USERWITHPOINTS_UID.replace(".", ""));
+
+        // ///////////////////
+        // Validate it's possible to customize the user profile name
+        getUtil().loginAsSuperAdmin();
+        getUtil().setPropertyInXWikiPreferences("ldap_userPageName", "String", "custom-${uid._upperCase}");
+        assertLogin(LDAPTestSetup.MOULTRIECRYSTAL_UID, LDAPTestSetup.MOULTRIECRYSTAL_PWD,
+            "custom-" + LDAPTestSetup.MOULTRIECRYSTAL_UID.toUpperCase());
     }
 }

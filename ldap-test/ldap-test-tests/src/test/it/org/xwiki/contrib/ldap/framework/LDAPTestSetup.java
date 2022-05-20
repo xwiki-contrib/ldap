@@ -135,6 +135,21 @@ public class LDAPTestSetup
     public static final String WILLIAMBUSH_UID_MIXED = "wBush";
 
     /**
+     * The LDAP DN of user Moultrie Crystal.
+     */
+    public static final String MOULTRIECRYSTAL_DN = "cn=Moultrie Crystal," + USERS_OU;
+
+    /**
+     * The LDAP password of user Moultrie Crystal.
+     */
+    public static final String MOULTRIECRYSTAL_PWD = "pass";
+
+    /**
+     * The LDAP unique id of user Moultrie Crystal.
+     */
+    public static final String MOULTRIECRYSTAL_UID = "mchrysta";
+
+    /**
      * The LDAP DN of user User.With.Points.
      */
     public static final String USERWITHPOINTS_DN = "cn=User.With.Points," + USERS_OU;
