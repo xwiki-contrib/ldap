@@ -36,6 +36,7 @@ import org.xwiki.test.ui.po.ViewPage;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.xwiki.test.ui.TestUtils.RestTestUtils.object;
 import static org.xwiki.test.ui.TestUtils.RestTestUtils.property;
 
@@ -79,6 +80,13 @@ public class LDAPAuthTest extends AbstractGuestTest
         getUtil().loginAsSuperAdmin();
     }
 
+    private void assertLogin(String login, String password, String username) throws Exception
+    {
+        getUtil().loginAndGotoPage(login, password, getUtil().getURL("XWiki", username));
+        assertEquals(username, getUtil().getLoggedInUserName());
+        assertTrue(getUtil().pageExists("XWiki", username));
+    }
+
     /**
      * Validate that it success to authenticate with LDAP user. Also the user id contains space character.
      */
@@ -111,21 +119,18 @@ public class LDAPAuthTest extends AbstractGuestTest
             + ",last_name=sn,first_name=givenname,fullname=description,email=mail"));
         obj.getProperties()
             .add(property("ldap_group_mapping", "XWiki.XWikiAdminGroup=cn=HMS Lydia,ou=crews,ou=groups,o=sevenSeas"));
-        obj.getProperties().add(property("ldap_userPageName", "${uid._upperCase}"));
         page.setObjects(new Objects());
         page.getObjects().getObjectSummaries().add(obj);
         getUtil().rest().save(page);
         // Wait for group cache invalidation
         Thread.sleep(1000);
-        getUtil().loginAndGotoPage(LDAPTestSetup.WILLIAMBUSH_UID, LDAPTestSetup.WILLIAMBUSH_PWD,
-            getUtil().getURL("XWiki", LDAPTestSetup.WILLIAMBUSH_UID.toUpperCase()));
-        assertEquals(LDAPTestSetup.WILLIAMBUSH_UID.toUpperCase(), getUtil().getLoggedInUserName());
+        assertLogin(LDAPTestSetup.WILLIAMBUSH_UID, LDAPTestSetup.WILLIAMBUSH_PWD, LDAPTestSetup.WILLIAMBUSH_UID);
 
         // ///////////////////
         // Validate
         // - XWIKI-2205: case insensitive user uid
         // - XWIKI-2202: LDAP user update corrupt XWiki user page
-        getUtil().login(LDAPTestSetup.WILLIAMBUSH_UID_MIXED, LDAPTestSetup.WILLIAMBUSH_PWD);
+        assertLogin(LDAPTestSetup.WILLIAMBUSH_UID_MIXED, LDAPTestSetup.WILLIAMBUSH_PWD, LDAPTestSetup.WILLIAMBUSH_UID);
 
         // ///////////////////
         // Validate XWIKI-2201: LDAP group mapping defined in XWikiPreferences is not working
@@ -140,6 +145,7 @@ public class LDAPAuthTest extends AbstractGuestTest
         // ///////////////////
         // Validate
         // - XWIKI-2264: LDAP authentication does not support "." in login names
-        getUtil().login(LDAPTestSetup.USERWITHPOINTS_UID, LDAPTestSetup.USERWITHPOINTS_PWD);
+        assertLogin(LDAPTestSetup.USERWITHPOINTS_UID, LDAPTestSetup.WILLIAMBUSH_PWD,
+            LDAPTestSetup.USERWITHPOINTS_UID.replace(".", ""));
     }
 }
