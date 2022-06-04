@@ -31,7 +31,7 @@
   <version>9.7.3-SNAPSHOT</version>
   <description>In case users get deleted from LDAP, this application removes their XWiki profile pages and transfers ownership of their pages to an anonymous account.</description>
   <properties>
-    <xwiki.extension.name>Removes old users no longer in LDAP</xwiki.extension.name>
+    <xwiki.extension.name>LDAP user cleanup</xwiki.extension.name>
   </properties>
   <dependencies>
     <dependency>
