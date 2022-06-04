@@ -543,7 +543,7 @@ import com.xpn.xwiki.doc.XWikiAttachment;
 import com.xpn.xwiki.XWikiException;
 
 
-def logger = LoggerFactory.getLogger('org.xwiki.contrib.ldap.scheduler.jh.GroupMembershipUpdater')
+def logger = LoggerFactory.getLogger('org.xwiki.contrib.ldap.scheduler.OldUserCleanup')
 def document = xcontext.getDoc()
 def doc = xwiki.getDocument(document.getFullName())
 
@@ -624,19 +624,26 @@ def adjustDocumentAuthorAndComments(userReference, replacementUserRef, config, l
         }
 
         if (needsSave) {
-          logger.debug("save document [${someDocName}] with replacement user [${replacementUserRef}]")
-          if (!dryRun) xwiki.getXWiki().saveDocument(someDoc, "Replaced user [${userName}] with user [${replacementUserName}]", true, xcontext)
+          if (dryRun) {
+            logger.debug("would update document [${someDocName}] with replacement user [${replacementUserRef}]")
+          } else {
+            logger.debug("save document [${someDocName}] with replacement user [${replacementUserRef}]")
+            xwiki.getXWiki().saveDocument(someDoc, "Replaced user [${userName}] with user [${replacementUserName}]", true, xcontext)
+          }
         }
 
       })
     }
 
-    // we need to handle comments separately; if we include them in the above query we'd only check documents with comments for all checks
-    // on the other hand comments are always language independent
+    // we need to handle comments separately; if we include them in the above query we'd only find document with at least one comment
+    // on the other hand comments are always language independent, making the check easier
+    // because of LDAP-116 we need to switch to HQL however
     if (replaceCommentAuthor) {
-      queryString = 'FROM doc.object(XWiki.XWikiComments) AS comment WHERE comment.author = :user'
+      queryString = "SELECT doc.fullName from XWikiDocument as doc, BaseObject as comment, LargeStringProperty as author"
+      queryString += " WHERE doc.fullName = comment.name AND comment.className = 'XWiki.XWikiComments'"
+      queryString += " AND (author.id.id=comment.id and author.id.name='author') AND (str(author.value) = :user)"
       def arguments = ['user' : userName]
-      services.query.xwql(queryString).bindValues(arguments).addFilter('unique').execute().each( { someDocName -&gt;
+      services.query.hql(queryString).bindValues(arguments).addFilter('unique').execute().each( { someDocName -&gt;
 
         logger.debug("found document with comments to check [$someDocName]")
         def someDoc = xwiki.getDocument(someDocName).getDocument()
@@ -649,8 +656,12 @@ def adjustDocumentAuthorAndComments(userReference, replacementUserRef, config, l
           }
         })
         if (needsSave) {
-          logger.debug("save comments in document [$someDocName] with replacement user [${replacementUserRef}]")
-          if (!dryRun) xwiki.getXWiki().saveDocument(someDoc, "Replaced user [${userName}] with user [${replacementUserName}]", true, xcontext)
+          if (dryRun) {
+            logger.debug("would save comments in document [$someDocName] with replacement user [${replacementUserRef}]")
+          } else {
+            logger.debug("save comments in document [$someDocName] with replacement user [${replacementUserRef}]")
+            xwiki.getXWiki().saveDocument(someDoc, "Replaced user [${userName}] with user [${replacementUserName}]", true, xcontext)
+          }
         }
 
       })
@@ -694,11 +705,18 @@ def deleteUser(userName, config, logger) {
     }
 
     def dryRun = (config.getValue('dryRun') != 0)
-    logger.info("delete the user [${userRef}]")
-    if (!dryRun) xwiki.getDocument(userRef).delete()
-
+    if (dryRun) {
+      logger.info("would delete user [${userRef}]")
+    } else {
+      logger.info("deleting the user [${userRef}]")
+      xwiki.getDocument(userRef).delete()
+    }
   } catch (Exception e) {
-    logger.warn("Exception while deleting [${userName}].", e)
+    if (config.getValue('dryRun') != 0) {
+      logger.warn("Exception while test deleting [${userName}].", e)
+    } else {
+      logger.warn("Exception while deleting [${userName}].", e)
+    }
   }
 }
 
