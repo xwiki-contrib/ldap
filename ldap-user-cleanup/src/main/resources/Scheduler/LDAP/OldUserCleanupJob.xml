@@ -580,15 +580,17 @@ def adjustDocumentAuthorAndComments(userReference, replacementUserRef, config, l
       queryString = fromClause + queryString
       logger.trace("run database query [${queryString}] with values [${arguments}]")
 
-      services.query.xwql(queryString).bindValues(arguments).addFilter('language').addFilter('unique').execute().each( { someDocRes -&gt;
+      services.query.xwql(queryString).bindValues(arguments).addFilter('language').execute().each( { someDocRes -&gt;
         def someDocName = someDocRes[0]
-        if (someDocRes[1] != '') {
-          someDocName = someDocName +'(lang='+someDocRes[1]+')'
+        String someDocLang = someDocRes[1]
+        if (someDocLang == null) { someDocLang = '' }
+        if (someDocLang != '') {
+          someDocName = someDocName +'(lang='+someDocLang+')'
         }
         logger.debug("found document to check [$someDocName]")
         def someDoc = xwiki.getDocument(someDocRes[0]).getDocument()
-        if (someDocRes[1] != '') {
-          def someTranslation = someDoc.getTranslatedDocument(someDocRes[1], xcontext)
+        if (someDocLang != '') {
+          def someTranslation = someDoc.getTranslatedDocument(someDocLang, xcontext)
           if (someTranslation != null &amp;&amp; !someTranslation.isNew()) {
             logger.trace("actually use translation [$someTranslation] aka [$someTranslation.documentReferenceWithLocale]")
             someDoc = someTranslation
