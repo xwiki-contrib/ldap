@@ -97,7 +97,7 @@ public class PagedLDAPSearchResults implements AutoCloseable
     private void search(byte[] cookie) throws LDAPException
     {
         LDAPPagedResultsControl control = new LDAPPagedResultsControl(this.pageSize, cookie, false);
-        LDAPSearchConstraints constraints = new LDAPSearchConstraints();
+        LDAPSearchConstraints constraints = new LDAPSearchConstraints(this.connection.getConstraints());
         constraints.setControls(control);
 
         if (LOGGER.isDebugEnabled()) {
