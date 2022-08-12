@@ -46,7 +46,6 @@ import org.slf4j.LoggerFactory;
 import com.novell.ldap.LDAPAttribute;
 import com.novell.ldap.LDAPAttributeSet;
 import com.novell.ldap.LDAPConnection;
-import com.novell.ldap.LDAPConstraints;
 import com.novell.ldap.LDAPDN;
 import com.novell.ldap.LDAPEntry;
 import com.novell.ldap.LDAPException;
@@ -135,14 +134,6 @@ public class XWikiLDAPConnection
     public LDAPConnection getConnection()
     {
         return this.connection;
-    }
-
-    /**
-     * @return the {@link LDAPConstraints} set for this connection.
-     */
-    public LDAPConstraints getConstraints()
-    {
-        return this.connection.getConstraints();
     }
 
     /**
