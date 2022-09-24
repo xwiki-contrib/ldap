@@ -609,7 +609,7 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
             // 6. if exclude group param, verify group membership
             // ////////////////////////////////////////////////////////////////////
 
-            String excludeGroupDN = configuration.getLDAPParam("ldap_exclude_group", "", context);
+            String excludeGroupDN = configuration.getLDAPParam("ldap_exclude_group", "");
 
             if (excludeGroupDN.length() > 0) {
                 if (LOGGER.isDebugEnabled()) {
