@@ -754,29 +754,31 @@ if (config == null) {
 
       XWikiLDAPUtils ldapUtils = new XWikiLDAPUtils(connector, configuration)
       ldapUtils.setBaseDN(configuration.getLDAPParam("ldap_base_DN", ""))
+      ldapUtils.setUidAttributeName(configuration.getLDAPParam("ldap_UID_attr", "cn"));
+      ldapUtils.setUserSearchFormatString(configuration.getLDAPParam("ldap_user_search_fmt", "({0}={1})"));
+
       try {
         services.query.xwql("from doc.object(XWiki.LDAPProfileClass) as ldap_profile").execute().each( {
           def userProfileDoc = xwiki.getDocument(it).getDocument()
           logger.debug("check user [{}]", userProfileDoc.getDocumentReference().getName())
           def userDn = userProfileDoc.getObject('XWiki.LDAPProfileClass').getStringValue('dn')
           def userId = userProfileDoc.getObject('XWiki.LDAPProfileClass').getStringValue('uid')
-          String uid = configuration.getMemoryConfiguration().get("uid");
 
-          def userObj
-          if (uid != null &amp;&amp; !"dn".equalsIgnoreCase(uid)) {
-            ldapUtils.setUidAttributeName(uid)
-            logger.debug("the uid search term is [{}={}] and the dn [{}]", uid, userId, userDn)
+          logger.debug("lookup by DN for [{}]", userDn)
+          userObj = connector.searchLDAP(userDn, '(objectClass=*)', null, 0)
+          if (userObj == null || userObj.isEmpty()) {
             def searchQuery = configuration.getLDAPParam("ldap_user_search_fmt", "({0}={1})")
-            logger.debug("we try to search with [{}]", searchQuery)
+            logger.debug("DN lookup failed; search instead for uid=[{}] with [{}]", userId, searchQuery)
             ldapUtils.setUserSearchFormatString(searchQuery)
             userObj = ldapUtils.searchUserAttributesByUid(userId, null)
-          } else {
-            // one cannot search by dn=..., instead make a lookup:
-            logger.debug("lookup by DN for [{}]", userDn)
-            userObj = connector.searchLDAP(userDn, '(objectClass=*)', null, 0)
           }
+
           if (userObj == null || userObj.isEmpty()) {
-            logger.info("the user [{}] is no longer in LDAP; we are going to delete it", it)
+            if (config.getValue('dryRun') != 0) {
+              logger.info("the user [{}] is no longer in LDAP; we would delete it", it)
+            } else {
+              logger.info("the user [{}] is no longer in LDAP; we are going to delete it", it)
+            }
             deleteUser(it, config, logger)
           }
         })
