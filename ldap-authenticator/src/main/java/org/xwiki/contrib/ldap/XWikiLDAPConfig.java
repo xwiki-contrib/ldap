@@ -853,7 +853,7 @@ public class XWikiLDAPConfig
     @Deprecated
     public int getLDAPTimeout(XWikiContext context)
     {
-        return (int) getLDAPParamAsLong("ldap_timeout", 1000);
+        return getLDAPTimeout();
     }
 
     /**
@@ -863,7 +863,7 @@ public class XWikiLDAPConfig
      */
     public int getLDAPTimeout()
     {
-        return (int) getLDAPParamAsLong("ldap_timeout", 1000);
+        return (int) getLDAPParamAsLong("ldap_timeout", 0);
     }
 
     /**
