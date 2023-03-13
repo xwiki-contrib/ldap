@@ -28,7 +28,10 @@ import org.xwiki.security.authservice.AbstractXWikiAuthServiceWrapper;
 import org.xwiki.security.authservice.XWikiAuthServiceComponent;
 
 /**
+ * Expose the LDAP authenticator as component.
+ * 
  * @version $Id$
+ * @since 9.8.0
  */
 @Component
 @Singleton
