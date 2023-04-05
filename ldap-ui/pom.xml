@@ -63,6 +63,7 @@
       <groupId>org.xwiki.contrib</groupId>
       <artifactId>authservice-backport-ui</artifactId>
       <version>${authservice-backport.version}</version>
+      <type>xar</type>
       <optional>true</optional>
     </dependency>
   </dependencies>
