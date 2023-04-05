@@ -65,7 +65,7 @@
     <xwiki.release.jira.skip>false</xwiki.release.jira.skip>
     <xwiki.issueManagement.jira.id>LDAP</xwiki.issueManagement.jira.id>
 
-    <authservice-backport.version>1.0.3-SNAPSHOT</authservice-backport.version>
+    <authservice-backport.version>1.1.1</authservice-backport.version>
   </properties>
   <build>
     <pluginManagement>
