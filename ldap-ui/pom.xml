@@ -58,5 +58,12 @@
       <version>${rendering.version}</version>
       <scope>runtime</scope>
     </dependency>
+    <!-- Allow configuring the LDAP authenticator at runtime -->
+    <dependency>
+      <groupId>org.xwiki.contrib</groupId>
+      <artifactId>authservice-backport-ui</artifactId>
+      <version>${authservice-backport.version}</version>
+      <optional>true</optional>
+    </dependency>
   </dependencies>
 </project>

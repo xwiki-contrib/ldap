@@ -57,7 +57,7 @@
     <dependency>
       <groupId>org.xwiki.contrib</groupId>
       <artifactId>authservice-backport-api</artifactId>
-      <version>1.0.2</version>
+      <version>${authservice-backport.version}</version>
     </dependency>
 
     <!-- Testing dependencies -->
