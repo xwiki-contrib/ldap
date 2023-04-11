@@ -49,6 +49,19 @@
     <defaultWeb/>
     <nameField/>
     <validationScript/>
+    <activeAttribute>
+      <customDisplay/>
+      <disabled>0</disabled>
+      <name>activeAttribute</name>
+      <number>11</number>
+      <picker>0</picker>
+      <prettyName/>
+      <size>30</size>
+      <unmodifiable>0</unmodifiable>
+      <validationMessage/>
+      <validationRegExp/>
+      <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+    </activeAttribute>
     <dryRun>
       <customDisplay/>
       <defaultValue>1</defaultValue>
@@ -63,6 +76,19 @@
       <validationRegExp/>
       <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
     </dryRun>
+    <inactiveValue>
+      <customDisplay/>
+      <disabled>0</disabled>
+      <name>inactiveValue</name>
+      <number>12</number>
+      <picker>0</picker>
+      <prettyName/>
+      <size>30</size>
+      <unmodifiable>0</unmodifiable>
+      <validationMessage/>
+      <validationRegExp/>
+      <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+    </inactiveValue>
     <ldapBindDn>
       <customDisplay/>
       <disabled>0</disabled>
@@ -201,6 +227,19 @@
       <defaultWeb/>
       <nameField/>
       <validationScript/>
+      <activeAttribute>
+        <customDisplay/>
+        <disabled>0</disabled>
+        <name>activeAttribute</name>
+        <number>11</number>
+        <picker>0</picker>
+        <prettyName/>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <validationMessage/>
+        <validationRegExp/>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </activeAttribute>
       <dryRun>
         <customDisplay/>
         <defaultValue>1</defaultValue>
@@ -215,6 +254,19 @@
         <validationRegExp/>
         <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
       </dryRun>
+      <inactiveValue>
+        <customDisplay/>
+        <disabled>0</disabled>
+        <name>inactiveValue</name>
+        <number>12</number>
+        <picker>0</picker>
+        <prettyName/>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <validationMessage/>
+        <validationRegExp/>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </inactiveValue>
       <ldapBindDn>
         <customDisplay/>
         <disabled>0</disabled>
@@ -340,7 +392,13 @@
       </shouldDisable>
     </class>
     <property>
+      <activeAttribute/>
+    </property>
+    <property>
       <dryRun>1</dryRun>
+    </property>
+    <property>
+      <inactiveValue/>
     </property>
     <property>
       <ldapBindDn/>
@@ -779,6 +837,8 @@ def getOrDefault(object, attribute, defaultValue) {
 def user
 def password
 def shouldDisable
+def activeAttribute
+def inactiveValue
 def config = doc.getObject(doc.getFullName())
 if (config == null) {
   logger.info('Could not run update; configuration is missing')
@@ -790,6 +850,8 @@ if (config == null) {
     user = getOrDefault(config, 'ldapBindDn', configuration.getLDAPParam("ldap_bind_DN",""))
     password = getOrDefault(config, 'ldapBindPass', configuration.getLDAPParam("ldap_bind_pass",""))
     shouldDisable = getOrDefault(config, 'shouldDisable', 0)
+    activeAttribute = getOrDefault(config, 'activeAttribute', '')
+    inactiveValue = getOrDefault(config, 'inactiveValue', '')
     setupOk = !(!user || !password)
 
     if (!setupOk) {
@@ -822,7 +884,7 @@ if (config == null) {
             ldapUtils.setUserSearchFormatString(searchQuery)
             userObj = ldapUtils.searchUserAttributesByUid(userId, null)
           }
-          if (userObj == null || userObj.isEmpty()) {
+          if (userObj == null || userObj.isEmpty() || userObj.stream().anyMatch{it.name.equals(activeAttribute) &amp;&amp; it.value.equals(inactiveValue)}) {
             if (config.getValue('dryRun') != 0) {
               logger.info("the user [{}] is no longer in LDAP; we would delete it", it)
             } else {
