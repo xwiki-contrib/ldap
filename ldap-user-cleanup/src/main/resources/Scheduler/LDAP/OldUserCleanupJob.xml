@@ -49,6 +49,19 @@
     <defaultWeb/>
     <nameField/>
     <validationScript/>
+    <activeAttribute>
+      <customDisplay/>
+      <disabled>0</disabled>
+      <name>activeAttribute</name>
+      <number>11</number>
+      <picker>0</picker>
+      <prettyName/>
+      <size>30</size>
+      <unmodifiable>0</unmodifiable>
+      <validationMessage/>
+      <validationRegExp/>
+      <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+    </activeAttribute>
     <dryRun>
       <customDisplay/>
       <defaultValue>1</defaultValue>
@@ -63,6 +76,19 @@
       <validationRegExp/>
       <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
     </dryRun>
+    <inactiveValue>
+      <customDisplay/>
+      <disabled>0</disabled>
+      <name>inactiveValue</name>
+      <number>12</number>
+      <picker>0</picker>
+      <prettyName/>
+      <size>30</size>
+      <unmodifiable>0</unmodifiable>
+      <validationMessage/>
+      <validationRegExp/>
+      <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+    </inactiveValue>
     <ldapBindDn>
       <customDisplay/>
       <disabled>0</disabled>
@@ -173,6 +199,19 @@
       <validationRegExp/>
       <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
     </replacementUser>
+    <shouldDisable>
+      <customDisplay/>
+      <disabled>0</disabled>
+      <name>shouldDisable</name>
+      <number>10</number>
+      <picker>0</picker>
+      <prettyName/>
+      <size>30</size>
+      <unmodifiable>0</unmodifiable>
+      <validationMessage/>
+      <validationRegExp/>
+      <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+    </shouldDisable>
   </class>
   <object>
     <name>Scheduler.LDAP.OldUserCleanupJob</name>
@@ -188,6 +227,19 @@
       <defaultWeb/>
       <nameField/>
       <validationScript/>
+      <activeAttribute>
+        <customDisplay/>
+        <disabled>0</disabled>
+        <name>activeAttribute</name>
+        <number>11</number>
+        <picker>0</picker>
+        <prettyName/>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <validationMessage/>
+        <validationRegExp/>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </activeAttribute>
       <dryRun>
         <customDisplay/>
         <defaultValue>1</defaultValue>
@@ -202,6 +254,19 @@
         <validationRegExp/>
         <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
       </dryRun>
+      <inactiveValue>
+        <customDisplay/>
+        <disabled>0</disabled>
+        <name>inactiveValue</name>
+        <number>12</number>
+        <picker>0</picker>
+        <prettyName/>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <validationMessage/>
+        <validationRegExp/>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </inactiveValue>
       <ldapBindDn>
         <customDisplay/>
         <disabled>0</disabled>
@@ -312,9 +377,28 @@
         <validationRegExp/>
         <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
       </replacementUser>
+      <shouldDisable>
+        <customDisplay/>
+        <disabled>0</disabled>
+        <name>shouldDisable</name>
+        <number>10</number>
+        <picker>0</picker>
+        <prettyName/>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <validationMessage/>
+        <validationRegExp/>
+        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+      </shouldDisable>
     </class>
     <property>
+      <activeAttribute/>
+    </property>
+    <property>
       <dryRun>1</dryRun>
+    </property>
+    <property>
+      <inactiveValue/>
     </property>
     <property>
       <ldapBindDn/>
@@ -339,6 +423,9 @@
     </property>
     <property>
       <replacementUser>XWiki.XWikiGuest</replacementUser>
+    </property>
+    <property>
+      <shouldDisable>0</shouldDisable>
     </property>
   </object>
   <object>
@@ -670,6 +757,24 @@ def adjustDocumentAuthorAndComments(userReference, replacementUserRef, config, l
     }
 }
 
+def disableUser(userName, config, logger) {
+  try {
+    def userRef = services.model.resolveDocument(userName)
+    if (config.getValue('dryRun') != 0) {
+      logger.info("Would disable the user [${userRef}]")
+    } else {
+      logger.info("Disabling the user [${userRef}]")
+      xwiki.getUser(userRef).setDisabledStatus(true)
+    }
+  } catch (Exception e) {
+    if (config.getValue('dryRun') != 0) {
+      logger.warn("Exception while test disabling [${userName}].", e)
+    } else {
+      logger.warn("Exception while disabling [${userName}].", e)
+    }
+  }
+}
+
 // adjust references to replacement user and remove user
 def deleteUser(userName, config, logger) {
   try {
@@ -721,9 +826,19 @@ def deleteUser(userName, config, logger) {
     }
   }
 }
+def getOrDefault(object, attribute, defaultValue) {
+  def value = object.getValue(attribute)
+  if (value == null) {
+    return defaultValue
+  }
+  return value
+}
 
 def user
 def password
+def shouldDisable
+def activeAttribute
+def inactiveValue
 def config = doc.getObject(doc.getFullName())
 if (config == null) {
   logger.info('Could not run update; configuration is missing')
@@ -731,15 +846,12 @@ if (config == null) {
 
   try {
     def setupOk = false;
-    user = config.getValue('ldapBindDn')
-    password = config.getValue('ldapBindPass')
     XWikiLDAPConfig configuration = new XWikiLDAPConfig(null);
-    if (!user) {
-      user = configuration.getLDAPParam("ldap_bind_DN","")
-    }
-    if (!password) {
-      password = configuration.getLDAPParam("ldap_bind_pass","")
-    }
+    user = getOrDefault(config, 'ldapBindDn', configuration.getLDAPParam("ldap_bind_DN",""))
+    password = getOrDefault(config, 'ldapBindPass', configuration.getLDAPParam("ldap_bind_pass",""))
+    shouldDisable = getOrDefault(config, 'shouldDisable', 0)
+    activeAttribute = getOrDefault(config, 'activeAttribute', '')
+    inactiveValue = getOrDefault(config, 'inactiveValue', '')
     setupOk = !(!user || !password)
 
     if (!setupOk) {
@@ -772,14 +884,17 @@ if (config == null) {
             ldapUtils.setUserSearchFormatString(searchQuery)
             userObj = ldapUtils.searchUserAttributesByUid(userId, null)
           }
-
-          if (userObj == null || userObj.isEmpty()) {
+          if (userObj == null || userObj.isEmpty() || userObj.stream().anyMatch{it.name.equals(activeAttribute) &amp;&amp; it.value.equals(inactiveValue)}) {
             if (config.getValue('dryRun') != 0) {
               logger.info("the user [{}] is no longer in LDAP; we would delete it", it)
             } else {
               logger.info("the user [{}] is no longer in LDAP; we are going to delete it", it)
             }
-            deleteUser(it, config, logger)
+            if (shouldDisable != 0) {
+              disableUser(it, config, logger)
+            } else {
+              deleteUser(it, config, logger)
+            }
           }
         })
       } finally {

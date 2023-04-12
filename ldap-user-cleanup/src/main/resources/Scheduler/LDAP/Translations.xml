@@ -49,6 +49,9 @@ Scheduler.LDAP.OldUserCleanupJob_replaceAuthor=Replace author?
 Scheduler.LDAP.OldUserCleanupJob_replaceContentAuthor=Replace content author?
 Scheduler.LDAP.OldUserCleanupJob_replaceCommentAuthor=Replace comment author?
 Scheduler.LDAP.OldUserCleanupJob_dryRun=Dry run
+Scheduler.LDAP.OldUserCleanupJob_shouldDisable=Should disable instead of delete
+Scheduler.LDAP.OldUserCleanupJob_activeAttribute=Active Attribute
+Scheduler.LDAP.OldUserCleanupJob_inactiveValue=Inactive Value
 # hints
 org.xwiki.contrib.ldap.scheduler.LDAP.OldUserCleanupJob.ldapBindDn.hint=The DN or name of the user to bind to the LDAP when running the job.
 ## currently unused
@@ -63,7 +66,9 @@ org.xwiki.contrib.ldap.scheduler.LDAP.OldUserCleanupJob.replaceAuthor.hint=Set t
 org.xwiki.contrib.ldap.scheduler.LDAP.OldUserCleanupJob.replaceContentAuthor.hint=Set this option if deleted users should be replaced as the last content author of pages.
 org.xwiki.contrib.ldap.scheduler.LDAP.OldUserCleanupJob.replaceCommentAuthor.hint=Set this option if deleted users should be replaced as the creator of comments.
 org.xwiki.contrib.ldap.scheduler.LDAP.OldUserCleanupJob.dryRun.hint=Set this option if you want the job to make no actual changes but only log any actions that would be performed.
-
+org.xwiki.contrib.ldap.scheduler.LDAP.OldUserCleanupJob.shouldDisable.hint=Set this option if you want the users to be disabled rather than deleted.
+org.xwiki.contrib.ldap.scheduler.LDAP.OldUserCleanupJob.activeAttribute.hint=The LDAP attribute that conveys whether an user is active or not. E.g. for Active Directory, the attribute is 'userAccountControl'.
+org.xwiki.contrib.ldap.scheduler.LDAP.OldUserCleanupJob.inactiveValue.hint=The value of the activeAttribute that determines that an user is inactive/disabled. E.g. in Active Directory, the value for the 'userAccountControl' attribute that says an user is inactive is '514'.
 # other
 org.xwiki.contrib.ldap.scheduler.LDAP.OldUserCleanupJob.jobname=Remove profile data for users no longer available in LDAP
 org.xwiki.contrib.ldap.scheduler.LDAP.OldUserCleanupJob.title=Old User Cleanup Job
