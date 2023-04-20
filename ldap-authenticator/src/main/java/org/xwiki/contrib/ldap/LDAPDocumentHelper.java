@@ -22,8 +22,6 @@ package org.xwiki.contrib.ldap;
 import java.util.List;
 
 import org.xwiki.component.annotation.Role;
-import org.xwiki.model.reference.DocumentReference;
-import org.xwiki.model.reference.SpaceReference;
 import org.xwiki.stability.Unstable;
 
 /**
@@ -47,14 +45,4 @@ public interface LDAPDocumentHelper
      */
     String getDocumentName(String documentNameFormat, String uidAttributeName,
         List<XWikiLDAPSearchAttribute> attributes, XWikiLDAPConfig config);
-
-    /**
-     * From the given document prefix and space reference, return a reference to a document that does not exist yet in
-     * space.
-     *
-     * @param documentPrefix the document name prefix
-     * @param space the document space
-     * @return a reference to a non-existing document
-     */
-    DocumentReference getAvailableDocument(String documentPrefix, SpaceReference space);
 }

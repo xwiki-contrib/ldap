@@ -40,7 +40,6 @@ import javax.imageio.stream.ImageInputStream;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.text.StrSubstitutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xwiki.cache.Cache;
@@ -48,7 +47,6 @@ import org.xwiki.cache.CacheException;
 import org.xwiki.cache.config.CacheConfiguration;
 import org.xwiki.contrib.ldap.internal.LDAPGroupsCache;
 import org.xwiki.model.reference.DocumentReference;
-import org.xwiki.model.reference.SpaceReference;
 import org.xwiki.rendering.syntax.Syntax;
 
 import com.novell.ldap.LDAPAttribute;
@@ -1697,12 +1695,8 @@ public class XWikiLDAPUtils
 
     private XWikiDocument getAvailableUserProfile(String validXWikiUserName, XWikiContext context) throws XWikiException
     {
-        LDAPDocumentHelper ldapDocumentHelper = Utils.getComponent(LDAPDocumentHelper.class);
-        SpaceReference spaceReference = new SpaceReference(XWIKI_USER_SPACE, context.getWikiReference());
-        DocumentReference documentReference =
-            ldapDocumentHelper.getAvailableDocument(validXWikiUserName, spaceReference);
-
-        return context.getWiki().getDocument(documentReference, context);
+        String profileName = context.getWiki().getUniquePageName(XWIKI_USER_SPACE, validXWikiUserName, context);
+        return context.getWiki().getDocument(profileName, context);
     }
 
     /**

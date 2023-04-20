@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import org.apache.commons.lang3.StringUtils;
@@ -34,11 +33,6 @@ import org.xwiki.component.annotation.Component;
 import org.xwiki.contrib.ldap.LDAPDocumentHelper;
 import org.xwiki.contrib.ldap.XWikiLDAPConfig;
 import org.xwiki.contrib.ldap.XWikiLDAPSearchAttribute;
-import org.xwiki.model.reference.DocumentReference;
-import org.xwiki.model.reference.SpaceReference;
-
-import com.xpn.xwiki.XWiki;
-import com.xpn.xwiki.XWikiContext;
 
 import static org.xwiki.contrib.ldap.XWikiLDAPUtils.cleanXWikiUserPageName;
 
@@ -54,9 +48,6 @@ public class DefaultLDAPDocumentHelper implements LDAPDocumentHelper
 {
     @Inject
     private Logger logger;
-
-    @Inject
-    private Provider<XWikiContext> contextProvider;
 
     @Override
     public String getDocumentName(String documentNameFormat, String uidAttributeName,
@@ -87,25 +78,6 @@ public class DefaultLDAPDocumentHelper implements LDAPDocumentHelper
         logger.debug("Generated document name : [{}]", documentName);
 
         return documentNameFormat;
-    }
-
-    @Override
-    public DocumentReference getAvailableDocument(String documentPrefix, SpaceReference space)
-    {
-        DocumentReference documentReference = new DocumentReference(documentPrefix, space);
-        XWikiContext context = contextProvider.get();
-        XWiki xwiki = context.getWiki();
-
-        // Check if the default profile document is available
-        for (int i = 0; true; ++i) {
-            if (i > 0) {
-                documentReference = new DocumentReference(documentPrefix + "_" + i, space);
-            }
-
-            if (xwiki.exists(documentReference, context)) {
-                return documentReference;
-            }
-        }
     }
 
     private void putVariable(Map<String, String> map, String key, String value)
