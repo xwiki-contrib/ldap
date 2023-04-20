@@ -48,6 +48,7 @@ import org.xwiki.cache.CacheException;
 import org.xwiki.cache.config.CacheConfiguration;
 import org.xwiki.contrib.ldap.internal.LDAPGroupsCache;
 import org.xwiki.model.reference.DocumentReference;
+import org.xwiki.model.reference.SpaceReference;
 import org.xwiki.rendering.syntax.Syntax;
 
 import com.novell.ldap.LDAPAttribute;
@@ -1682,33 +1683,6 @@ public class XWikiLDAPUtils
     }
 
     /**
-     * @param validXWikiUserName a valid XWiki username for which to get a profile document
-     * @param context the XWiki context
-     * @return a (new) XWiki document for the passed username
-     * @throws XWikiException when a problem occurs while retrieving the user profile
-     */
-    private XWikiDocument getAvailableUserProfile(String validXWikiUserName, XWikiContext context) throws XWikiException
-    {
-        DocumentReference userReference =
-            new DocumentReference(context.getWikiId(), XWIKI_USER_SPACE, validXWikiUserName);
-
-        // Check if the default profile document is available
-        for (int i = 0; true; ++i) {
-            if (i > 0) {
-                userReference =
-                    new DocumentReference(context.getWikiId(), XWIKI_USER_SPACE, validXWikiUserName + "_" + i);
-            }
-
-            XWikiDocument doc = context.getWiki().getDocument(userReference, context);
-
-            // Don't use non user existing document
-            if (doc.isNew()) {
-                return doc;
-            }
-        }
-    }
-
-    /**
      * @param attributes the LDAP attributes of the user
      * @param context the XWiki context
      * @return the name of the XWiki user profile page
@@ -1718,8 +1692,17 @@ public class XWikiLDAPUtils
         throws XWikiException
     {
         String pageName = getUserPageName(attributes, context);
-
         return getAvailableUserProfile(pageName, context);
+    }
+
+    private XWikiDocument getAvailableUserProfile(String validXWikiUserName, XWikiContext context) throws XWikiException
+    {
+        LDAPDocumentHelper ldapDocumentHelper = Utils.getComponent(LDAPDocumentHelper.class);
+        SpaceReference spaceReference = new SpaceReference(XWIKI_USER_SPACE, context.getWikiReference());
+        DocumentReference documentReference =
+            ldapDocumentHelper.getAvailableDocument(validXWikiUserName, spaceReference);
+
+        return context.getWiki().getDocument(documentReference, context);
     }
 
     /**
@@ -1729,53 +1712,9 @@ public class XWikiLDAPUtils
      */
     public String getUserPageName(List<XWikiLDAPSearchAttribute> attributes, XWikiContext context)
     {
+        LDAPDocumentHelper ldapDocumentHelper = Utils.getComponent(LDAPDocumentHelper.class);
         String userPageName = getConfiguration().getLDAPParam("ldap_userPageName", "${uid}");
 
-        Map<String, String> memoryConfiguration = getConfiguration().getMemoryConfiguration();
-        Map<String, String> valueMap = new HashMap<>();
-        if (attributes != null) {
-            // Complete existing configuration
-            for (Map.Entry<String, String> entry : memoryConfiguration.entrySet()) {
-                putVariable(valueMap, entry.getKey(), entry.getValue());
-            }
-
-            // Inject attributes
-            for (XWikiLDAPSearchAttribute attribute : attributes) {
-                putVariable(valueMap, "ldap." + attribute.name, attribute.value);
-                if (attribute.name.equals(getUidAttributeName())) {
-                    // Override the default uid value with the real one coming from LDAP
-                    putVariable(valueMap, "uid", attribute.value);
-                }
-            }
-        }
-
-        String pageName = StrSubstitutor.replace(userPageName, valueMap);
-
-        // Do the minimal needed cleanup anyway, even if it is not requested in the userPageName property.
-        pageName = cleanXWikiUserPageName(pageName);
-
-        LOGGER.debug("UserPageName: {}", pageName);
-
-        return pageName;
-    }
-
-    private void putVariable(Map<String, String> map, String key, String value)
-    {
-        if (value != null) {
-            map.put(key, value);
-
-            map.put(key + "._lowerCase", value.toLowerCase());
-            map.put(key + "._upperCase", value.toUpperCase());
-
-            String cleanValue = clean(value);
-            map.put(key + "._clean", cleanValue);
-            map.put(key + "._clean._lowerCase", cleanValue.toLowerCase());
-            map.put(key + "._clean._upperCase", cleanValue.toUpperCase());
-        }
-    }
-
-    private String clean(String str)
-    {
-        return StringUtils.removePattern(str, "[\\.\\:\\s,@\\^\\/]");
+        return ldapDocumentHelper.getDocumentName(userPageName, getUidAttributeName(), attributes, getConfiguration());
     }
 }

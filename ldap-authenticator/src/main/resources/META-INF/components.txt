@@ -1,3 +1,4 @@
+org.xwiki.contrib.ldap.internal.DefaultLDAPDocumentHelper
 org.xwiki.contrib.ldap.internal.ExtensionInitializerListener
 org.xwiki.contrib.ldap.internal.GroupCacheExpirationEventListener
 org.xwiki.contrib.ldap.internal.LDAPAuthService
