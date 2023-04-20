@@ -30,7 +30,7 @@ import org.xwiki.stability.Unstable;
  * Helper class that allows to perform common operations to manage documents created by the LDAP application.
  *
  * @version $Id$
- * @since 9.9.2
+ * @since 9.10
  */
 @Role
 @Unstable
@@ -39,9 +39,9 @@ public interface LDAPDocumentHelper
     /**
      * Based on the given parameters, compute the document name.
      *
+     * @param documentNameFormat the page name format that should be used
      * @param uidAttributeName the name of the LDAP attribute containing the entity UID
      * @param attributes the LDAP attributes of the entity
-     * @param documentNameFormat the page name format that should be used
      * @param config the current LDAP configuration
      * @return the name of the XWiki page
      */
@@ -49,12 +49,12 @@ public interface LDAPDocumentHelper
         List<XWikiLDAPSearchAttribute> attributes, XWikiLDAPConfig config);
 
     /**
-     * From the given document name and space reference, return a reference to a document that does not exist yet in
+     * From the given document prefix and space reference, return a reference to a document that does not exist yet in
      * space.
      *
-     * @param documentName a valid document name
+     * @param documentPrefix the document name prefix
      * @param space the document space
      * @return a reference to a non-existing document
      */
-    DocumentReference getAvailableDocument(String documentName, SpaceReference space);
+    DocumentReference getAvailableDocument(String documentPrefix, SpaceReference space);
 }

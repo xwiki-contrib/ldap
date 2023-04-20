@@ -46,7 +46,7 @@ import static org.xwiki.contrib.ldap.XWikiLDAPUtils.cleanXWikiUserPageName;
  * Default implementation of {@link LDAPDocumentHelper}.
  *
  * @version $Id$
- * @since 9.9.2
+ * @since 9.10
  */
 @Component
 @Singleton
@@ -90,16 +90,16 @@ public class DefaultLDAPDocumentHelper implements LDAPDocumentHelper
     }
 
     @Override
-    public DocumentReference getAvailableDocument(String documentName, SpaceReference space)
+    public DocumentReference getAvailableDocument(String documentPrefix, SpaceReference space)
     {
-        DocumentReference documentReference = new DocumentReference(documentName, space);
+        DocumentReference documentReference = new DocumentReference(documentPrefix, space);
         XWikiContext context = contextProvider.get();
         XWiki xwiki = context.getWiki();
 
         // Check if the default profile document is available
         for (int i = 0; true; ++i) {
             if (i > 0) {
-                documentReference = new DocumentReference(documentName + "_" + i, space);
+                documentReference = new DocumentReference(documentPrefix + "_" + i, space);
             }
 
             if (xwiki.exists(documentReference, context)) {
