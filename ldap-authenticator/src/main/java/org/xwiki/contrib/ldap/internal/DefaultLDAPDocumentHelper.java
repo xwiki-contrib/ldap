@@ -77,7 +77,7 @@ public class DefaultLDAPDocumentHelper implements LDAPDocumentHelper
         documentName = cleanXWikiUserPageName(documentName);
         logger.debug("Generated document name : [{}]", documentName);
 
-        return documentNameFormat;
+        return documentName;
     }
 
     private void putVariable(Map<String, String> map, String key, String value)
