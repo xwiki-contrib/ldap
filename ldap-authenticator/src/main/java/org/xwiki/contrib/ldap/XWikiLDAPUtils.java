@@ -1681,6 +1681,33 @@ public class XWikiLDAPUtils
     }
 
     /**
+     * @param validXWikiUserName a valid XWiki username for which to get a profile document
+     * @param context the XWiki context
+     * @return a (new) XWiki document for the passed username
+     * @throws XWikiException when a problem occurs while retrieving the user profile
+     */
+    private XWikiDocument getAvailableUserProfile(String validXWikiUserName, XWikiContext context) throws XWikiException
+    {
+        DocumentReference userReference =
+            new DocumentReference(context.getWikiId(), XWIKI_USER_SPACE, validXWikiUserName);
+
+        // Check if the default profile document is available
+        for (int i = 0; true; ++i) {
+            if (i > 0) {
+                userReference =
+                    new DocumentReference(context.getWikiId(), XWIKI_USER_SPACE, validXWikiUserName + "_" + i);
+            }
+
+            XWikiDocument doc = context.getWiki().getDocument(userReference, context);
+
+            // Don't use non user existing document
+            if (doc.isNew()) {
+                return doc;
+            }
+        }
+    }
+
+    /**
      * @param attributes the LDAP attributes of the user
      * @param context the XWiki context
      * @return the name of the XWiki user profile page
@@ -1690,13 +1717,8 @@ public class XWikiLDAPUtils
         throws XWikiException
     {
         String pageName = getUserPageName(attributes, context);
-        return getAvailableUserProfile(pageName, context);
-    }
 
-    private XWikiDocument getAvailableUserProfile(String validXWikiUserName, XWikiContext context) throws XWikiException
-    {
-        String profileName = context.getWiki().getUniquePageName(XWIKI_USER_SPACE, validXWikiUserName, context);
-        return context.getWiki().getDocument(profileName, context);
+        return getAvailableUserProfile(pageName, context);
     }
 
     /**
