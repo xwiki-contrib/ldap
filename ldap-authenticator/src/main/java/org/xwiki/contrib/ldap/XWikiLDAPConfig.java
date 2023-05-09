@@ -138,11 +138,6 @@ public class XWikiLDAPConfig
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(XWikiLDAPConfig.class);
 
-    /**
-     * The default secure provider to use for SSL.
-     */
-    private static final String DEFAULT_SECUREPROVIDER = "com.sun.net.ssl.internal.ssl.Provider";
-
     static {
         DEFAULT_GROUP_CLASSES.add("group".toLowerCase());
         DEFAULT_GROUP_CLASSES.add("groupOfNames".toLowerCase());
@@ -520,21 +515,24 @@ public class XWikiLDAPConfig
     }
 
     /**
-     * @return the secure provider to use for SSL.
+     * @return the secure provider to use for SSL, or {@code null} if the preregistered ones must be used.
      * @throws XWikiLDAPException error when trying to instantiate secure provider.
      * @since 9.1.1
      */
     public Provider getSecureProvider() throws XWikiLDAPException
     {
-        Provider provider;
+        Provider provider = null;
 
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
-        String className = getLDAPParam("ldap_ssl.secure_provider", DEFAULT_SECUREPROVIDER);
+        // Get a specific provider only if specifically asked.
+        String className = getLDAPParam("ldap_ssl.secure_provider", null);
 
-        try {
-            provider = (java.security.Provider) cl.loadClass(className).newInstance();
-        } catch (Exception e) {
-            throw new XWikiLDAPException("Fail to load secure ssl provider.", e);
+        if (className != null) {
+            try {
+                provider = (java.security.Provider) cl.loadClass(className).newInstance();
+            } catch (Exception e) {
+                throw new XWikiLDAPException("Fail to load secure ssl provider.", e);
+            }
         }
 
         return provider;

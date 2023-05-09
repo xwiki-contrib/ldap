@@ -20,6 +20,7 @@
 package org.xwiki.contrib.ldap;
 
 import java.io.UnsupportedEncodingException;
+import java.security.Provider;
 import java.security.Security;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -195,8 +196,12 @@ public class XWikiLDAPConnection
 
         try {
             if (ssl) {
-                // Dynamically set JSSE as a security provider
-                Security.addProvider(this.configuration.getSecureProvider());
+                // The security providers are preregistered and used depending on the context, so there is no need to
+                // set one. Dynamically set it only if a specific provider is requested.
+                Provider secureProvider = this.configuration.getSecureProvider();
+                if (secureProvider != null) {
+                    Security.addProvider(secureProvider);
+                }
 
                 if (pathToKeys != null && pathToKeys.length() > 0) {
                     // Dynamically set the property that JSSE uses to identify
