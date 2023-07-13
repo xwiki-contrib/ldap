@@ -21,8 +21,11 @@ package org.xwiki.contrib.ldap;
 
 import java.security.Principal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpSession;
 
@@ -59,7 +62,6 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -86,9 +88,9 @@ public class XWikiLDAPAuthServiceImplTest extends AbstractLDAPTestCase
 
     private HttpSession session;
 
-    private ThreadLocal<String> authUid = new ThreadLocal<String>();
-    private ThreadLocal<String> authDn = new ThreadLocal<String>();
-    private ThreadLocal<String> authUserPageName = new ThreadLocal<String>();
+    private Map<String, List<String>> searchResultsForUid = new HashMap<>();
+
+    private Map<String, List<String>> searchResultsForDn = new HashMap<>();
 
     @AfterComponent
     public void afterComponent()
@@ -136,37 +138,43 @@ public class XWikiLDAPAuthServiceImplTest extends AbstractLDAPTestCase
         userClass.addNumberField("numberfield", "Number field", 30, "integer");
         this.mocker.getSpyXWiki().saveDocument(userDocument, this.mocker.getXWikiContext());
 
-        final List<String> mockQueryResult = new ArrayList<>();
-
-        // somewhat complicated mock to return the right search result:
-        // if the passed value is the expected one, then return one entry with the expected user profile
-        // otherwise return an empty list
-        class ExpectValueAnswer implements Answer<Query> {
-            final ThreadLocal<String> expectedValue;
-
-            public ExpectValueAnswer(ThreadLocal<String> expectedValue) {
-                this.expectedValue = expectedValue;
-            }
+        List<String> resultForUid = new ArrayList<>();
+        Query mockQueryForUid = mock(Query.class);
+        when(mockQueryForUid.addFilter(any(QueryFilter.class))).thenReturn(mockQueryForUid);
+        when(mockQueryForUid.bindValue(eq("value"), anyString())).thenAnswer(new Answer<Query>()
+        {
             @Override
             public Query answer(InvocationOnMock invocation) throws Throwable
             {
-                mockQueryResult.clear();
-                String uid = invocation.getArgumentAt(1, String.class);
-                if (uid.equalsIgnoreCase(expectedValue.get())) {
-                    mockQueryResult.add(authUserPageName.get());
+                List<String> result = searchResultsForUid.get(invocation.getArgumentAt(1, String.class));
+                resultForUid.clear();
+                if (result != null) {
+                    resultForUid.addAll(result);
                 }
-                return (Query)invocation.getMock();
-            }
-        }
 
-        Query mockQueryForUid = mock(Query.class);
-        when(mockQueryForUid.addFilter(any(QueryFilter.class))).thenReturn(mockQueryForUid);
-        when(mockQueryForUid.bindValue(eq("value"), anyString())).thenAnswer(new ExpectValueAnswer(authUid));
-        when(mockQueryForUid.<String>execute()).thenReturn(mockQueryResult);
+                return mockQueryForUid;
+            }
+        });
+        when(mockQueryForUid.<String>execute()).thenReturn(resultForUid);
+
+        List<String> resultForDn = new ArrayList<>();
         Query mockQueryForDn = mock(Query.class);
         when(mockQueryForDn.addFilter(any(QueryFilter.class))).thenReturn(mockQueryForUid);
-        when(mockQueryForDn.bindValue(eq("value"), anyString())).thenAnswer(new ExpectValueAnswer(authDn));
-        when(mockQueryForDn.<String>execute()).thenReturn(mockQueryResult);
+        when(mockQueryForDn.bindValue(eq("value"), anyString())).thenAnswer(new Answer<Query>()
+        {
+            @Override
+            public Query answer(InvocationOnMock invocation) throws Throwable
+            {
+                List<String> result = searchResultsForDn.get(invocation.getArgumentAt(1, String.class));
+                resultForDn.clear();
+                if (result != null) {
+                    resultForDn.addAll(result);
+                }
+
+                return mockQueryForDn;
+            }
+        });
+        when(mockQueryForDn.<String>execute()).thenReturn(resultForDn);
 
         QueryManager queryMock = mock(QueryManager.class);
         bindMockQuery(queryMock, "uid", mockQueryForUid);
@@ -187,7 +195,6 @@ public class XWikiLDAPAuthServiceImplTest extends AbstractLDAPTestCase
             + " and ldap.className = 'XWiki.LDAPProfileClass' and ldap.id = dn.id.id and dn.id.name = '"
             + prop + "' and lower(str(dn.value)) = :value", Query.HQL)).thenReturn(mockQuery);
     }
-
 
     protected String userProfileName(String uid)
     {
@@ -239,11 +246,6 @@ public class XWikiLDAPAuthServiceImplTest extends AbstractLDAPTestCase
     protected XWikiDocument assertAuthenticate(String login, String password, String xwikiUserName, String storedDn,
         String storedUid, boolean sso) throws XWikiException
     {
-        // Register user profile data to mock so that it's found by following queries
-        authUid.set(storedUid);
-        authDn.set(storedDn);
-        authUserPageName.set(xwikiUserName);
-
         Principal principal = authenticate(login, password, sso);
 
         // Check that authentication return a valid Principal
@@ -269,6 +271,10 @@ public class XWikiLDAPAuthServiceImplTest extends AbstractLDAPTestCase
             ldapProfileObj.getStringValue(LDAPProfileXClass.LDAP_XFIELD_DN).toLowerCase());
         assertEquals(storedUid.toLowerCase(),
             ldapProfileObj.getStringValue(LDAPProfileXClass.LDAP_XFIELD_UID).toLowerCase());
+
+        // Register user profile data to mock so that it's found by following queries
+        this.searchResultsForUid.put(storedUid.toLowerCase(), Arrays.asList(xwikiUserName));
+        this.searchResultsForUid.put(storedDn.toLowerCase(), Arrays.asList(xwikiUserName));
 
         return userProfile;
     }
@@ -416,11 +422,8 @@ public class XWikiLDAPAuthServiceImplTest extends AbstractLDAPTestCase
     @Test
     public void testAuthenticateTwice() throws XWikiException
     {
-        XWikiDocument document = assertAuthenticate(LDAPTestSetup.HORATIOHORNBLOWER_CN,
-            LDAPTestSetup.HORATIOHORNBLOWER_PWD, LDAPTestSetup.HORATIOHORNBLOWER_DN);
-
-        when(this.mocker.getMockStore().searchDocuments(anyString(), anyBoolean(), anyBoolean(), anyBoolean(), anyInt(),
-            anyInt(), anyList(), anyXWikiContext())).thenReturn(Collections.singletonList(document));
+        assertAuthenticate(LDAPTestSetup.HORATIOHORNBLOWER_CN, LDAPTestSetup.HORATIOHORNBLOWER_PWD,
+            LDAPTestSetup.HORATIOHORNBLOWER_DN);
 
         assertAuthenticate(LDAPTestSetup.HORATIOHORNBLOWER_CN, LDAPTestSetup.HORATIOHORNBLOWER_PWD,
             LDAPTestSetup.HORATIOHORNBLOWER_DN);
@@ -429,11 +432,8 @@ public class XWikiLDAPAuthServiceImplTest extends AbstractLDAPTestCase
     @Test
     public void testAuthenticateTwiceAndWrongPassword() throws XWikiException
     {
-        XWikiDocument document = assertAuthenticate(LDAPTestSetup.HORATIOHORNBLOWER_CN,
-            LDAPTestSetup.HORATIOHORNBLOWER_PWD, LDAPTestSetup.HORATIOHORNBLOWER_DN);
-
-        when(this.mocker.getMockStore().searchDocuments(anyString(), anyBoolean(), anyBoolean(), anyBoolean(), anyInt(),
-            anyInt(), anyList(), anyXWikiContext())).thenReturn(Collections.singletonList(document));
+        assertAuthenticate(LDAPTestSetup.HORATIOHORNBLOWER_CN, LDAPTestSetup.HORATIOHORNBLOWER_PWD,
+            LDAPTestSetup.HORATIOHORNBLOWER_DN);
 
         try {
             authenticate(LDAPTestSetup.HORATIOHORNBLOWER_CN, "wrong", false);
@@ -449,11 +449,8 @@ public class XWikiLDAPAuthServiceImplTest extends AbstractLDAPTestCase
     @Test
     public void testAuthenticateTwiceAndDifferentCase() throws XWikiException
     {
-        XWikiDocument document = assertAuthenticate(LDAPTestSetup.HORATIOHORNBLOWER_CN,
-            LDAPTestSetup.HORATIOHORNBLOWER_PWD, LDAPTestSetup.HORATIOHORNBLOWER_DN);
-
-        when(this.mocker.getMockStore().searchDocuments(anyString(), anyBoolean(), anyBoolean(), anyBoolean(), anyInt(),
-            anyInt(), anyList(), anyXWikiContext())).thenReturn(Collections.singletonList(document));
+        assertAuthenticate(LDAPTestSetup.HORATIOHORNBLOWER_CN, LDAPTestSetup.HORATIOHORNBLOWER_PWD,
+            LDAPTestSetup.HORATIOHORNBLOWER_DN);
 
         assertAuthenticate(LDAPTestSetup.HORATIOHORNBLOWER_CN.toUpperCase(), LDAPTestSetup.HORATIOHORNBLOWER_PWD,
             userProfileName(LDAPTestSetup.HORATIOHORNBLOWER_CN), LDAPTestSetup.HORATIOHORNBLOWER_DN,
@@ -467,11 +464,8 @@ public class XWikiLDAPAuthServiceImplTest extends AbstractLDAPTestCase
     @Test
     public void testAuthenticateTwiceAndWithWhiteSpaces() throws XWikiException
     {
-        XWikiDocument document = assertAuthenticate(LDAPTestSetup.HORATIOHORNBLOWER_CN,
-            LDAPTestSetup.HORATIOHORNBLOWER_PWD, LDAPTestSetup.HORATIOHORNBLOWER_DN);
-
-        when(this.mocker.getMockStore().searchDocuments(anyString(), anyBoolean(), anyBoolean(), anyBoolean(), anyInt(),
-            anyInt(), anyList(), anyXWikiContext())).thenReturn(Collections.singletonList(document));
+        assertAuthenticate(LDAPTestSetup.HORATIOHORNBLOWER_CN, LDAPTestSetup.HORATIOHORNBLOWER_PWD,
+            LDAPTestSetup.HORATIOHORNBLOWER_DN);
 
         assertAuthenticate(" " + LDAPTestSetup.HORATIOHORNBLOWER_CN + " ", LDAPTestSetup.HORATIOHORNBLOWER_PWD,
             userProfileName(LDAPTestSetup.HORATIOHORNBLOWER_CN), LDAPTestSetup.HORATIOHORNBLOWER_DN,
@@ -678,9 +672,6 @@ public class XWikiLDAPAuthServiceImplTest extends AbstractLDAPTestCase
 
         BaseObject ldapProfileObj = userProfile.getXObject(LDAPProfileXClass.LDAPPROFILECLASS_REFERENCE);
         ldapProfileObj.setStringValue(LDAPProfileXClass.LDAP_XFIELD_DN, "oldDN");
-
-        when(this.mocker.getMockStore().searchDocuments(anyString(), anyBoolean(), anyBoolean(), anyBoolean(), anyInt(),
-            anyInt(), anyList(), anyXWikiContext())).thenReturn(Collections.singletonList(userProfile));
 
         assertAuthenticate(LDAPTestSetup.HORATIOHORNBLOWER_CN, LDAPTestSetup.HORATIOHORNBLOWER_PWD,
             LDAPTestSetup.HORATIOHORNBLOWER_DN);
