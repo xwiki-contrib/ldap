@@ -71,11 +71,17 @@ public class DefaultLDAPDocumentHelper implements LDAPDocumentHelper
             }
         }
 
+        this.logger.debug("User page name format: {}", documentNameFormat);
+        this.logger.debug("User page name subtitution map: {}", valueMap);
+
         String documentName = StrSubstitutor.replace(documentNameFormat, valueMap);
+
+        logger.debug("User page name : [{}]", documentName);
 
         // Do the minimal needed cleanup anyway, even if it is not requested.
         documentName = cleanXWikiUserPageName(documentName);
-        logger.debug("Generated document name : [{}]", documentName);
+
+        logger.debug("Cleaned user page name : [{}]", documentName);
 
         return documentName;
     }
