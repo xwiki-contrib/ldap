@@ -121,11 +121,13 @@ dn: cn=HMS Lydia,ou=crews,ou=groups,o=sevenSeas
 objectclass: groupOfUniqueNames
 objectclass: top
 cn: HMS Lydia
+uniquemember: cn=doesnotexist
 uniquemember: cn=horatio Hornblower,ou=people,o=sevenseas
 uniquemember: cn=William Bush,ou=people,o=sevenSeas
 uniquemember: cn=Thomas Quist,ou=people,o=sevenSeas
 uniquemember: User.With.Points
 uniquemember: (cn=Moultrie Crystal)
+uniquemember: cn=doesnotexistagain
 
 # HMS Victory Crew
 # ----------------
