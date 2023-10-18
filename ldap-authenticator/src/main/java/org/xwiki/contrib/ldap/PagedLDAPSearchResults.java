@@ -131,7 +131,8 @@ public class PagedLDAPSearchResults implements AutoCloseable
                     }
                 }
             } catch (LDAPReferralException e) {
-                LOGGER.debug("Failed to call next value because it require a referral but referral following is disabled",
+                LOGGER.debug(
+                    "Failed search next search result page it require a referral but referral following is disabled",
                     e);
             }
 
