@@ -1230,4 +1230,13 @@ public class XWikiLDAPConfig
     {
         return (int) getLDAPParamAsLong("ldap_searchPageSize", 500);
     }
+
+    /**
+     * @return true if referrals should be followed
+     * @since 9.12.0
+     */
+    public boolean isFollowReferrals()
+    {
+        return "1".equals(getLDAPParam("ldap_follow_referrals", "1"));
+    }
 }

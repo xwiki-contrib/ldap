@@ -115,19 +115,24 @@ public class PagedLDAPSearchResults implements AutoCloseable
     private LDAPSearchResults getCurrentLDAPSearchResults() throws LDAPException
     {
         if (!this.lastResult && !this.currentSearchResults.hasMore()) {
-            // Get next page (if any)
-            LDAPControl[] controls = this.currentSearchResults.getResponseControls();
-            if (controls != null) {
-                for (LDAPControl resposeControl : controls) {
-                    if (resposeControl instanceof LDAPPagedResultsResponse) {
-                        LDAPPagedResultsResponse pagedResponse = (LDAPPagedResultsResponse) resposeControl;
+            try {
+                // Get next page (if any)
+                LDAPControl[] controls = this.currentSearchResults.getResponseControls();
+                if (controls != null) {
+                    for (LDAPControl resposeControl : controls) {
+                        if (resposeControl instanceof LDAPPagedResultsResponse) {
+                            LDAPPagedResultsResponse pagedResponse = (LDAPPagedResultsResponse) resposeControl;
 
-                        // Get next page
-                        nextLDAPSearchResults(pagedResponse.getCookie());
+                            // Get next page
+                            nextLDAPSearchResults(pagedResponse.getCookie());
 
-                        return this.currentSearchResults;
+                            return this.currentSearchResults;
+                        }
                     }
                 }
+            } catch (LDAPReferralException e) {
+                LOGGER.debug("Failed to call next value because it require a referral but referral following is disabled",
+                    e);
             }
 
             // Mark that we reached the last page
@@ -168,10 +173,6 @@ public class PagedLDAPSearchResults implements AutoCloseable
 
     /**
      * Returns the next result as an LDAPEntry.
-     * <p>
-     * If automatic referral following is disabled or if a referral was not followed, next() will throw an
-     * LDAPReferralException when the referral is received.
-     * </p>
      *
      * @return The next search result as an LDAPEntry.
      * @exception LDAPException A general exception which includes an error message and an LDAP error code.
@@ -179,7 +180,17 @@ public class PagedLDAPSearchResults implements AutoCloseable
      */
     public LDAPEntry next() throws LDAPException
     {
-        return getCurrentLDAPSearchResults().next();
+        try {
+            return getCurrentLDAPSearchResults().next();
+        } catch (LDAPReferralException e) {
+            LOGGER.debug("Failed to call next value because it require a referral but referral following is disabled",
+                e);
+
+            // Mark that we reached the last page
+            this.lastResult = true;
+
+            return null;
+        }
     }
 
     @Override

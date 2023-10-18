@@ -232,8 +232,10 @@ public class XWikiLDAPConnection
             LDAPSearchConstraints constraints = new LDAPSearchConstraints(this.connection.getConstraints());
             constraints.setTimeLimit(getTimeout(context));
             constraints.setMaxResults(getMaxResults(context));
-            constraints.setReferralFollowing(true);
-            constraints.setReferralHandler(new LDAPPluginReferralHandler(loginDN, password, context));
+            if (this.configuration.isFollowReferrals()) {
+                constraints.setReferralFollowing(true);
+                constraints.setReferralHandler(new LDAPPluginReferralHandler(loginDN, password, context));
+            }
             this.connection.setConstraints(constraints);
 
             // bind
