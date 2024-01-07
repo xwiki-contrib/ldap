@@ -24,13 +24,13 @@ import java.security.Provider;
 import java.security.Security;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import javax.naming.Context;
 import javax.naming.NameNotFoundException;
@@ -41,6 +41,7 @@ import javax.naming.directory.DirContext;
 import javax.naming.directory.InitialDirContext;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -347,23 +348,32 @@ public class XWikiLDAPConnection
             sb.append(target);
             return sb.toString();
         }
-    }
 
-    /**
-     * This class sorts SRV records by priority and weight as per RFC 2782.
-     */
-    private static class SRVRecordComparator implements Comparator<SRVRecord>
-    {
-        private static final SRVRecordComparator COMPARATOR = new SRVRecordComparator();
-
-        @Override
-        public int compare(SRVRecord o1, SRVRecord o2)
+        /**
+         * Performs a weighted shuffle on a list of SRV records using Efraimidis/Spirakis fast parallel weighted random
+         * sampling algorithm A
+         * 
+         * @param records a list of SRV records
+         * @return a list of SRV records, shuffled according to their weight
+         */
+        private static List<SRVRecord> efraimidisWeightedShuffle(List<SRVRecord> records)
         {
-            if (o1.getPriority() == o2.getPriority()) {
-                return Integer.compare(o2.getWeight(), o1.getWeight());
-            } else {
-                return Integer.compare(o1.getPriority(), o2.getPriority());
+            List<Pair<SRVRecord, Double>> recordKeyList = new ArrayList<>(records.size());
+            for (SRVRecord record : records) {
+                // Math.radom() returns doubles < 1.0 so this is not entirely correct, but since key is always 0 for
+                // u < 1.0 and weight=0 it saves us from handling 0-weighted records separately (permissible by RFC 2782
+                // but weights need to be strictly positive reals for Efraimidis/Spirakis algorithm A to work)
+                double key = Math.pow(Math.random(), (1.0 / record.getWeight()));
+                recordKeyList.add(Pair.of(record, key));
             }
+            recordKeyList.sort(
+                (Pair<SRVRecord, Double> p1, Pair<SRVRecord, Double> p2) -> p2.getRight().compareTo(p1.getRight()));
+
+            List<SRVRecord> resultList = new ArrayList<>(records.size());
+            for (Pair<SRVRecord, Double> p : recordKeyList)
+                resultList.add(p.getLeft());
+
+            return resultList;
         }
     }
 
@@ -400,14 +410,16 @@ public class XWikiLDAPConnection
             return null;
         }
 
-        List<SRVRecord> list = new ArrayList<>(attribute.size());
+        // organise entries by priority so a weighted shuffle can be performed for all entries with a given priority
+        SortedMap<Integer, List<SRVRecord>> priorityMap = new TreeMap<>();
         for (int i = 0; i < attribute.size(); i++) {
             try {
                 Object value = attribute.get(i);
                 if (value != null) {
                     SRVRecord srvRecord = new SRVRecord(value.toString().split(" "));
                     LOGGER.trace("SRV record found: {}", srvRecord.toString());
-                    list.add(srvRecord);
+                    priorityMap.putIfAbsent(srvRecord.getPriority(), new ArrayList<SRVRecord>());
+                    priorityMap.get(srvRecord.getPriority()).add(srvRecord);
                 }
             } catch (NamingException e) {
                 LOGGER.debug("Unable to get {}-th value from attributes.", i, e);
@@ -415,9 +427,11 @@ public class XWikiLDAPConnection
                 LOGGER.debug("Unable to create SRVRecord object.", e);
             }
         }
-        Collections.sort(list, SRVRecordComparator.COMPARATOR);
+        List<SRVRecord> sortedWeightedRecordList = new ArrayList<>();
+        for (int priority : priorityMap.keySet())
+            sortedWeightedRecordList.addAll(SRVRecord.efraimidisWeightedShuffle(priorityMap.get(priority)));
 
-        return list;
+        return sortedWeightedRecordList;
     }
 
     /**
