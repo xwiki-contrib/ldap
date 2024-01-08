@@ -813,7 +813,7 @@ public class XWikiLDAPUtils
      * 
      * @param groupDN the name of the group.
      * @param context the XWiki context.
-     * @return the members of the group.
+     * @return the members of the group, or null if the given name is not a group.
      * @throws XWikiException error when getting the group cache.
      */
     public Map<String, String> getGroupMembers(String groupDN, XWikiContext context) throws XWikiException
