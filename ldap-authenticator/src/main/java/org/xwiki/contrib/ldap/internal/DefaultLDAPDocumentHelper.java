@@ -72,7 +72,7 @@ public class DefaultLDAPDocumentHelper implements LDAPDocumentHelper
         }
 
         this.logger.debug("User page name format: {}", documentNameFormat);
-        this.logger.debug("User page name subtitution map: {}", valueMap);
+        this.logger.debug("User page name substitution map: {}", valueMap);
 
         String documentName = StrSubstitutor.replace(documentNameFormat, valueMap);
 
