@@ -831,7 +831,7 @@ def deleteUser(userName, config, logger) {
 }
 def getOrDefault(object, attribute, defaultValue) {
   def value = object.getValue(attribute)
-  if (value == null) {
+  if ("".equals(value)) {
     return defaultValue
   }
   return value
@@ -886,8 +886,13 @@ if (config == null) {
           def userDn = userProfileDoc.getObject('XWiki.LDAPProfileClass').getStringValue('dn')
           def userId = userProfileDoc.getObject('XWiki.LDAPProfileClass').getStringValue('uid')
 
-          logger.debug("lookup by DN for [{}]", userDn)
-          userObj = connector.searchLDAP(userDn, '(objectClass=*)', null, 0)
+          def userObj = null;
+          if (userDn != null &amp;&amp; !userDn.isEmpty()) {
+            logger.debug("lookup by DN for [{}]", userDn)
+            userObj = connector.searchLDAP(userDn, '(objectClass=*)', null, 0)
+          } else {
+            logger.debug("DN of user [{}] is empty.", it)
+          }
           if (userObj == null || userObj.isEmpty()) {
             def searchQuery = ldapConfig.getLDAPParam("ldap_user_search_fmt", "({0}={1})")
             logger.debug("DN lookup failed; search instead for uid=[{}] with [{}]", userId, searchQuery)
