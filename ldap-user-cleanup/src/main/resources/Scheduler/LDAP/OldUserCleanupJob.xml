@@ -890,14 +890,14 @@ if (config == null) {
           if (userDn != null &amp;&amp; !userDn.isEmpty()) {
             logger.debug("lookup by DN for [{}]", userDn)
             userObj = connector.searchLDAP(userDn, '(objectClass=*)', null, 0)
+            if (userObj == null || userObj.isEmpty()) {
+              def searchQuery = ldapConfig.getLDAPParam("ldap_user_search_fmt", "({0}={1})")
+              logger.debug("DN lookup failed; search instead for uid=[{}] with [{}]", userId, searchQuery)
+              ldapUtils.setUserSearchFormatString(searchQuery)
+              userObj = ldapUtils.searchUserAttributesByUid(userId, null)
+            }
           } else {
             logger.debug("DN of user [{}] is empty.", it)
-          }
-          if (userObj == null || userObj.isEmpty()) {
-            def searchQuery = ldapConfig.getLDAPParam("ldap_user_search_fmt", "({0}={1})")
-            logger.debug("DN lookup failed; search instead for uid=[{}] with [{}]", userId, searchQuery)
-            ldapUtils.setUserSearchFormatString(searchQuery)
-            userObj = ldapUtils.searchUserAttributesByUid(userId, null)
           }
           if (userObj == null || userObj.isEmpty() || userObj.stream().anyMatch{it.name.equals(activeAttribute) &amp;&amp; it.value.equals(inactiveValue)}) {
             if (config.getValue('dryRun') != 0) {
