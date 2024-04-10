@@ -620,11 +620,13 @@
       <jobName>Remove profile data for users no longer in LDAP</jobName>
     </property>
     <property>
-      <script>import org.slf4j.Logger
+      <script>import javax.inject.Provider;
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.xwiki.contrib.ldap.XWikiLDAPUtils;
 import org.xwiki.contrib.ldap.XWikiLDAPConfig;
 import org.xwiki.contrib.ldap.XWikiLDAPConnection;
+import org.xwiki.component.util.DefaultParameterizedType;
 import org.xwiki.security.authorization.Right;
 import com.xpn.xwiki.doc.XWikiAttachment;
 import com.xpn.xwiki.XWikiException;
@@ -633,6 +635,7 @@ import com.xpn.xwiki.XWikiException;
 def logger = LoggerFactory.getLogger('org.xwiki.contrib.ldap.scheduler.OldUserCleanup')
 def document = xcontext.getDoc()
 def doc = xwiki.getDocument(document.getFullName())
+def ldapConfigProvider = services.component.getInstance(new DefaultParameterizedType(null, Provider.class, XWikiLDAPConfig.class))
 
 logger.info('running scheduler job {} in version [{}]', doc.getPlainTitle(), doc.getVersion())
 
@@ -846,9 +849,18 @@ if (config == null) {
 
   try {
     def setupOk = false;
-    XWikiLDAPConfig configuration = new XWikiLDAPConfig(null);
-    user = getOrDefault(config, 'ldapBindDn', configuration.getLDAPParam("ldap_bind_DN",""))
-    password = getOrDefault(config, 'ldapBindPass', configuration.getLDAPParam("ldap_bind_pass",""))
+    XWikiLDAPConfig ldapConfig = null;
+    if (ldapConfigProvider != null &amp;&amp; ldapConfigProvider.get() != null) {
+      logger.debug('Using ldap configuration coming from a provider.');
+      ldapConfig = ldapConfigProvider.get();
+    } else {
+      logger.debug('Using standard ldap configuration.')
+      ldapConfig = new XWikiLDAPConfig(null);
+    }
+
+    user = getOrDefault(config, 'ldapBindDn', ldapConfig.getLDAPParam("ldap_bind_DN",""))
+    password = getOrDefault(config, 'ldapBindPass', ldapConfig.getLDAPParam("ldap_bind_pass",""))
+    logger.debug('Using the following user to connect to ldap [{}].', user);
     shouldDisable = getOrDefault(config, 'shouldDisable', 0)
     activeAttribute = getOrDefault(config, 'activeAttribute', '')
     inactiveValue = getOrDefault(config, 'inactiveValue', '')
@@ -860,15 +872,13 @@ if (config == null) {
 
       logger.info('Starting cleanup of removed users');
 
-      configuration = new XWikiLDAPConfig(null);
-      XWikiLDAPConnection connector = new XWikiLDAPConnection(configuration);
+      XWikiLDAPConnection connector = new XWikiLDAPConnection(ldapConfig);
       connector.open(user, password, xcontext);
 
-      XWikiLDAPUtils ldapUtils = new XWikiLDAPUtils(connector, configuration)
-      ldapUtils.setBaseDN(configuration.getLDAPParam("ldap_base_DN", ""))
-      ldapUtils.setUidAttributeName(configuration.getLDAPParam("ldap_UID_attr", "cn"));
-      ldapUtils.setUserSearchFormatString(configuration.getLDAPParam("ldap_user_search_fmt", "({0}={1})"));
-
+      XWikiLDAPUtils ldapUtils = new XWikiLDAPUtils(connector, ldapConfig)
+      ldapUtils.setBaseDN(ldapConfig.getLDAPParam("ldap_base_DN", ""))
+      ldapUtils.setUidAttributeName(ldapConfig.getLDAPParam("ldap_UID_attr", "cn"));
+      ldapUtils.setUserSearchFormatString(ldapConfig.getLDAPParam("ldap_user_search_fmt", "({0}={1})"));
       try {
         services.query.xwql("from doc.object(XWiki.LDAPProfileClass) as ldap_profile").execute().each( {
           def userProfileDoc = xwiki.getDocument(it).getDocument()
@@ -879,7 +889,7 @@ if (config == null) {
           logger.debug("lookup by DN for [{}]", userDn)
           userObj = connector.searchLDAP(userDn, '(objectClass=*)', null, 0)
           if (userObj == null || userObj.isEmpty()) {
-            def searchQuery = configuration.getLDAPParam("ldap_user_search_fmt", "({0}={1})")
+            def searchQuery = ldapConfig.getLDAPParam("ldap_user_search_fmt", "({0}={1})")
             logger.debug("DN lookup failed; search instead for uid=[{}] with [{}]", userId, searchQuery)
             ldapUtils.setUserSearchFormatString(searchQuery)
             userObj = ldapUtils.searchUserAttributesByUid(userId, null)
@@ -895,6 +905,8 @@ if (config == null) {
             } else {
               deleteUser(it, config, logger)
             }
+          } else {
+            logger.debug('Skipping user [{}].', it);
           }
         })
       } finally {
