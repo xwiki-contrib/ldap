@@ -52,6 +52,7 @@ Scheduler.LDAP.OldUserCleanupJob_dryRun=Dry run
 Scheduler.LDAP.OldUserCleanupJob_shouldDisable=Should disable instead of delete
 Scheduler.LDAP.OldUserCleanupJob_activeAttribute=Active Attribute
 Scheduler.LDAP.OldUserCleanupJob_inactiveValue=Inactive Value
+Scheduler.LDAP.OldUserCleanupJob_removeExcludedGroups=Check included/excluded groups
 # hints
 org.xwiki.contrib.ldap.scheduler.LDAP.OldUserCleanupJob.ldapBindDn.hint=The DN or name of the user to bind to the LDAP when running the job.
 ## currently unused
@@ -69,6 +70,7 @@ org.xwiki.contrib.ldap.scheduler.LDAP.OldUserCleanupJob.dryRun.hint=Set this opt
 org.xwiki.contrib.ldap.scheduler.LDAP.OldUserCleanupJob.shouldDisable.hint=Set this option if you want the users to be disabled rather than deleted.
 org.xwiki.contrib.ldap.scheduler.LDAP.OldUserCleanupJob.activeAttribute.hint=The LDAP attribute that conveys whether an user is active or not. E.g. for Active Directory, the attribute is 'userAccountControl'.
 org.xwiki.contrib.ldap.scheduler.LDAP.OldUserCleanupJob.inactiveValue.hint=The value of the activeAttribute that determines that an user is inactive/disabled. E.g. in Active Directory, the value for the 'userAccountControl' attribute that says an user is inactive is '514'.
+org.xwiki.contrib.ldap.scheduler.LDAP.OldUserCleanupJob.removeExcludedGroups.hint=Set this option if the users that are part of the excluded groups OR are not part of the included groups should be deleted/disabled.
 # other
 org.xwiki.contrib.ldap.scheduler.LDAP.OldUserCleanupJob.jobname=Remove profile data for users no longer available in LDAP
 org.xwiki.contrib.ldap.scheduler.LDAP.OldUserCleanupJob.title=Old User Cleanup Job

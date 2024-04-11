@@ -117,6 +117,20 @@
       <validationRegExp/>
       <classType>com.xpn.xwiki.objects.classes.PasswordClass</classType>
     </ldapBindPass>
+    <removeExcludedGroups>
+      <customDisplay/>
+      <defaultValue/>
+      <disabled>0</disabled>
+      <displayFormType>select</displayFormType>
+      <displayType/>
+      <name>removeExcludedGroups</name>
+      <number>13</number>
+      <prettyName>removeExcludedGroups</prettyName>
+      <unmodifiable>0</unmodifiable>
+      <validationMessage/>
+      <validationRegExp/>
+      <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+    </removeExcludedGroups>
     <replaceAuthor>
       <customDisplay/>
       <defaultValue>1</defaultValue>
@@ -295,6 +309,20 @@
         <validationRegExp/>
         <classType>com.xpn.xwiki.objects.classes.PasswordClass</classType>
       </ldapBindPass>
+      <removeExcludedGroups>
+        <customDisplay/>
+        <defaultValue/>
+        <disabled>0</disabled>
+        <displayFormType>select</displayFormType>
+        <displayType/>
+        <name>removeExcludedGroups</name>
+        <number>13</number>
+        <prettyName>removeExcludedGroups</prettyName>
+        <unmodifiable>0</unmodifiable>
+        <validationMessage/>
+        <validationRegExp/>
+        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+      </removeExcludedGroups>
       <replaceAuthor>
         <customDisplay/>
         <defaultValue>1</defaultValue>
@@ -405,6 +433,9 @@
     </property>
     <property>
       <ldapBindPass/>
+    </property>
+    <property>
+      <removeExcludedGroups/>
     </property>
     <property>
       <replaceAuthor>1</replaceAuthor>
@@ -837,11 +868,54 @@ def getOrDefault(object, attribute, defaultValue) {
   return value
 }
 
+def shouldDelete(userDn, userId, ldapConfig, config, connector, ldapUtils, it, logger) {
+  if (userDn == null || userDn.isEmpty()) {
+    logger.debug("DN of user [{}] is empty.", it);
+    return true;
+  }
+
+  logger.debug("lookup by DN for [{}]", userDn);
+  def userObj = connector.searchLDAP(userDn, '(objectClass=*)', null, 0);
+
+  if (userObj == null || userObj.isEmpty()) {
+    def searchQuery = ldapConfig.getLDAPParam("ldap_user_search_fmt", "({0}={1})");
+    logger.debug("DN lookup failed; search instead for uid=[{}] with [{}]", userId, searchQuery);
+    ldapUtils.setUserSearchFormatString(searchQuery);
+    userObj = ldapUtils.searchUserAttributesByUid(userId, null);
+  }
+
+  if (userObj == null || userObj.isEmpty()) {
+    return true;
+  }
+
+  if (getOrDefault(config, 'removeExcludedGroups', 0)) {
+    def includedGroups = ldapConfig.getLDAPParam("ldap_user_group", "");
+    logger.debug("Checking whether the user is in the included groups [{}].", includedGroups);
+    if (!includedGroups.isEmpty() &amp;&amp; ldapUtils.isInGroup(userId, userDn, includedGroups, xcontext) == null) {
+      logger.debug("The user is not part of the included groups.");
+      return true;
+    }
+    def excludedGroups = ldapConfig.getLDAPParam("ldap_exclude_group", "");
+    logger.debug("Checking whether the user is in the excluded groups [{}].", excludedGroups);
+    if (!excludedGroups.isEmpty() &amp;&amp; ldapUtils.isInGroup(userId, userDn, excludedGroups, xcontext) != null) {
+      logger.debug("The user is part of the excluded groups.");
+      return true;
+    }
+  }
+  def activeAttribute = getOrDefault(config, 'activeAttribute', '');
+  def inactiveValue = getOrDefault(config, 'inactiveValue', '');
+  logger.debug("Checking if the user is disabled in LDAP. Must have attribute [{}={}].", activeAttribute, inactiveValue);
+  if (userObj.stream().anyMatch{it.name.equals(activeAttribute) &amp;&amp; it.value.equals(inactiveValue)}) {
+    logger.debug("The user is disabled in the LDAP server.");
+    return true;
+  }
+
+  return false;
+}
+
 def user
 def password
 def shouldDisable
-def activeAttribute
-def inactiveValue
 def config = doc.getObject(doc.getFullName())
 if (config == null) {
   logger.info('Could not run update; configuration is missing')
@@ -862,8 +936,6 @@ if (config == null) {
     password = getOrDefault(config, 'ldapBindPass', ldapConfig.getLDAPParam("ldap_bind_pass",""))
     logger.debug('Using the following user to connect to ldap [{}].', user);
     shouldDisable = getOrDefault(config, 'shouldDisable', 0)
-    activeAttribute = getOrDefault(config, 'activeAttribute', '')
-    inactiveValue = getOrDefault(config, 'inactiveValue', '')
     setupOk = !(!user || !password)
 
     if (!setupOk) {
@@ -885,21 +957,7 @@ if (config == null) {
           logger.debug("check user [{}]", userProfileDoc.getDocumentReference().getName())
           def userDn = userProfileDoc.getObject('XWiki.LDAPProfileClass').getStringValue('dn')
           def userId = userProfileDoc.getObject('XWiki.LDAPProfileClass').getStringValue('uid')
-
-          def userObj = null;
-          if (userDn != null &amp;&amp; !userDn.isEmpty()) {
-            logger.debug("lookup by DN for [{}]", userDn)
-            userObj = connector.searchLDAP(userDn, '(objectClass=*)', null, 0)
-            if (userObj == null || userObj.isEmpty()) {
-              def searchQuery = ldapConfig.getLDAPParam("ldap_user_search_fmt", "({0}={1})")
-              logger.debug("DN lookup failed; search instead for uid=[{}] with [{}]", userId, searchQuery)
-              ldapUtils.setUserSearchFormatString(searchQuery)
-              userObj = ldapUtils.searchUserAttributesByUid(userId, null)
-            }
-          } else {
-            logger.debug("DN of user [{}] is empty.", it)
-          }
-          if (userObj == null || userObj.isEmpty() || userObj.stream().anyMatch{it.name.equals(activeAttribute) &amp;&amp; it.value.equals(inactiveValue)}) {
+          if (shouldDelete(userDn, userId, ldapConfig, config, connector, ldapUtils, it, logger)) {
             if (config.getValue('dryRun') != 0) {
               logger.info("the user [{}] is no longer in LDAP; we would delete it", it)
             } else {
