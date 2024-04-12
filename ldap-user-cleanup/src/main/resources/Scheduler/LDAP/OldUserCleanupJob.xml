@@ -875,6 +875,8 @@ def shouldDelete(userDn, userId, ldapConfig, config, connector, ldapUtils, it, l
   def userObj = null;
   if (userDn == null || userDn.isEmpty()) {
     logger.debug("DN of user [{}] is empty.", it);
+    // Setting the userDn to null in case it is an empty string, otherwise the removeExcludedGroups checks would fail.
+    userDn = null;
   } else {
     logger.debug("lookup by DN for [{}]", userDn);
     userObj = connector.searchLDAP(userDn, '(objectClass=*)', null, 0);
