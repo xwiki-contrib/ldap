@@ -872,13 +872,13 @@ def getOrDefault(object, attribute, defaultValue) {
 }
 
 def shouldDelete(userDn, userId, ldapConfig, config, connector, ldapUtils, it, logger) {
+  def userObj = null;
   if (userDn == null || userDn.isEmpty()) {
     logger.debug("DN of user [{}] is empty.", it);
-    return true;
+  } else {
+    logger.debug("lookup by DN for [{}]", userDn);
+    userObj = connector.searchLDAP(userDn, '(objectClass=*)', null, 0);
   }
-
-  logger.debug("lookup by DN for [{}]", userDn);
-  def userObj = connector.searchLDAP(userDn, '(objectClass=*)', null, 0);
 
   if (userObj == null || userObj.isEmpty()) {
     def searchQuery = ldapConfig.getLDAPParam("ldap_user_search_fmt", "({0}={1})");
