@@ -898,13 +898,13 @@ def shouldDelete(userDn, userId, ldapConfig, config, connector, ldapUtils, it, l
   if (getOrDefault(config, 'removeExcludedGroups', 0)) {
     def includedGroups = ldapConfig.getLDAPParam("ldap_user_group", "");
     logger.debug("Checking whether the user is in the included groups [{}].", includedGroups);
-    if (!includedGroups.isEmpty() &amp;&amp; ldapUtils.isInGroup(userId, userDn, includedGroups, xcontext) == null) {
+    if (!includedGroups.isEmpty() &amp;&amp; ldapUtils.isInGroup(userId, null, includedGroups, xcontext) == null) {
       logger.debug("The user is not part of the included groups.");
       return true;
     }
     def excludedGroups = ldapConfig.getLDAPParam("ldap_exclude_group", "");
     logger.debug("Checking whether the user is in the excluded groups [{}].", excludedGroups);
-    if (!excludedGroups.isEmpty() &amp;&amp; ldapUtils.isInGroup(userId, userDn, excludedGroups, xcontext) != null) {
+    if (!excludedGroups.isEmpty() &amp;&amp; ldapUtils.isInGroup(userId, null, excludedGroups, xcontext) != null) {
       logger.debug("The user is part of the excluded groups.");
       return true;
     }
