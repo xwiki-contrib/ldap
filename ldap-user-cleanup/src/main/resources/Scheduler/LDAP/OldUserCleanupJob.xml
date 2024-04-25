@@ -794,14 +794,16 @@ def adjustDocumentAuthorAndComments(userReference, replacementUserRef, config, l
 def disableUser(userName, config, logger) {
   try {
     def userRef = services.model.resolveDocument(userName)
-    if (config.getValue('dryRun') != 0) {
-      logger.info("Would disable the user [${userRef}]")
-    } else {
-      logger.info("Disabling the user [${userRef}]")
-      def user = xwiki.getUser(userRef);
-      if (!user.isDisabled()) {
+    def user = xwiki.getUser(userRef);
+    if (!user.isDisabled()) {
+      if (config.getValue('dryRun') != 0) {
+        logger.info("Would disable the user [${userRef}]")
+      } else {
+        logger.info("Disabling the user [${userRef}]")
         user.setDisabledStatus(true);
       }
+    } else {
+      logger.debug("User [${userRef}] is already disabled")
     }
   } catch (Exception e) {
     if (config.getValue('dryRun') != 0) {
