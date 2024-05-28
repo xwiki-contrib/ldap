@@ -249,7 +249,7 @@ public class XWikiLDAPUtilsTest extends AbstractLDAPTestCase
         Map<String, String> wrongGroupMembers =
             this.ldapUtils.getGroupMembers("cn=wronggroupdn,ou=people,o=sevenSeas", this.mocker.getXWikiContext());
 
-        assertNull("Should return null if group does not exists [" + wrongGroupMembers + "]", wrongGroupMembers);
+        assertNull("Should return null if group does not exist [" + wrongGroupMembers + "]", wrongGroupMembers);
     }
 
     /**
