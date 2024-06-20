@@ -1403,23 +1403,22 @@ public class XWikiLDAPUtils
         BaseObject userObj = userProfile.getXObject(userClass.getDocumentReference());
 
         // Get current user avatar
-        String userAvatar = userObj.getStringValue("avatar");
-        XWikiAttachment currentPhoto = null;
-        if (userAvatar != null) {
-            currentPhoto = userProfile.getAttachment(userAvatar);
+        String userAvatarName = userObj.getStringValue("avatar");
+        XWikiAttachment userAvatarAttachment = null;
+        if (StringUtils.isNotEmpty(userAvatarName)) {
+            userAvatarAttachment = userProfile.getAttachment(userAvatarName);
         }
 
         // Get properties
-        String photoAttachmentName =
+        String ldapBaseAvatarName =
             this.configuration.getLDAPParam(XWikiLDAPConfig.PREF_LDAP_PHOTO_ATTACHMENT_NAME, "ldapPhoto");
 
         // Proceed only if any of conditions are true:
         // 1. User do not have avatar currently
-        // 2. User have avatar and avatar file name is equals to PREF_LDAP_PHOTO_ATTACHMENT_NAME
-        if (StringUtils.isEmpty(userAvatar) || photoAttachmentName.equals(FilenameUtils.getBaseName(userAvatar))
-            || currentPhoto == null) {
+        // 2. User have avatar and avatar file name is equals to the configured name
+        if (userAvatarAttachment == null || ldapBaseAvatarName.equals(FilenameUtils.getBaseName(userAvatarName))) {
             // Obtain photo from LDAP
-            byte[] ldapPhoto = null;
+            byte[] ldapPhotoBytes = null;
             if (ldapAttributes != null) {
                 String ldapPhotoAttribute = this.configuration.getLDAPParam(XWikiLDAPConfig.PREF_LDAP_PHOTO_ATTRIBUTE,
                     XWikiLDAPConfig.DEFAULT_PHOTO_ATTRIBUTE);
@@ -1428,54 +1427,57 @@ public class XWikiLDAPUtils
                 // Let's iterate over array and search ldapPhotoAttribute
                 for (XWikiLDAPSearchAttribute attribute : ldapAttributes) {
                     if (attribute.name.equals(ldapPhotoAttribute)) {
-                        ldapPhoto = attribute.byteValue;
+                        ldapPhotoBytes = attribute.byteValue;
                     }
                 }
             }
 
-            if (ldapPhoto != null) {
-                ByteArrayInputStream ldapPhotoInputStream = new ByteArrayInputStream(ldapPhoto);
+            if (ldapPhotoBytes != null) {
+                ByteArrayInputStream ldapPhotoStream = new ByteArrayInputStream(ldapPhotoBytes);
                 // Try to guess image type
-                String ldapPhotoType = guessImageType(ldapPhotoInputStream);
-                ldapPhotoInputStream.reset();
+                String ldapAvatarType = guessImageType(ldapPhotoStream);
+                ldapPhotoStream.reset();
 
-                if (ldapPhotoType != null) {
-                    String photoAttachmentFullName = photoAttachmentName + "." + ldapPhotoType.toLowerCase();
+                if (ldapAvatarType != null) {
+                    String ldapAvatarName = ldapBaseAvatarName + "." + ldapAvatarType.toLowerCase();
 
-                    if (!StringUtils.isEmpty(userAvatar) && currentPhoto != null) {
+                    if (ldapAvatarName.equals(userAvatarName) && userAvatarAttachment != null) {
                         try {
                             // Compare current xwiki avatar and LDAP photo
-                            if (!IOUtils.contentEquals(currentPhoto.getContentInputStream(context),
-                                ldapPhotoInputStream)) {
-                                ldapPhotoInputStream.reset();
-
-                                // Store photo
-                                return addAvatarToProfile(userProfile, context, ldapPhotoInputStream,
-                                    photoAttachmentFullName);
+                            if (!isEqual(ldapPhotoStream, userAvatarAttachment, context)) {
+                                // Update the avatar attachment
+                                return addAvatarToProfile(userProfile, context, ldapPhotoStream, ldapAvatarName);
                             }
                         } catch (IOException ex) {
                             LOGGER.error(ex.getMessage());
                         }
-                    } else if (addAvatarToProfile(userProfile, context, ldapPhotoInputStream,
-                        photoAttachmentFullName)) {
-                        PropertyClass avatarProperty = (PropertyClass) userClass.getField("avatar");
-                        userObj.safeput("avatar", avatarProperty.fromString(photoAttachmentFullName));
+                    } else if (addAvatarToProfile(userProfile, context, ldapPhotoStream, ldapAvatarName)) {
+                        userObj.setStringValue("avatar", ldapAvatarName);
 
                         return true;
                     }
                 } else {
                     LOGGER.info("Unable to determine LDAP photo image type.");
                 }
-            } else if (currentPhoto != null) {
+            } else if (userAvatarAttachment != null) {
                 // Remove current avatar
-                PropertyClass avatarProperty = (PropertyClass) userClass.getField("avatar");
-                userObj.safeput("avatar", avatarProperty.fromString(""));
+                userObj.setStringValue("avatar", "");
 
                 return true;
             }
         }
 
         return false;
+    }
+
+    boolean isEqual(ByteArrayInputStream ldapPhotoStream, XWikiAttachment userAvatarAttachment, XWikiContext xcontext)
+        throws IOException, XWikiException
+    {
+        try (InputStream userAvatarStream = userAvatarAttachment.getContentInputStream(xcontext)) {
+            return IOUtils.contentEquals(userAvatarStream, ldapPhotoStream);
+        } finally {
+            ldapPhotoStream.reset();
+        }
     }
 
     /**
