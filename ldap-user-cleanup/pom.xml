@@ -28,7 +28,6 @@
   <artifactId>ldap-user-cleanup</artifactId>
   <packaging>xar</packaging>
   <name>LDAP - remove old users utility</name>
-  <version>9.15.6-SNAPSHOT</version>
   <description>In case users get deleted from LDAP, this application removes their XWiki profile pages and transfers ownership of their pages to an anonymous account.</description>
   <properties>
     <xwiki.extension.name>LDAP user cleanup</xwiki.extension.name>
