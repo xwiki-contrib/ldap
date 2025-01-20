@@ -1555,10 +1555,13 @@ public class XWikiLDAPUtils
 
             BaseClass groupClass = context.getWiki().getGroupClass(context);
 
-            // Get document representing group
-            XWikiDocument groupDoc = context.getWiki().getDocument(groupName, context);
+            synchronized (this) {
+                // Get document representing group
+                XWikiDocument groupDoc = context.getWiki().getDocument(groupName, context);
 
-            synchronized (groupDoc) {
+                // Clone the cached group document to avoid messing with other threads
+                groupDoc = groupDoc.clone();
+
                 // Make extra sure the group cannot contain duplicate (even if this method is not supposed to be called
                 // in this case)
                 List<BaseObject> xobjects = groupDoc.getXObjects(groupClass.getDocumentReference());
@@ -1610,10 +1613,13 @@ public class XWikiLDAPUtils
         try {
             BaseClass groupClass = context.getWiki().getGroupClass(context);
 
-            // Get the XWiki document holding the objects comprising the group membership list
-            XWikiDocument groupDoc = context.getWiki().getDocument(groupName, context);
+            synchronized (this) {
+                // Get the XWiki document holding the objects comprising the group membership list
+                XWikiDocument groupDoc = context.getWiki().getDocument(groupName, context);
 
-            synchronized (groupDoc) {
+                // Clone the cached group document to avoid messing with other threads
+                groupDoc = groupDoc.clone();
+
                 // Get and remove the specific group membership object for the user
                 BaseObject groupObj =
                     groupDoc.getXObject(groupClass.getDocumentReference(), XWIKI_GROUP_MEMBERFIELD, xwikiUserName);
