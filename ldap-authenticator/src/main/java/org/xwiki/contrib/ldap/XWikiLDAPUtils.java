@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -1119,13 +1120,13 @@ public class XWikiLDAPUtils
             }
 
             if (userProfile.isNew()) {
-                LOGGER.debug("Creating new XWiki user based on LDAP attribues located at [{}]", ldapDn);
+                LOGGER.debug("Creating new XWiki user based on LDAP attributes located at [{}]", ldapDn);
 
                 createUserFromLDAP(userProfile, attributes, ldapDn, authInput, context);
 
                 LOGGER.debug("New XWiki user created: [{}]", userProfile.getDocumentReference());
             } else {
-                LOGGER.debug("Updating existing user with LDAP attribues located at [{}]", ldapDn);
+                LOGGER.debug("Updating existing user with LDAP attributes located at [{}]", ldapDn);
 
                 try {
                     updateUserFromLDAP(userProfile, attributes, ldapDn, authInput, context);
@@ -1255,6 +1256,7 @@ public class XWikiLDAPUtils
 
         Map<String, Object> map = new HashMap<>();
         if (searchAttributes != null) {
+            Set<String> missingAttrs = new HashSet<>(userMappings.values());
             for (XWikiLDAPSearchAttribute lattr : searchAttributes) {
                 String lval = lattr.value;
                 String xattr = userMappings.get(lattr.name.toLowerCase());
@@ -1263,24 +1265,34 @@ public class XWikiLDAPUtils
                     continue;
                 }
 
-                PropertyClass pclass = (PropertyClass) userClass.get(xattr);
-
-                if (pclass != null) {
-                    if (pclass instanceof ListClass) {
-                        Object mapValue = map.get(xattr);
-                        if (mapValue == null) {
-                            mapValue = new ArrayList<>();
-                            map.put(xattr, mapValue);
-                        }
-                        ((List) mapValue).add(lval);
-                    } else {
-                        map.put(xattr, lval);
-                    }
-                }
+                putAttributeToMap(userClass, map, xattr, lval);
+                missingAttrs.remove(xattr);
+            }
+            for (String missingAttr : missingAttrs) {
+                putAttributeToMap(userClass, map, missingAttr, "");
             }
         }
 
         return map;
+    }
+
+    private void putAttributeToMap(BaseClass userClass, Map<String, Object> map,
+        String name, String value)
+    {
+        PropertyClass pclass = (PropertyClass) userClass.get(name);
+
+        if (pclass != null) {
+            if (pclass instanceof ListClass) {
+                Object mapValue = map.get(name);
+                if (mapValue == null) {
+                    mapValue = new ArrayList<>();
+                    map.put(name, mapValue);
+                }
+                ((List) mapValue).add(value);
+            } else {
+                map.put(name, value);
+            }
+        }
     }
 
     /**
