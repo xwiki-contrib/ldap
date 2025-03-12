@@ -515,7 +515,8 @@ public class XWikiLDAPConnection
      *            <li>SCOPE_ONE - searches only entries under the base DN
      *            <li>SCOPE_SUB - searches the base DN and all entries within its subtree
      *            </ul>
-     * @return the found LDAP attributes.
+     * @return the found LDAP attributes. If nothing was found, an empty list is returned. If an exception is thrown,
+     *     null is returned.
      */
     public List<XWikiLDAPSearchAttribute> searchLDAP(String baseDN, String filter, String[] attr, int ldapScope)
     {
