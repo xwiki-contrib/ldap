@@ -874,7 +874,7 @@ def getOrDefault(object, attribute, defaultValue) {
 }
 
 def shouldDelete(userDn, userId, ldapConfig, config, connector, ldapUtils, it, logger) {
-  def userObj = null;
+  def userObj = [];
   if (userDn == null || userDn.isEmpty()) {
     logger.debug("DN of user [{}] is empty.", it);
     // Setting the userDn to null in case it is an empty string, otherwise the removeExcludedGroups checks would fail.
@@ -883,7 +883,10 @@ def shouldDelete(userDn, userId, ldapConfig, config, connector, ldapUtils, it, l
     logger.debug("lookup by DN for [{}]", userDn);
     userObj = connector.searchLDAP(userDn, '(objectClass=*)', null, 0);
   }
-
+  if (userObj == null) {
+    logger.warn("There was an error when trying to search for the user [{}]. The user won't be disabled/deleted.");
+    return false;
+  }
   if (userObj == null || userObj.isEmpty()) {
     def searchQuery = ldapConfig.getLDAPParam("ldap_user_search_fmt", "({0}={1})");
     logger.debug("DN lookup failed; search instead for uid=[{}] with [{}]", userId, searchQuery);
@@ -891,7 +894,11 @@ def shouldDelete(userDn, userId, ldapConfig, config, connector, ldapUtils, it, l
     userObj = ldapUtils.searchUserAttributesByUid(userId, null);
   }
 
-  if (userObj == null || userObj.isEmpty()) {
+  if (userObj == null) {
+    logger.warn("There was an error when trying to search for the user [{}]. The user won't be disabled/deleted.");
+    return false;
+  }
+  else if (userObj.isEmpty()) {
     return true;
   }
 

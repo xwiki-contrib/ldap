@@ -1109,7 +1109,7 @@ public class XWikiLDAPUtils
                     getConnection().searchLDAP(ldapDn, null, getAttributeNameTable(context), LDAPConnection.SCOPE_BASE);
             }
 
-            if (attributes == null) {
+            if (attributes == null || attributes.isEmpty()) {
                 LOGGER.error("Can't find any attributes for user [{}]", ldapDn);
             }
 

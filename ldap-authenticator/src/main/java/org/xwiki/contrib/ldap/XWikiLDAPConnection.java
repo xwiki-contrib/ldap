@@ -24,6 +24,7 @@ import java.security.Provider;
 import java.security.Security;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -523,7 +524,7 @@ public class XWikiLDAPConnection
         // filter return all attributes return attrs and values time out value
         try (PagedLDAPSearchResults searchResults = searchPaginated(baseDN, ldapScope, filter, attr, false)) {
             if (!searchResults.hasMore()) {
-                return null;
+                return Collections.emptyList();
             }
 
             LDAPEntry nextEntry = searchResults.next();
