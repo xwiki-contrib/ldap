@@ -24,6 +24,7 @@ import java.security.Provider;
 import java.security.Security;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -514,7 +515,8 @@ public class XWikiLDAPConnection
      *            <li>SCOPE_ONE - searches only entries under the base DN
      *            <li>SCOPE_SUB - searches the base DN and all entries within its subtree
      *            </ul>
-     * @return the found LDAP attributes.
+     * @return the found LDAP attributes. If nothing was found, an empty list is returned. If an exception is thrown,
+     *     null is returned.
      */
     public List<XWikiLDAPSearchAttribute> searchLDAP(String baseDN, String filter, String[] attr, int ldapScope)
     {
@@ -523,7 +525,7 @@ public class XWikiLDAPConnection
         // filter return all attributes return attrs and values time out value
         try (PagedLDAPSearchResults searchResults = searchPaginated(baseDN, ldapScope, filter, attr, false)) {
             if (!searchResults.hasMore()) {
-                return null;
+                return Collections.emptyList();
             }
 
             LDAPEntry nextEntry = searchResults.next();
