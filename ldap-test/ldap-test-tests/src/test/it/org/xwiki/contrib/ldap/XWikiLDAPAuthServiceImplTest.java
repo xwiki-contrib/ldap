@@ -191,7 +191,7 @@ public class XWikiLDAPAuthServiceImplTest extends AbstractLDAPTestCase
     private void bindMockQuery(QueryManager queryMock, String prop, Query mockQuery) throws QueryException
     {
         when(queryMock.createQuery(
-            ", BaseObject as ldap, " + ("dn".equals(prop)? "LongStringProperty" : "StringProperty") + " as dn where doc.fullName = ldap.name"
+            ", BaseObject as ldap, " + ("dn".equals(prop) ? "LargeStringProperty" : "StringProperty") + " as dn where doc.fullName = ldap.name"
             + " and ldap.className = 'XWiki.LDAPProfileClass' and ldap.id = dn.id.id and dn.id.name = '"
             + prop + "' and lower(str(dn.value)) = :value", Query.HQL)).thenReturn(mockQuery);
     }
