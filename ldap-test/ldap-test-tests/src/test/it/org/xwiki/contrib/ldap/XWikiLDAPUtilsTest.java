@@ -140,7 +140,7 @@ public class XWikiLDAPUtilsTest extends AbstractLDAPTestCase
     public void testSearchUserAttributesByUid()
     {
         List<XWikiLDAPSearchAttribute> attributes =
-            this.ldapUtils.searchUserAttributesByUid("Moultrie Crystal", new String[] { "dn", "cn" });
+            this.ldapUtils.searchUserAttributesByUid("Moultrie Crystal", new String[] {"dn", "cn"});
 
         Map<String, String> mexpected = new HashMap<String, String>();
         mexpected.put("dn", "cn=Moultrie Crystal,ou=people,o=sevenSeas");

@@ -31,6 +31,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -47,6 +48,8 @@ import org.xwiki.cache.Cache;
 import org.xwiki.cache.CacheException;
 import org.xwiki.cache.config.CacheConfiguration;
 import org.xwiki.contrib.ldap.internal.LDAPGroupsCache;
+import org.xwiki.contrib.ldap.internal.RangeLDAPAttribute;
+import org.xwiki.contrib.ldap.internal.RangeLDAPAttribute.Range;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.rendering.syntax.Syntax;
 
@@ -143,6 +146,98 @@ public class XWikiLDAPUtils
      * @see #isResolveSubgroups()
      */
     private boolean resolveSubgroups = true;
+
+    class RangeLDAPAttributeEnumeration implements Enumeration<String>
+    {
+        private final String dn;
+
+        private final String baseAttributeName;
+
+        private Enumeration<String> currentValues;
+
+        private Range currentRange;
+
+        private boolean lastRange;
+
+        /**
+         * @param firstAttribute the first attribute
+         */
+        public RangeLDAPAttributeEnumeration(String dn, RangeLDAPAttribute firstAttribute)
+        {
+            this.dn = dn;
+            this.baseAttributeName = firstAttribute.getAttribute().getBaseName();
+
+            this.currentValues = firstAttribute.getAttribute().getStringValues();
+            this.currentRange = firstAttribute.getRange();
+            this.lastRange = false;
+        }
+
+        @Override
+        public boolean hasMoreElements()
+        {
+            if (this.currentValues != null) {
+                if (this.currentValues.hasMoreElements()) {
+                    return true;
+                }
+
+                if (!this.lastRange) {
+                    this.currentValues = null;
+                    this.lastRange = true;
+
+                    try {
+                        long nextRangeMin = this.currentRange.getMax() + 1;
+
+                        StringBuilder newRange = new StringBuilder(this.baseAttributeName);
+                        newRange.append(';');
+                        newRange.append(Range.serialize(new Range(nextRangeMin, null)));
+
+                        String fieldName = newRange.toString();
+
+                        LOGGER.debug("Search for values with member [{}] in entry [{}].", fieldName, this.dn);
+
+                        LDAPSearchResults results = getConnection().getConnection().search(this.dn,
+                            LDAPConnection.SCOPE_BASE, null, new String[] {fieldName}, false);
+
+                        if (results.hasMore()) {
+                            RangeLDAPAttribute rangeAttribute =
+                                getRangeLDAPAttribute(this.baseAttributeName, nextRangeMin, results.next());
+
+                            if (rangeAttribute != null) {
+                                this.currentValues = rangeAttribute.getAttribute().getStringValues();
+                                this.currentRange = rangeAttribute.getRange();
+
+                                LOGGER.debug("  New range found : {}", this.currentRange);
+
+                                if (this.currentRange.getMax() != null) {
+                                    LOGGER.debug("    It's not the last range");
+
+                                    // There will be more
+                                    this.lastRange = false;
+                                }
+
+                                return true;
+                            }
+                        }
+                    } catch (LDAPException e) {
+                        LOGGER.debug("Failed to retrieve next batch of values", e);
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        @Override
+        public String nextElement()
+        {
+            if (hasMoreElements()) {
+                return this.currentValues.nextElement();
+            }
+
+            throw new NoSuchElementException();
+        }
+
+    }
 
     /**
      * Create an instance of {@link XWikiLDAPUtils}.
@@ -417,9 +512,9 @@ public class XWikiLDAPUtils
         List<String> subgroups, XWikiContext context)
     {
         for (String memberField : getGroupMemberFields()) {
-            LDAPAttribute attribute = ldapEntry.getAttribute(memberField);
-            if (attribute != null) {
-                Enumeration<String> values = attribute.getStringValues();
+            Enumeration<String> values = getStringValues(memberField, ldapEntry);
+
+            if (values != null) {
                 while (values.hasMoreElements()) {
                     String member = values.nextElement();
 
@@ -433,6 +528,65 @@ public class XWikiLDAPUtils
                 }
             }
         }
+    }
+
+    private Enumeration<String> getStringValues(String baseName, LDAPEntry ldapEntry)
+    {
+        Enumeration<String> results = null;
+
+        LDAPAttribute attribute = ldapEntry.getAttribute(baseName);
+        if (attribute != null) {
+            results = attribute.getStringValues();
+
+            if (results.hasMoreElements()) {
+                return results;
+            }
+        }
+
+        LOGGER.debug("Could not find any value for field [{}]."
+            + " Trying MS to find the same field but associated to an MS range.", baseName);
+
+        // Check if there is a special Microsoft range based attribute
+        RangeLDAPAttribute rangeAttribute = getRangeLDAPAttribute(baseName, 0, ldapEntry);
+
+        if (rangeAttribute != null) {
+            results = new RangeLDAPAttributeEnumeration(ldapEntry.getDN(), rangeAttribute);
+        }
+
+        return results;
+    }
+
+    private RangeLDAPAttribute getRangeLDAPAttribute(String baseName, long rangeMin, LDAPEntry ldapEntry)
+    {
+        // Microsoft came up with their own range system to field values, meaning that if there are more than some
+        // configured maximum on server side, the result associated to the name will be empty and another result
+        // (associated with a specific range will be provided on another attribute).
+        // So in case we are in the case of Active Directory, we have to make sure the request attribute is not some
+        // range limited one.
+        // See
+        // https://learn.microsoft.com/en-us/previous-versions/windows/desktop/ldap/searching-using-range-retrieval
+        // for more details
+        for (LDAPAttribute attribute : (Set<LDAPAttribute>) ldapEntry.getAttributeSet()) {
+            if (attribute.getBaseName().equals(baseName)) {
+                LOGGER.debug("    - attribute [{}] ([{}])", attribute.getName(), attribute.getBaseName());
+
+                if (attribute.size() > 0) {
+                    Range range = RangeLDAPAttribute.Range.parse(attribute);
+
+                    LOGGER.debug("       -> {} values (range={}, rangeMin={})", attribute.size(), range, rangeMin);
+
+                    if (range != null && range.getMin() == rangeMin) {
+                        LOGGER.debug("       -> returning new range");
+
+                        return new RangeLDAPAttribute(attribute, range);
+                    }
+                } else {
+                    LOGGER.debug("       -> no value");
+                }
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -849,7 +1003,7 @@ public class XWikiLDAPUtils
             throw new XWikiException("Unknown error with cache", e);
         }
 
-        LOGGER.debug("Found group [{}] members [{}]", groupDN, groupMembers);
+        LOGGER.debug("Found group [{}] with [{}] members [{}]", groupDN, groupMembers.size(), groupMembers);
 
         return groupMembers;
     }
