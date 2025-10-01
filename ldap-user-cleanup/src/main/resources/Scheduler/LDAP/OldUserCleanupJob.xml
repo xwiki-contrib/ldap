@@ -881,13 +881,17 @@ def shouldDelete(userDn, userId, ldapConfig, config, connector, ldapUtils, it, l
     userDn = null;
   } else {
     logger.debug("lookup by DN for [{}]", userDn);
+    // here we get back a null on ldap server errors, including if there is no such user at the given dn.
+    // (as it is done via DN lookup, a missing object at this dn counts as an error
+    // and is not distinguisable from any other server error)
+    // this might happen, if the user dn got renamed (i.e. moved to another OU)
+    // or simply deleted.
     userObj = connector.searchLDAP(userDn, '(objectClass=*)', null, 0);
   }
-  if (userObj == null) {
-    logger.warn("There was an error when trying to search for the user [{}]. The user won't be disabled/deleted.");
-    return false;
-  }
   if (userObj == null || userObj.isEmpty()) {
+    // second try: find it by its uid
+    // this also returns null on failure, but it returns an empty result if the user is not found,
+    // allowing to distinguish between cases of ldap server error and removed user
     def searchQuery = ldapConfig.getLDAPParam("ldap_user_search_fmt", "({0}={1})");
     logger.debug("DN lookup failed; search instead for uid=[{}] with [{}]", userId, searchQuery);
     ldapUtils.setUserSearchFormatString(searchQuery);
@@ -895,7 +899,7 @@ def shouldDelete(userDn, userId, ldapConfig, config, connector, ldapUtils, it, l
   }
 
   if (userObj == null) {
-    logger.warn("There was an error when trying to search for the user [{}]. The user won't be disabled/deleted.");
+    logger.warn("There was an error when trying to search for the user [{}] with dn [{}]. The user won't be disabled/deleted.", userId, userDn);
     return false;
   }
   else if (userObj.isEmpty()) {
