@@ -49,4 +49,11 @@ public class RangeLDAPAttributeTest
         assertEquals(new Range(1L, 2L), RangeLDAPAttribute.Range.parse(new LDAPAttribute("attribute;range=1-2")));
         assertEquals(new Range(1L, null), RangeLDAPAttribute.Range.parse(new LDAPAttribute("attribute;range=1-*")));
     }
+
+    @Test
+    public void rangeSerialize()
+    {
+        assertEquals("range=1500-*", RangeLDAPAttribute.Range.serialize(new Range(1500L, null)));
+        assertEquals("range=1500-42", RangeLDAPAttribute.Range.serialize(new Range(1500L, 42L)));
+    }
 }
