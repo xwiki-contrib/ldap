@@ -1003,7 +1003,11 @@ public class XWikiLDAPUtils
             throw new XWikiException("Unknown error with cache", e);
         }
 
-        LOGGER.debug("Found group [{}] with [{}] members [{}]", groupDN, groupMembers.size(), groupMembers);
+        if (groupMembers != null) {
+            LOGGER.debug("Found group [{}] with [{}] members [{}]", groupDN, groupMembers.size(), groupMembers);
+        } else {
+            LOGGER.debug("No group corresponding to [{}] could be found", groupDN);
+        }
 
         return groupMembers;
     }
