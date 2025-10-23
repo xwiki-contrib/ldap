@@ -108,9 +108,8 @@ class LDAPOldUserCleanup {
       if (replaceContentAuthor) {
         queryStringParts.add('(doc.contentAuthor = :user OR doc.contentAuthor = :fulluser)')
       }
-      queryString += String.join(" OR ", queryStringParts)
+      queryString += '(' + String.join(' OR ', queryStringParts) + ') AND doc.fullName &lt;&gt; :user'
       queryString = fromClause + queryString
-      logger.info("&gt;&gt;&gt;&gt; run database query [${queryString}] with values [${arguments}]")
 
       services.query.xwql(queryString).bindValues(arguments).addFilter('language').execute().each( { someDocRes -&gt;
         def someDocName = someDocRes[0]
@@ -182,7 +181,6 @@ class LDAPOldUserCleanup {
             someDoc.setMetaDataDirty(false)
             someDoc.setContentDirty(false)
             xwiki.saveDocument(someDoc, "Replaced user [${userName}] with user [${replacementUserName}]", true, xcontext)
-            // xwiki.getHibernateStore().saveXWikiDoc(someDoc, xcontext)
           }
         }
 
@@ -214,7 +212,7 @@ class LDAPOldUserCleanup {
             logger.debug("would save comments in document [$someDocName] with replacement user [${replacementUserRef}]")
           } else {
             logger.debug("save comments in document [$someDocName] with replacement user [${replacementUserRef}]")
-            xwiki.saveDocument(someDoc, "Replaced user [${userName}] with user [${replacementUserName}]", true, xcontext)
+            xwiki.saveDocument(someDoc, "Replaced user [${userName}] with user [${replacementUserName}] in comments", true, xcontext)
           }
         }
 
@@ -373,10 +371,8 @@ class LDAPOldUserCleanup {
     def doc = xwiki.getDocument(document.getFullName(), xcontext)
     def thisDoc = xwiki.getDocument('Scheduler.LDAP.OldUserCleanupJobCode', xcontext)
 
-    logger.info('running scheduler job {} in version [{}]', doc.getTitle(), doc.getVersion())
-    logger.info('code is in version [{}]', thisDoc.getVersion())
-    logger.warn('running scheduler doc {} aka document [{}] with name [{}]', doc.getClass(), document.getClass(), doc.getFullName())
-    logger.warn('xcontext is [{}] and xwiki [{}]', xcontext.getClass(), xwiki.getClass())
+    logger.debug('running scheduler job {} in version [{}]', doc.getTitle(), doc.getVersion())
+    logger.debug('code is in version [{}]', thisDoc.getVersion())
 
     this.config = doc.getXObject(doc.getDocumentReference())
     this.hasMetaAuthors = doc.metaClass.respondsTo(doc, 'getAuthors')
