@@ -46,11 +46,6 @@
       <artifactId>ldap-api</artifactId>
       <version>${project.version}</version>
     </dependency>
-    <dependency>
-      <groupId>commons-lang</groupId>
-      <artifactId>commons-lang</artifactId>
-      <scope>compile</scope>
-    </dependency>
 
     <!-- Test dependencies -->
     <dependency>
@@ -85,6 +80,17 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+  <dependencyManagement>
+    <dependencies>
+      <!-- Required by dependanties in this version of XWiki -->
+      <dependency>
+        <groupId>commons-lang</groupId>
+        <artifactId>commons-lang</artifactId>
+        <version>2.6</version>
+        <scope>compile</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
   <build>
     <testSourceDirectory>src/test/it</testSourceDirectory>
     <plugins>
