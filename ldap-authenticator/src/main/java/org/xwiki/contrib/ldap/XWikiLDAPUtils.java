@@ -1449,7 +1449,7 @@ public class XWikiLDAPUtils
                     map.put(name, mapValue);
                 }
                 ((List) mapValue).add(value);
-            } else if (pclass instanceof StringClass && !(pclass instanceof TextAreaClass)) {
+            } else if (pclass instanceof StringClass && !(pclass instanceof TextAreaClass) && value.length() > 768) {
                 LOGGER.warn(
                     "The value of the attribute [{}] is longer than the supported size for a xwiki string property. "
                         + "The imported value was trimmed.",
