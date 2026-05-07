@@ -20,7 +20,7 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 -->
 
-<xwikidoc version="1.6" reference="Scheduler.LDAP.OldUserCleanupJobCode" locale="">
+<xwikidoc version="1.3" reference="Scheduler.LDAP.OldUserCleanupJobCode" locale="">
   <web>Scheduler.LDAP</web>
   <name>OldUserCleanupJobCode</name>
   <language/>
@@ -29,7 +29,6 @@
   <creator>xwiki:XWiki.Admin</creator>
   <parent>Main.WebHome</parent>
   <author>xwiki:XWiki.Admin</author>
-  <originalMetadataAuthor>XWiki.Admin</originalMetadataAuthor>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <version>1.1</version>
   <title>Old User Cleanup Job Code</title>
@@ -422,7 +421,24 @@ class LDAPOldUserCleanup {
           ldapUtils.setUidAttributeName(ldapConfig.getLDAPParam('ldap_UID_attr', 'cn'));
           ldapUtils.setUserSearchFormatString(ldapConfig.getLDAPParam('ldap_user_search_fmt', '({0}={1})'));
           try {
-            services.query.xwql("from doc.object(XWiki.LDAPProfileClass) as ldap_profile").execute().each( {
+            var statement = "from doc.object(XWiki.LDAPProfileClass) as ldap_profile";
+            var excludedUsers = config.getLargeStringValue('excludedUsers')
+            if (excludedUsers == null || excludedUsers.isEmpty()) {
+              excludedUsers = [];
+            } else {
+              excludedUsers = excludedUsers.split(',').toList();
+            }
+            if (!excludedUsers.isEmpty()) {
+              statement += " where doc.fullName not in (:excludedUsers)";
+            }
+            var query = services.query.xwql(statement);
+            if (!excludedUsers.isEmpty()) {
+              logger.debug("Excluding the following users from the cleanup: [{}].", excludedUsers);
+              query.bindValue('excludedUsers', excludedUsers);
+            } else {
+              logger.debug("No users get excluded.");
+            }
+            query.execute().each( {
               // def userProfileRef = services.model.resolveDocument(it, 'currentwiki')
               def userProfileDoc = xwiki.getDocument(it, xcontext)
               logger.debug('check user [{}]', userProfileDoc.getDocumentReference().getName())

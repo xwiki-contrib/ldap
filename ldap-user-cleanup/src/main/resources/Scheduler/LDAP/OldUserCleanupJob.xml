@@ -20,7 +20,7 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 -->
 
-<xwikidoc version="1.2" reference="Scheduler.LDAP.OldUserCleanupJob" locale="">
+<xwikidoc version="1.3" reference="Scheduler.LDAP.OldUserCleanupJob" locale="">
   <web>Scheduler.LDAP</web>
   <name>OldUserCleanupJob</name>
   <language/>
@@ -49,6 +49,7 @@
     <activeAttribute>
       <customDisplay/>
       <disabled>0</disabled>
+      <hint/>
       <name>activeAttribute</name>
       <number>11</number>
       <picker>0</picker>
@@ -65,6 +66,7 @@
       <disabled>0</disabled>
       <displayFormType>checkbox</displayFormType>
       <displayType/>
+      <hint/>
       <name>dryRun</name>
       <number>9</number>
       <prettyName>dryRun</prettyName>
@@ -73,9 +75,34 @@
       <validationRegExp/>
       <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
     </dryRun>
+    <excludedUsers>
+      <cache>0</cache>
+      <customDisplay/>
+      <defaultValue/>
+      <disabled>0</disabled>
+      <displayType>input</displayType>
+      <freeText/>
+      <hint/>
+      <multiSelect>1</multiSelect>
+      <name>excludedUsers</name>
+      <number>14</number>
+      <picker>1</picker>
+      <prettyName>excludedUsers</prettyName>
+      <relationalStorage>0</relationalStorage>
+      <separator> </separator>
+      <separators/>
+      <size>20</size>
+      <sort/>
+      <unmodifiable>0</unmodifiable>
+      <usesList>0</usesList>
+      <validationMessage/>
+      <validationRegExp/>
+      <classType>com.xpn.xwiki.objects.classes.UsersClass</classType>
+    </excludedUsers>
     <inactiveValue>
       <customDisplay/>
       <disabled>0</disabled>
+      <hint/>
       <name>inactiveValue</name>
       <number>12</number>
       <picker>0</picker>
@@ -89,6 +116,7 @@
     <ldapBindDn>
       <customDisplay/>
       <disabled>0</disabled>
+      <hint/>
       <name>ldapBindDn</name>
       <number>1</number>
       <picker>0</picker>
@@ -103,6 +131,7 @@
       <algorithm/>
       <customDisplay/>
       <disabled>0</disabled>
+      <hint/>
       <name>ldapBindPass</name>
       <number>2</number>
       <picker>0</picker>
@@ -120,6 +149,7 @@
       <disabled>0</disabled>
       <displayFormType>select</displayFormType>
       <displayType/>
+      <hint/>
       <name>removeExcludedGroups</name>
       <number>13</number>
       <prettyName>removeExcludedGroups</prettyName>
@@ -134,6 +164,7 @@
       <disabled>0</disabled>
       <displayFormType>checkbox</displayFormType>
       <displayType/>
+      <hint/>
       <name>replaceAuthor</name>
       <number>6</number>
       <prettyName>replaceAuthor</prettyName>
@@ -148,6 +179,7 @@
       <disabled>0</disabled>
       <displayFormType>checkbox</displayFormType>
       <displayType/>
+      <hint/>
       <name>replaceCommentAuthor</name>
       <number>8</number>
       <prettyName>replaceCommentAuthor</prettyName>
@@ -162,6 +194,7 @@
       <disabled>0</disabled>
       <displayFormType>checkbox</displayFormType>
       <displayType/>
+      <hint/>
       <name>replaceContentAuthor</name>
       <number>7</number>
       <prettyName>replaceContentAuthor</prettyName>
@@ -176,6 +209,7 @@
       <disabled>0</disabled>
       <displayFormType>checkbox</displayFormType>
       <displayType/>
+      <hint/>
       <name>replaceCreator</name>
       <number>5</number>
       <prettyName>replaceCreator</prettyName>
@@ -187,6 +221,7 @@
     <replacementAdmin>
       <customDisplay/>
       <disabled>0</disabled>
+      <hint/>
       <name>replacementAdmin</name>
       <number>4</number>
       <picker>0</picker>
@@ -200,6 +235,7 @@
     <replacementUser>
       <customDisplay/>
       <disabled>0</disabled>
+      <hint/>
       <name>replacementUser</name>
       <number>3</number>
       <picker>0</picker>
@@ -212,12 +248,14 @@
     </replacementUser>
     <shouldDisable>
       <customDisplay/>
+      <defaultValue/>
       <disabled>0</disabled>
+      <displayFormType>select</displayFormType>
+      <displayType/>
+      <hint/>
       <name>shouldDisable</name>
       <number>10</number>
-      <picker>0</picker>
       <prettyName/>
-      <size>30</size>
       <unmodifiable>0</unmodifiable>
       <validationMessage/>
       <validationRegExp/>
@@ -241,6 +279,7 @@
       <activeAttribute>
         <customDisplay/>
         <disabled>0</disabled>
+        <hint/>
         <name>activeAttribute</name>
         <number>11</number>
         <picker>0</picker>
@@ -257,6 +296,7 @@
         <disabled>0</disabled>
         <displayFormType>checkbox</displayFormType>
         <displayType/>
+        <hint/>
         <name>dryRun</name>
         <number>9</number>
         <prettyName>dryRun</prettyName>
@@ -265,9 +305,34 @@
         <validationRegExp/>
         <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
       </dryRun>
+      <excludedUsers>
+        <cache>0</cache>
+        <customDisplay/>
+        <defaultValue/>
+        <disabled>0</disabled>
+        <displayType>input</displayType>
+        <freeText/>
+        <hint/>
+        <multiSelect>1</multiSelect>
+        <name>excludedUsers</name>
+        <number>14</number>
+        <picker>1</picker>
+        <prettyName>excludedUsers</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators/>
+        <size>20</size>
+        <sort/>
+        <unmodifiable>0</unmodifiable>
+        <usesList>0</usesList>
+        <validationMessage/>
+        <validationRegExp/>
+        <classType>com.xpn.xwiki.objects.classes.UsersClass</classType>
+      </excludedUsers>
       <inactiveValue>
         <customDisplay/>
         <disabled>0</disabled>
+        <hint/>
         <name>inactiveValue</name>
         <number>12</number>
         <picker>0</picker>
@@ -281,6 +346,7 @@
       <ldapBindDn>
         <customDisplay/>
         <disabled>0</disabled>
+        <hint/>
         <name>ldapBindDn</name>
         <number>1</number>
         <picker>0</picker>
@@ -295,6 +361,7 @@
         <algorithm/>
         <customDisplay/>
         <disabled>0</disabled>
+        <hint/>
         <name>ldapBindPass</name>
         <number>2</number>
         <picker>0</picker>
@@ -312,6 +379,7 @@
         <disabled>0</disabled>
         <displayFormType>select</displayFormType>
         <displayType/>
+        <hint/>
         <name>removeExcludedGroups</name>
         <number>13</number>
         <prettyName>removeExcludedGroups</prettyName>
@@ -326,6 +394,7 @@
         <disabled>0</disabled>
         <displayFormType>checkbox</displayFormType>
         <displayType/>
+        <hint/>
         <name>replaceAuthor</name>
         <number>6</number>
         <prettyName>replaceAuthor</prettyName>
@@ -340,6 +409,7 @@
         <disabled>0</disabled>
         <displayFormType>checkbox</displayFormType>
         <displayType/>
+        <hint/>
         <name>replaceCommentAuthor</name>
         <number>8</number>
         <prettyName>replaceCommentAuthor</prettyName>
@@ -354,6 +424,7 @@
         <disabled>0</disabled>
         <displayFormType>checkbox</displayFormType>
         <displayType/>
+        <hint/>
         <name>replaceContentAuthor</name>
         <number>7</number>
         <prettyName>replaceContentAuthor</prettyName>
@@ -368,6 +439,7 @@
         <disabled>0</disabled>
         <displayFormType>checkbox</displayFormType>
         <displayType/>
+        <hint/>
         <name>replaceCreator</name>
         <number>5</number>
         <prettyName>replaceCreator</prettyName>
@@ -379,6 +451,7 @@
       <replacementAdmin>
         <customDisplay/>
         <disabled>0</disabled>
+        <hint/>
         <name>replacementAdmin</name>
         <number>4</number>
         <picker>0</picker>
@@ -392,6 +465,7 @@
       <replacementUser>
         <customDisplay/>
         <disabled>0</disabled>
+        <hint/>
         <name>replacementUser</name>
         <number>3</number>
         <picker>0</picker>
@@ -404,12 +478,14 @@
       </replacementUser>
       <shouldDisable>
         <customDisplay/>
+        <defaultValue/>
         <disabled>0</disabled>
+        <displayFormType>select</displayFormType>
+        <displayType/>
+        <hint/>
         <name>shouldDisable</name>
         <number>10</number>
-        <picker>0</picker>
         <prettyName/>
-        <size>30</size>
         <unmodifiable>0</unmodifiable>
         <validationMessage/>
         <validationRegExp/>
@@ -421,6 +497,9 @@
     </property>
     <property>
       <dryRun>1</dryRun>
+    </property>
+    <property>
+      <excludedUsers/>
     </property>
     <property>
       <inactiveValue/>
@@ -471,17 +550,29 @@
       <nameField/>
       <validationScript/>
       <sheet>
+        <cache>0</cache>
+        <classname/>
         <customDisplay/>
         <disabled>0</disabled>
+        <displayType>input</displayType>
+        <hint/>
+        <idField/>
+        <multiSelect>0</multiSelect>
         <name>sheet</name>
         <number>1</number>
-        <picker>0</picker>
+        <picker>1</picker>
         <prettyName>Sheet</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators/>
         <size>30</size>
+        <sort>none</sort>
+        <sql/>
         <unmodifiable>0</unmodifiable>
         <validationMessage/>
         <validationRegExp/>
-        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+        <valueField/>
+        <classType>com.xpn.xwiki.objects.classes.PageClass</classType>
       </sheet>
     </class>
     <property>
@@ -606,6 +697,7 @@
         <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
       </jobName>
       <script>
+        <contenttype>PureText</contenttype>
         <disabled>0</disabled>
         <editor>PureText</editor>
         <name>script</name>
