@@ -68,6 +68,8 @@ import com.xpn.xwiki.objects.BaseObject;
 import com.xpn.xwiki.objects.classes.BaseClass;
 import com.xpn.xwiki.objects.classes.ListClass;
 import com.xpn.xwiki.objects.classes.PropertyClass;
+import com.xpn.xwiki.objects.classes.StringClass;
+import com.xpn.xwiki.objects.classes.TextAreaClass;
 import com.xpn.xwiki.web.Utils;
 
 /**
@@ -1447,6 +1449,12 @@ public class XWikiLDAPUtils
                     map.put(name, mapValue);
                 }
                 ((List) mapValue).add(value);
+            } else if (pclass instanceof StringClass && !(pclass instanceof TextAreaClass) && value.length() > 768) {
+                LOGGER.warn(
+                    "The value of the attribute [{}] is longer than the supported size for a xwiki string property. "
+                        + "The imported value was trimmed.",
+                    name);
+                map.put(name, value.substring(0, 768));
             } else {
                 map.put(name, value);
             }
