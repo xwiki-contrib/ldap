@@ -529,15 +529,18 @@ public class XWikiLDAPConnection
             }
 
             LDAPEntry nextEntry = searchResults.next();
-            String foundDN = nextEntry.getDN();
-
             searchAttributeList = new ArrayList<>();
 
-            searchAttributeList.add(new XWikiLDAPSearchAttribute("dn", foundDN));
+            // Avoid crashing on NPE in case of LDAPReferralException was raised in searchResults.next()
+            if (nextEntry != null) {
+                String foundDN = nextEntry.getDN();
 
-            LDAPAttributeSet attributeSet = nextEntry.getAttributeSet();
+                searchAttributeList.add(new XWikiLDAPSearchAttribute("dn", foundDN));
 
-            ldapToXWikiAttribute(searchAttributeList, attributeSet);
+                LDAPAttributeSet attributeSet = nextEntry.getAttributeSet();
+
+                ldapToXWikiAttribute(searchAttributeList, attributeSet);
+            }
         } catch (LDAPException e) {
             LOGGER.debug("LDAP Search failed", e);
         }
