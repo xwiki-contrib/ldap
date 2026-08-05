@@ -33,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xwiki.context.Execution;
 import org.xwiki.context.ExecutionContext;
+import org.xwiki.security.authentication.UserAuthenticatedEventNotifier;
 import org.xwiki.text.StringUtils;
 
 import com.novell.ldap.LDAPDN;
@@ -71,6 +72,8 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
 
     private Execution execution;
 
+    private UserAuthenticatedEventNotifier notifier;
+
     protected ExecutionContext getExecutionContext()
     {
         if (this.execution == null) {
@@ -78,6 +81,15 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
         }
 
         return this.execution.getContext();
+    }
+
+    private UserAuthenticatedEventNotifier getNotifier()
+    {
+        if (this.notifier == null) {
+            this.notifier = Utils.getComponent(UserAuthenticatedEventNotifier.class);
+        }
+
+        return this.notifier;
     }
 
     /**
@@ -216,6 +228,9 @@ public class XWikiLDAPAuthServiceImpl extends XWikiAuthServiceImpl
             // Remember user in the session
             request.getSession().setAttribute(SecurityRequestWrapper.PRINCIPAL_SESSION_KEY, principal);
             request.getSession().setAttribute("ldap.remoteuser", remoteUser);
+
+            // Notify about this new authentication
+            getNotifier().notify(principal.getName());
 
             user = new XWikiUser(principal.getName());
         } else {
