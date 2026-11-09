@@ -101,8 +101,8 @@
     </plugins>
   </build>
   <dependencyManagement>
-    <!-- Dependencies coming from authservice-backport, which has a 8.4 parent -->
     <dependencies>
+      <!-- Transitive dependency coming from dependencies whith different contrib parent version redifined here to fix their versions -->
       <dependency>
         <groupId>org.xwiki.platform</groupId>
         <artifactId>xwiki-platform-display-macro</artifactId>
@@ -117,9 +117,50 @@
         <groupId>org.xwiki.platform</groupId>
         <artifactId>xwiki-platform-administration-ui</artifactId>
         <version>${platform.version}</version>
+        <type>xar</type>
+      </dependency>
+      <dependency>
+        <groupId>org.xwiki.platform</groupId>
+        <artifactId>xwiki-platform-model</artifactId>
+        <version>${platform.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.xwiki.platform</groupId>
+        <artifactId>xwiki-platform-security-script</artifactId>
+        <version>${platform.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.xwiki.platform</groupId>
+        <artifactId>xwiki-platform-rendering-macro-velocity</artifactId>
+        <version>${platform.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.xwiki.rendering</groupId>
+        <artifactId>xwiki-rendering-macro-html</artifactId>
+        <version>${rendering.version}</version>
+      </dependency>
+
+      <!-- TODO: Remove when upgrading to XWiki 15.3+ -->
+      <dependency>
+        <groupId>org.xwiki.contrib</groupId>
+        <artifactId>authservice-backport-api</artifactId>
+        <version>${authservice-backport.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.xwiki.contrib</groupId>
+        <artifactId>authservice-backport-ui</artifactId>
+        <version>${authservice-backport.version}</version>
+        <type>xar</type>
+        <optional>true</optional>
+      </dependency>
+
+      <!-- TODO: Remove when upgrading to XWiki 13.3+ -->
+      <dependency>
+        <groupId>org.xwiki.contrib</groupId>
+        <artifactId>userauthenticatedevent-backport</artifactId>
+        <version>1.0.0</version>
       </dependency>
     </dependencies>
-    <!-- End of dependencies coming from authservice-backport -->
   </dependencyManagement>
   <modules>
     <module>ldap-api</module>
